@@ -45,6 +45,7 @@ const TaskCard: React.FC<{
   onOpenRecurrenceModal: (task: Task) => void;
   onToggleTimer: (task: Task) => void;
   onOpenHistory: (task: Task) => void;
+  onEdit: (task: Task) => void;
   onDragStart?: (e: React.DragEvent, task: Task) => void;
   isDragging?: boolean;
 }> = ({ 
@@ -57,6 +58,7 @@ const TaskCard: React.FC<{
   onOpenRecurrenceModal,
   onToggleTimer,
   onOpenHistory,
+  onEdit,
   onDragStart,
   isDragging
 }) => {
@@ -107,10 +109,7 @@ const TaskCard: React.FC<{
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        onClick={() => {
-          // Placeholder for edit modal
-          alert('Abrir detalhes da tarefa');
-        }}
+        onClick={() => onEdit(task)}
         draggable={true}
         onDragStart={(e) => onDragStart && onDragStart(e, task)}
         className={cn(
@@ -228,14 +227,15 @@ const TaskCard: React.FC<{
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="flex items-center gap-3 py-2 border-b border-slate-100 bg-white group hover:bg-slate-50/50 transition-colors"
+      onClick={() => onEdit(task)}
+      className="flex items-center gap-3 py-2 border-b border-slate-100 bg-white group hover:bg-slate-50/50 transition-colors cursor-pointer"
     >
       <div className="opacity-0 group-hover:opacity-100 cursor-grab text-slate-300 transition-opacity">
         <GripVertical className="w-4 h-4" />
       </div>
       
       <button 
-        onClick={() => onToggle(task.id, task.status)}
+        onClick={(e) => { e.stopPropagation(); onToggle(task.id, task.status); }}
         className={cn(
           "w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0",
           task.status === 'completed' 
@@ -335,7 +335,7 @@ const TaskCard: React.FC<{
   );
 };
 
-const NewTaskModal = ({ isOpen, onClose, onSave, projects }: { isOpen: boolean; onClose: () => void; onSave: (task: any) => void; projects: {id: string, name: string, color: string}[] }) => {
+const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: boolean; onClose: () => void; onSave: (task: any) => void; projects: {id: string, name: string, color: string}[]; taskToEdit?: Task | null }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -347,6 +347,30 @@ const NewTaskModal = ({ isOpen, onClose, onSave, projects }: { isOpen: boolean; 
   const [recurrence, setRecurrence] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
   const [taskDate, setTaskDate] = useState<Date>(new Date());
   const [projectId, setProjectId] = useState<string>('none');
+
+  useEffect(() => {
+    if (isOpen) {
+      if (taskToEdit) {
+        setTitle(taskToEdit.title);
+        setDescription(taskToEdit.description || '');
+        setPriority(taskToEdit.priority || 'P4');
+        setDuration(taskToEdit.estimated_time ? taskToEdit.estimated_time.toString() : '30');
+        setTime(taskToEdit.time || '');
+        setRecurrence((taskToEdit.recurrence as any) || 'none');
+        setTaskDate(taskToEdit.due_date ? new Date(taskToEdit.due_date) : new Date());
+        setProjectId(taskToEdit.project_id || 'none');
+      } else {
+        setTitle('');
+        setDescription('');
+        setPriority('P4');
+        setDuration('30');
+        setTime('');
+        setRecurrence('none');
+        setTaskDate(new Date());
+        setProjectId('none');
+      }
+    }
+  }, [isOpen, taskToEdit]);
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -563,7 +587,7 @@ const NewTaskModal = ({ isOpen, onClose, onSave, projects }: { isOpen: boolean; 
               disabled={isSaveDisabled}
               onClick={() => {
                 if (isSaveDisabled) return;
-                onSave({ title, description, priority, estimated_time: parseInt(duration) || 30, time: time || undefined, recurrence, date: taskDate, project_id: projectId === 'none' ? null : projectId });
+                onSave({ id: taskToEdit?.id, title, description, priority, estimated_time: parseInt(duration) || 30, time: time || undefined, recurrence, date: taskDate, project_id: projectId === 'none' ? null : projectId });
                 setTitle(''); setDescription(''); setTime(''); setRecurrence('none'); setPriority('P4'); setDuration('30'); setProjectId('none');
                 setIsDatePickerOpen(false); setIsTimePickerOpen(false); setIsRecurrencePickerOpen(false);
                 onClose();
@@ -864,19 +888,90 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
 
   const handleToggleTask = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    const isCompletingRecurring = newStatus === 'completed' && task.recurrence && task.recurrence !== 'none';
     
+    let completedDateIso = '';
+    if (isCompletingRecurring) {
+      const originalDueDate = task.due_date ? new Date(task.due_date) : new Date();
+      const completedDate = new Date(selectedDate);
+      completedDate.setHours(originalDueDate.getHours(), originalDueDate.getMinutes(), originalDueDate.getSeconds(), originalDueDate.getMilliseconds());
+      completedDateIso = completedDate.toISOString();
+    }
+
     // Optimistic update
-    setTasks(tasks.map(t => 
-      t.id === id ? { ...t, status: newStatus } : t
-    ));
+    setTasks(tasks.map(t => {
+      if (t.id === id) {
+        return { 
+          ...t, 
+          status: newStatus,
+          // If completing a recurring task, remove recurrence from this instance
+          ...(isCompletingRecurring ? { recurrence: 'none', due_date: completedDateIso } : {})
+        };
+      }
+      return t;
+    }));
 
     try {
+      const updatePayload: any = { status: newStatus };
+      if (isCompletingRecurring) {
+        updatePayload.recurrence = 'none';
+        // Update the due_date of the completed instance to the currently selected date
+        // so it shows up in the completed list for the day it was actually done.
+        updatePayload.due_date = completedDateIso;
+      }
+
       const { error } = await supabase
         .from('tasks')
-        .update({ status: newStatus })
+        .update(updatePayload)
         .eq('id', id);
 
       if (error) throw error;
+
+      // If completing a recurring task, create the next instance
+      if (isCompletingRecurring && user) {
+        // The next occurrence should be based on the day it was completed (selectedDate)
+        // but preserve the time from the original due_date
+        const originalDueDate = task.due_date ? new Date(task.due_date) : new Date();
+        let nextDate = new Date(selectedDate);
+        nextDate.setHours(originalDueDate.getHours(), originalDueDate.getMinutes(), originalDueDate.getSeconds(), originalDueDate.getMilliseconds());
+        
+        if (task.recurrence === 'daily') {
+          nextDate = addDays(nextDate, 1);
+        } else if (task.recurrence === 'weekly') {
+          nextDate = addDays(nextDate, 7);
+        } else if (task.recurrence === 'monthly') {
+          nextDate = addMonths(nextDate, 1);
+        }
+
+        const newTask = {
+          user_id: user.id,
+          title: task.title,
+          description: task.description,
+          due_date: nextDate.toISOString(),
+          status: 'pending',
+          estimated_time: task.estimated_time,
+          time: task.time,
+          recurrence: task.recurrence,
+          elapsed_time: 0,
+          is_running: false,
+          project_id: task.project_id
+        };
+
+        const { data: newInstance, error: insertError } = await supabase
+          .from('tasks')
+          .insert([newTask])
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+        
+        if (newInstance) {
+          setTasks(prev => [...prev, newInstance]);
+        }
+      }
     } catch (error) {
       console.error('Error updating task:', error);
       // Revert on error
@@ -1008,34 +1103,54 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
   const handleSaveNewTask = async (taskData: any) => {
     if (!user) return;
 
-    const newTask = {
+    const taskPayload = {
       user_id: user.id,
       title: taskData.title || 'Nova Tarefa',
       description: taskData.description,
       due_date: taskData.date ? taskData.date.toISOString() : null,
-      status: 'pending',
       estimated_time: taskData.estimated_time,
       time: taskData.time,
       recurrence: taskData.recurrence,
-      elapsed_time: 0,
-      is_running: false,
       project_id: taskData.project_id || null
     };
 
     try {
-      const { data, error } = await supabase
-        .from('tasks')
-        .insert([newTask])
-        .select()
-        .single();
+      if (taskData.id) {
+        // Update existing task
+        const { data, error } = await supabase
+          .from('tasks')
+          .update(taskPayload)
+          .eq('id', taskData.id)
+          .select()
+          .single();
 
-      if (error) throw error;
-      
-      if (data) {
-        setTasks([data, ...tasks]);
+        if (error) throw error;
+        
+        if (data) {
+          setTasks(tasks.map(t => t.id === data.id ? data : t));
+        }
+      } else {
+        // Create new task
+        const newTask = {
+          ...taskPayload,
+          status: 'pending',
+          elapsed_time: 0,
+          is_running: false,
+        };
+        const { data, error } = await supabase
+          .from('tasks')
+          .insert([newTask])
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        if (data) {
+          setTasks([data, ...tasks]);
+        }
       }
     } catch (error) {
-      console.error('Error creating task:', error);
+      console.error('Error saving task:', error);
     }
   };
 
@@ -1174,9 +1289,27 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
   const filteredTasks = projectFilteredTasks.filter(t => {
     if (!t.due_date) {
       return isSameDay(new Date(), selectedDate); // Show tasks without due date on today
-    } else {
-      return isSameDay(parseISO(t.due_date), selectedDate);
     }
+    
+    const dueDate = parseISO(t.due_date);
+    
+    if (isSameDay(dueDate, selectedDate)) {
+      return true;
+    }
+
+    if (t.recurrence && t.recurrence !== 'none' && selectedDate > dueDate) {
+      if (t.recurrence === 'daily') {
+        return true;
+      }
+      if (t.recurrence === 'weekly') {
+        return getDay(selectedDate) === getDay(dueDate);
+      }
+      if (t.recurrence === 'monthly') {
+        return selectedDate.getDate() === dueDate.getDate();
+      }
+    }
+
+    return false;
   });
   const pendingTasks = filteredTasks.filter(t => t.status === 'pending');
   const completedTasks = filteredTasks.filter(t => t.status === 'completed');
@@ -1344,6 +1477,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                             onOpenRecurrenceModal={openRecurrenceModal}
                             onToggleTimer={handleToggleTimer}
                             onOpenHistory={handleOpenHistory}
+                            onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }}
                           />
                         ))
                       )}
@@ -1370,6 +1504,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                         onOpenRecurrenceModal={openRecurrenceModal}
                         onToggleTimer={handleToggleTimer}
                         onOpenHistory={handleOpenHistory}
+                        onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }}
                       />
                     ))}
                   </div>
@@ -1400,7 +1535,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                 </div>
                 <div className="space-y-3">
                   {projectFilteredTasks.filter(t => t.status === 'pending' && !t.is_running).map(task => (
-                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={handleDeleteTask} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
+                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={handleDeleteTask} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
                   ))}
                 </div>
               </div>
@@ -1421,7 +1556,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                 </div>
                 <div className="space-y-3">
                   {projectFilteredTasks.filter(t => t.status === 'pending' && t.is_running).map(task => (
-                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={handleDeleteTask} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
+                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={handleDeleteTask} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
                   ))}
                 </div>
               </div>
@@ -1442,7 +1577,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                 </div>
                 <div className="space-y-3 opacity-60">
                   {projectFilteredTasks.filter(t => t.status === 'completed').map(task => (
-                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={handleDeleteTask} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
+                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={handleDeleteTask} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
                   ))}
                 </div>
               </div>
@@ -1490,7 +1625,15 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                   const isSelected = isSameDay(day, selectedDate);
                   const dayTasks = projectFilteredTasks.filter(t => {
                     if (!t.due_date) return false;
-                    return isSameDay(parseISO(t.due_date), day);
+                    const dueDate = parseISO(t.due_date);
+                    if (isSameDay(dueDate, day)) return true;
+                    
+                    if (t.recurrence && t.recurrence !== 'none' && day > dueDate) {
+                      if (t.recurrence === 'daily') return true;
+                      if (t.recurrence === 'weekly') return getDay(day) === getDay(dueDate);
+                      if (t.recurrence === 'monthly') return day.getDate() === dueDate.getDate();
+                    }
+                    return false;
                   });
                   
                   return (
@@ -1539,11 +1682,15 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
         {/* Modals */}
         <AnimatePresence>
           {isCreateModalOpen && (
-            <NewTaskModal 
+            <TaskModal 
               isOpen={isCreateModalOpen}
-              onClose={() => setIsCreateModalOpen(false)}
+              onClose={() => {
+                setIsCreateModalOpen(false);
+                setSelectedTaskForModal(null);
+              }}
               onSave={handleSaveNewTask}
               projects={projects}
+              taskToEdit={selectedTaskForModal}
             />
           )}
           {isTimeModalOpen && (
