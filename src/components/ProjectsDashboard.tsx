@@ -111,7 +111,7 @@ export default function ProjectsDashboard() {
 
   return (
     <div className="flex-1 flex flex-col bg-white h-screen overflow-hidden">
-      <header className="px-8 py-6 border-b border-slate-100 flex justify-between items-center shrink-0">
+      <header className="px-4 md:px-8 py-4 md:py-6 border-b border-slate-100 flex justify-between items-center shrink-0">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Meus Projetos</h1>
           <span className="px-2.5 py-1 rounded-full bg-slate-100 text-xs font-medium text-slate-600 border border-slate-200">
@@ -128,7 +128,7 @@ export default function ProjectsDashboard() {
         </button>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-8">
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
         <div className="max-w-5xl mx-auto">
           {projects.length === 0 ? (
             <div className="text-center py-20">

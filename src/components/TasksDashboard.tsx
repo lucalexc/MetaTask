@@ -1196,20 +1196,20 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
 
   return (
     <main className="flex-1 flex flex-col overflow-hidden bg-slate-50">
-      <div className="max-w-4xl mx-auto w-full pt-10 px-8 flex-1 overflow-y-auto pb-12">
+      <div className="max-w-4xl mx-auto w-full pt-6 md:pt-10 px-4 md:px-8 flex-1 overflow-y-auto pb-12">
         
         {/* Header */}
           <header className="flex flex-col gap-4 mb-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h1 className="text-xl font-bold text-slate-900 capitalize">
                   {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
                 </h1>
               </div>
               
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
                 {/* Toggle Group */}
-                <div className="flex items-center bg-slate-100 p-1 rounded-lg">
+                <div className="flex items-center bg-slate-100 p-1 rounded-lg shrink-0">
                   <button
                     onClick={() => setView('list')}
                     className={cn(

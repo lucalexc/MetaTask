@@ -302,7 +302,7 @@ export default function RoutinesDashboard({
 
   return (
     <main className="flex-1 flex overflow-y-auto bg-white">
-      <div className="max-w-3xl mx-auto w-full pt-10 px-8 pb-20">
+      <div className="max-w-3xl mx-auto w-full pt-6 md:pt-10 px-4 md:px-8 pb-20">
         
         {view === 'today' ? (
           <motion.div

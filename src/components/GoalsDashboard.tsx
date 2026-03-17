@@ -280,7 +280,7 @@ export default function GoalsDashboard({ isCreateModalOpen, setIsCreateModalOpen
 
   return (
     <main className="flex-1 flex flex-col overflow-hidden bg-slate-50">
-      <div className="max-w-4xl mx-auto w-full pt-10 px-8 flex-1 overflow-y-auto pb-12">
+      <div className="max-w-4xl mx-auto w-full pt-6 md:pt-10 px-4 md:px-8 flex-1 overflow-y-auto pb-12">
         <header className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-display font-extrabold text-slate-900 tracking-tight">

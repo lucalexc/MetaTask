@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, Plus, Inbox, Sword, RefreshCcw, Map, Fingerprint, Settings, Folder } from 'lucide-react';
+import { Target, Plus, Inbox, Sword, RefreshCcw, Map, Fingerprint, Settings, Folder, Menu, X } from 'lucide-react';
 import TasksDashboard from '@/src/components/TasksDashboard';
 import ProjectsDashboard from '@/src/components/ProjectsDashboard';
 import GoalsDashboard from '@/src/components/GoalsDashboard';
@@ -8,17 +8,30 @@ import MissionsMapDashboard from '@/src/components/MissionsMapDashboard';
 import IdentityDashboard from '@/src/components/IdentityDashboard';
 import SettingsDashboard from '@/src/components/SettingsDashboard';
 import { cn } from '@/src/lib/utils';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'tasks' | 'projects' | 'goals' | 'routines' | 'missions' | 'identity' | 'settings'>('tasks');
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [isRoutineModalOpen, setIsRoutineModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleFabClick = () => {
+    if (activeTab === 'goals') setIsGoalModalOpen(true);
+    else if (activeTab === 'routines') setIsRoutineModalOpen(true);
+    else setIsTaskModalOpen(true); // Default to task
+  };
+
+  const handleTabChange = (tab: typeof activeTab) => {
+    setActiveTab(tab);
+    setIsMobileMenuOpen(false);
+  };
 
   return (
-    <div className="flex h-screen bg-white font-sans text-slate-900">
-      {/* Sidebar */}
-      <aside className="w-64 bg-slate-50/50 border-r border-slate-100 flex flex-col shrink-0">
+    <div className="flex h-screen bg-white font-sans text-slate-900 overflow-hidden relative">
+      {/* Sidebar (Desktop) */}
+      <aside className="hidden md:flex w-64 bg-slate-50/50 border-r border-slate-100 flex-col shrink-0">
         <div className="p-4 flex items-center gap-2">
           <div className="w-5 h-5 rounded bg-blue-600 flex items-center justify-center">
             <Target className="w-3 h-3 text-white" />
@@ -29,11 +42,7 @@ export default function Dashboard() {
         <div className="px-3 mb-4">
           {activeTab !== 'missions' && activeTab !== 'identity' && activeTab !== 'settings' && (
             <button 
-              onClick={() => {
-                if (activeTab === 'tasks') setIsTaskModalOpen(true);
-                else if (activeTab === 'goals') setIsGoalModalOpen(true);
-                else setIsRoutineModalOpen(true);
-              }}
+              onClick={handleFabClick}
               className="flex items-center gap-2 px-2 py-1.5 text-sm font-medium text-red-600 hover:bg-slate-100 rounded-md transition-colors w-full"
             >
               <Plus className="w-4 h-4" />
@@ -44,7 +53,7 @@ export default function Dashboard() {
 
         <nav className="px-3 flex-1 space-y-1">
           <button 
-            onClick={() => setActiveTab('tasks')}
+            onClick={() => handleTabChange('tasks')}
             className={cn(
               "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
               activeTab === 'tasks' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
@@ -54,7 +63,7 @@ export default function Dashboard() {
             Tarefas
           </button>
           <button 
-            onClick={() => setActiveTab('projects')}
+            onClick={() => handleTabChange('projects')}
             className={cn(
               "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
               activeTab === 'projects' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
@@ -64,7 +73,7 @@ export default function Dashboard() {
             Projetos
           </button>
           <button 
-            onClick={() => setActiveTab('routines')}
+            onClick={() => handleTabChange('routines')}
             className={cn(
               "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
               activeTab === 'routines' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
@@ -74,7 +83,7 @@ export default function Dashboard() {
             Rotinas
           </button>
           <button 
-            onClick={() => setActiveTab('goals')}
+            onClick={() => handleTabChange('goals')}
             className={cn(
               "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
               activeTab === 'goals' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
@@ -84,7 +93,7 @@ export default function Dashboard() {
             Metas
           </button>
           <button 
-            onClick={() => setActiveTab('missions')}
+            onClick={() => handleTabChange('missions')}
             className={cn(
               "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
               activeTab === 'missions' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
@@ -94,7 +103,7 @@ export default function Dashboard() {
             Missões
           </button>
           <button 
-            onClick={() => setActiveTab('identity')}
+            onClick={() => handleTabChange('identity')}
             className={cn(
               "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
               activeTab === 'identity' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
@@ -107,7 +116,7 @@ export default function Dashboard() {
 
         <div className="p-3 mt-auto border-t border-slate-100">
           <button 
-            onClick={() => setActiveTab('settings')}
+            onClick={() => handleTabChange('settings')}
             className={cn(
               "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
               activeTab === 'settings' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
@@ -120,27 +129,120 @@ export default function Dashboard() {
       </aside>
 
       {/* Main Content Area */}
-      <div className={cn("flex-1 flex flex-col overflow-hidden", activeTab !== 'identity' && "hidden")}>
-        <IdentityDashboard />
-      </div>
-      <div className={cn("flex-1 flex flex-col overflow-hidden", activeTab !== 'missions' && "hidden")}>
-        <MissionsMapDashboard />
-      </div>
-      <div className={cn("flex-1 flex flex-col overflow-hidden", activeTab !== 'tasks' && "hidden")}>
-        <TasksDashboard isCreateModalOpen={isTaskModalOpen} setIsCreateModalOpen={setIsTaskModalOpen} />
-      </div>
-      <div className={cn("flex-1 flex flex-col overflow-hidden", activeTab !== 'projects' && "hidden")}>
-        <ProjectsDashboard />
-      </div>
-      <div className={cn("flex-1 flex flex-col overflow-hidden", activeTab !== 'goals' && "hidden")}>
-        <GoalsDashboard isCreateModalOpen={isGoalModalOpen} setIsCreateModalOpen={setIsGoalModalOpen} />
-      </div>
-      <div className={cn("flex-1 flex flex-col overflow-hidden", activeTab !== 'routines' && "hidden")}>
-        <RoutinesDashboard isCreateModalOpen={isRoutineModalOpen} setIsCreateModalOpen={setIsRoutineModalOpen} />
-      </div>
-      <div className={cn("flex-1 flex flex-col overflow-hidden", activeTab !== 'settings' && "hidden")}>
-        <SettingsDashboard />
-      </div>
+      <main className="flex-1 flex flex-col overflow-hidden relative pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'identity' && "hidden")}>
+          <IdentityDashboard />
+        </div>
+        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'missions' && "hidden")}>
+          <MissionsMapDashboard />
+        </div>
+        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'tasks' && "hidden")}>
+          <TasksDashboard isCreateModalOpen={isTaskModalOpen} setIsCreateModalOpen={setIsTaskModalOpen} />
+        </div>
+        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'projects' && "hidden")}>
+          <ProjectsDashboard />
+        </div>
+        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'goals' && "hidden")}>
+          <GoalsDashboard isCreateModalOpen={isGoalModalOpen} setIsCreateModalOpen={setIsGoalModalOpen} />
+        </div>
+        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'routines' && "hidden")}>
+          <RoutinesDashboard isCreateModalOpen={isRoutineModalOpen} setIsCreateModalOpen={setIsRoutineModalOpen} />
+        </div>
+        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'settings' && "hidden")}>
+          <SettingsDashboard />
+        </div>
+      </main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex items-center justify-between px-2 pb-[env(safe-area-inset-bottom)] z-50 h-[calc(4rem+env(safe-area-inset-bottom))]">
+        <button onClick={() => handleTabChange('tasks')} className={cn("flex flex-col items-center justify-center w-16 h-16", activeTab === 'tasks' ? "text-blue-600" : "text-slate-500")}>
+          <Inbox className="w-5 h-5" />
+          <span className="text-[10px] mt-1 font-medium">Tarefas</span>
+        </button>
+        <button onClick={() => handleTabChange('projects')} className={cn("flex flex-col items-center justify-center w-16 h-16", activeTab === 'projects' ? "text-blue-600" : "text-slate-500")}>
+          <Folder className="w-5 h-5" />
+          <span className="text-[10px] mt-1 font-medium">Projetos</span>
+        </button>
+        
+        {/* Centered FAB */}
+        <div className="relative -top-5 flex justify-center w-16 h-16">
+          <button 
+            onClick={handleFabClick}
+            className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-6 h-6" />
+          </button>
+        </div>
+
+        <button onClick={() => handleTabChange('goals')} className={cn("flex flex-col items-center justify-center w-16 h-16", activeTab === 'goals' ? "text-blue-600" : "text-slate-500")}>
+          <Map className="w-5 h-5" />
+          <span className="text-[10px] mt-1 font-medium">Metas</span>
+        </button>
+        <button onClick={() => setIsMobileMenuOpen(true)} className={cn("flex flex-col items-center justify-center w-16 h-16", ['routines', 'missions', 'identity', 'settings'].includes(activeTab) ? "text-blue-600" : "text-slate-500")}>
+          <Menu className="w-5 h-5" />
+          <span className="text-[10px] mt-1 font-medium">Mais</span>
+        </button>
+      </nav>
+
+      {/* Mobile More Menu Modal */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="md:hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60]"
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="md:hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-[70] overflow-hidden pb-[env(safe-area-inset-bottom)]"
+            >
+              <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+                <h3 className="font-bold text-slate-800">Mais Opções</h3>
+                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-2 space-y-1">
+                <button 
+                  onClick={() => handleTabChange('routines')}
+                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'routines' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
+                >
+                  <RefreshCcw className={cn("w-5 h-5", activeTab === 'routines' ? "text-blue-600" : "text-slate-400")} />
+                  <span className="font-medium">Rotinas</span>
+                </button>
+                <button 
+                  onClick={() => handleTabChange('missions')}
+                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'missions' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
+                >
+                  <Sword className={cn("w-5 h-5", activeTab === 'missions' ? "text-blue-600" : "text-slate-400")} />
+                  <span className="font-medium">Missões</span>
+                </button>
+                <button 
+                  onClick={() => handleTabChange('identity')}
+                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'identity' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
+                >
+                  <Fingerprint className={cn("w-5 h-5", activeTab === 'identity' ? "text-blue-600" : "text-slate-400")} />
+                  <span className="font-medium">Identidade</span>
+                </button>
+                <div className="h-px bg-slate-100 my-2 mx-3" />
+                <button 
+                  onClick={() => handleTabChange('settings')}
+                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'settings' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
+                >
+                  <Settings className={cn("w-5 h-5", activeTab === 'settings' ? "text-blue-600" : "text-slate-400")} />
+                  <span className="font-medium">Configurações</span>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
