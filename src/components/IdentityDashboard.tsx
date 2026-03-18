@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Fingerprint, 
@@ -16,7 +16,9 @@ import {
   Droplets,
   Brain
 } from 'lucide-react';
-import { cn } from '@/src/lib/utils';
+import { cn } from '../lib/utils';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../lib/AuthContext';
 
 type IdentityTab = 'necrologio' | 'temperamento' | 'camadas';
 type TestStatus = 'idle' | 'running' | 'finished';
@@ -29,11 +31,6 @@ interface NecrologioVersion {
   text: string;
   title: string;
 }
-
-const MOCK_VERSIONS: NecrologioVersion[] = [
-  { id: 'v1', date: '12 Jan 2024', title: 'Versão 2024', text: 'Eu fui um homem que buscou a verdade acima de tudo...' },
-  { id: 'v2', date: '15 Mar 2025', title: 'Versão 2025', text: 'Um pai dedicado e um profissional que nunca aceitou a mediocridade...' },
-];
 
 const temperamentQuestions = [
   {
@@ -204,10 +201,83 @@ const layerData: Record<LayerType, { title: string, desc: string, forces: string
 };
 
 export default function IdentityDashboard() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<IdentityTab>('necrologio');
   const [necrologioText, setNecrologioText] = useState('');
   const [selectedVersion, setSelectedVersion] = useState<NecrologioVersion | null>(null);
-  
+  const [necrologioVersions, setNecrologioVersions] = useState<NecrologioVersion[]>([]);
+  const [isSavingNecrologio, setIsSavingNecrologio] = useState(false);
+  const [isLoadingNecrologio, setIsLoadingNecrologio] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
+
+  useEffect(() => {
+    if (user && activeTab === 'necrologio') {
+      fetchNecrologioVersions();
+    }
+  }, [user, activeTab]);
+
+  const fetchNecrologioVersions = async () => {
+    if (!user) return;
+    setIsLoadingNecrologio(true);
+    try {
+      const { data, error } = await supabase
+        .from('identity_necrology')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data) {
+        const formattedVersions = data.map((item: any) => {
+          const dateObj = new Date(item.created_at);
+          return {
+            id: item.id,
+            date: dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }),
+            title: `Versão ${dateObj.getFullYear()}`,
+            text: item.content
+          };
+        });
+        setNecrologioVersions(formattedVersions);
+      }
+    } catch (error) {
+      console.error('Error fetching necrology:', error);
+    } finally {
+      setIsLoadingNecrologio(false);
+    }
+  };
+
+  const handleSaveNecrologio = async () => {
+    if (!user || !necrologioText.trim()) return;
+    
+    setIsSavingNecrologio(true);
+    try {
+      const { data, error } = await supabase
+        .from('identity_necrology')
+        .insert([
+          { 
+            user_id: user.id, 
+            content: necrologioText.trim() 
+          }
+        ])
+        .select();
+
+      if (error) throw error;
+
+      setToastMsg('Versão salva com sucesso!');
+      setNecrologioText('');
+      fetchNecrologioVersions();
+      
+      setTimeout(() => setToastMsg(''), 3000);
+    } catch (error) {
+      console.error('Error saving necrology:', error);
+      setToastMsg('Erro ao salvar versão.');
+      setTimeout(() => setToastMsg(''), 3000);
+    } finally {
+      setIsSavingNecrologio(false);
+    }
+  };
+
   // Temperament Test State
   const [testStatus, setTestStatus] = useState<TestStatus>('idle');
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -291,7 +361,22 @@ export default function IdentityDashboard() {
   };
 
   const renderNecrologio = () => (
-    <div className="flex h-full gap-8">
+    <div className="flex h-full gap-8 relative">
+      {/* Toast */}
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium flex items-center gap-2"
+          >
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            {toastMsg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Main Editor */}
       <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-slate-50 flex justify-between items-center">
@@ -304,9 +389,13 @@ export default function IdentityDashboard() {
               <p className="text-xs text-slate-500">Memento Mori: Escreva o seu legado.</p>
             </div>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors">
+          <button 
+            onClick={handleSaveNecrologio}
+            disabled={isSavingNecrologio || !necrologioText.trim() || !!selectedVersion}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Save className="w-4 h-4" />
-            Salvar Versão
+            {isSavingNecrologio ? 'Salvando...' : 'Salvar Versão'}
           </button>
         </div>
         <div className="flex-1 p-8">
@@ -337,37 +426,41 @@ export default function IdentityDashboard() {
       {/* History Sidebar */}
       <div className="w-80 flex flex-col gap-4">
         <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2">Histórico de Versões</h4>
-        <div className="space-y-3">
-          {MOCK_VERSIONS.map((v) => (
-            <button
-              key={v.id}
-              onClick={() => setSelectedVersion(v)}
-              className={cn(
-                "w-full p-4 rounded-xl border text-left transition-all group",
-                selectedVersion?.id === v.id 
-                  ? "bg-slate-50 border-slate-300 shadow-sm" 
-                  : "bg-white border-slate-100 hover:border-slate-200 hover:shadow-md"
-              )}
-            >
-              <div className="flex justify-between items-start mb-1">
-                <span className={cn(
-                  "font-bold text-sm",
-                  selectedVersion?.id === v.id ? "text-slate-900" : "text-slate-700"
-                )}>{v.title}</span>
-                <span className="text-[10px] text-slate-400 font-medium">{v.date}</span>
+        <div className="space-y-3 overflow-y-auto pr-2 pb-4">
+          {isLoadingNecrologio ? (
+            <div className="text-center p-4 text-sm text-slate-500">Carregando histórico...</div>
+          ) : necrologioVersions.length > 0 ? (
+            necrologioVersions.map((v) => (
+              <button
+                key={v.id}
+                onClick={() => setSelectedVersion(v)}
+                className={cn(
+                  "w-full p-4 rounded-xl border text-left transition-all group",
+                  selectedVersion?.id === v.id 
+                    ? "bg-slate-50 border-slate-300 shadow-sm" 
+                    : "bg-white border-slate-100 hover:border-slate-200 hover:shadow-md"
+                )}
+              >
+                <div className="flex justify-between items-start mb-1">
+                  <span className={cn(
+                    "font-bold text-sm",
+                    selectedVersion?.id === v.id ? "text-slate-900" : "text-slate-700"
+                  )}>{v.title}</span>
+                  <span className="text-[10px] text-slate-400 font-medium">{v.date}</span>
+                </div>
+                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                  {v.text}
+                </p>
+              </button>
+            ))
+          ) : (
+            <div className="p-6 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center text-center gap-2 opacity-50">
+              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                <Fingerprint className="w-4 h-4 text-slate-400" />
               </div>
-              <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                {v.text}
-              </p>
-            </button>
-          ))}
-          
-          <div className="p-6 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center text-center gap-2 opacity-50">
-            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
-              <Fingerprint className="w-4 h-4 text-slate-400" />
+              <p className="text-[10px] font-medium text-slate-500">Suas versões anteriores aparecerão aqui para você acompanhar sua evolução.</p>
             </div>
-            <p className="text-[10px] font-medium text-slate-500">Suas versões anteriores aparecerão aqui para você acompanhar sua evolução.</p>
-          </div>
+          )}
         </div>
       </div>
     </div>
