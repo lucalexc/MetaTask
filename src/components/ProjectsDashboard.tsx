@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, X, Folder, Loader2 } from 'lucide-react';
+import { Plus, X, Folder, Loader2, Edit2, Check } from 'lucide-react';
 import { supabase } from '@/src/lib/supabase';
 import { useAuth } from '@/src/lib/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/src/lib/utils';
+import { toast } from 'sonner';
 
 interface Project {
   id: string;
   name: string;
+  description?: string;
   color: string;
   task_count?: number;
 }
@@ -28,6 +30,7 @@ export default function ProjectsDashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -93,19 +96,45 @@ export default function ProjectsDashboard() {
     }
   };
 
-  const handleCreateProject = async (name: string, color: string) => {
+  const handleCreateProject = async (name: string, description: string, color: string) => {
     if (!user) return;
     try {
       const { error } = await supabase.from('projects').insert([{
         user_id: user.id,
         name,
+        description,
         color
       }]);
       if (error) throw error;
       setIsModalOpen(false);
       fetchProjects();
+      toast.success('Projeto criado com sucesso!');
     } catch (error) {
       console.error('Error creating project:', error);
+      toast.error('Erro ao criar projeto.');
+    }
+  };
+
+  const handleUpdateProject = async (id: string, name: string, description: string, color: string) => {
+    if (!user) return;
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({
+          name,
+          description,
+          color
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setEditingProject(null);
+      fetchProjects();
+      toast.success('Projeto atualizado com sucesso!');
+    } catch (error) {
+      console.error('Error updating project:', error);
+      toast.error('Erro ao atualizar projeto.');
     }
   };
 
@@ -114,8 +143,10 @@ export default function ProjectsDashboard() {
       const { error } = await supabase.from('projects').delete().eq('id', id);
       if (error) throw error;
       fetchProjects();
+      toast.success('Projeto excluído com sucesso!');
     } catch (error) {
       console.error('Error deleting project:', error);
+      toast.error('Erro ao excluir projeto.');
     }
   };
 
@@ -175,26 +206,48 @@ export default function ProjectsDashboard() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="group relative bg-white border border-slate-200 rounded-xl p-5 hover:border-slate-300 hover:shadow-sm transition-all"
+                    onClick={() => setEditingProject(project)}
+                    className="group relative bg-white border border-slate-200 rounded-xl p-5 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer overflow-hidden"
                   >
+                    {/* Colored sidebar */}
+                    <div 
+                      className="absolute left-0 top-0 bottom-0 w-1.5"
+                      style={{ backgroundColor: project.color }}
+                    />
+                    
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <div 
-                          className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm"
                           style={{ backgroundColor: project.color }}
-                        />
-                        <h3 className="font-semibold text-slate-900">{project.name}</h3>
+                        >
+                          <Folder className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-slate-900 leading-none">{project.name}</h3>
+                          {project.description && (
+                            <p className="text-xs text-slate-500 mt-1 line-clamp-1">{project.description}</p>
+                          )}
+                        </div>
                       </div>
                       <button
-                        onClick={() => handleDeleteProject(project.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteProject(project.id);
+                        }}
                         className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all"
                         title="Excluir projeto"
                       >
                         <X className="w-4 h-4" />
                       </button>
                     </div>
-                    <div className="flex items-center text-sm text-slate-500">
-                      <span>{project.task_count} {project.task_count === 1 ? 'tarefa' : 'tarefas'}</span>
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="flex items-center text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        <span>{project.task_count} {project.task_count === 1 ? 'tarefa' : 'tarefas'}</span>
+                      </div>
+                      <div className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-slate-100 transition-colors">
+                        <Edit2 className="w-3 h-3 text-slate-400" />
+                      </div>
                     </div>
                   </motion.div>
                 ))}
@@ -211,13 +264,21 @@ export default function ProjectsDashboard() {
             onSave={handleCreateProject}
           />
         )}
+        {editingProject && (
+          <EditProjectModal
+            project={editingProject}
+            onClose={() => setEditingProject(null)}
+            onSave={handleUpdateProject}
+          />
+        )}
       </AnimatePresence>
     </div>
   );
 }
 
-function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (name: string, color: string) => void }) {
+function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (name: string, description: string, color: string) => void }) {
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [color, setColor] = useState(PRESET_COLORS[4]); // Default blue
 
   return (
@@ -237,31 +298,44 @@ function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (na
         
         <div className="p-6 space-y-6">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Nome do Projeto</label>
+            <label className="block text-sm font-bold text-slate-700 mb-1">Nome do Projeto</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ex: Trabalho, Pessoal, Estudos..."
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
               autoFocus
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Cor</label>
-            <div className="flex flex-wrap gap-3">
+            <label className="block text-sm font-bold text-slate-700 mb-1">Descrição</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Descreva o objetivo deste projeto..."
+              rows={3}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-2">Cor do Projeto</label>
+            <div className="grid grid-cols-4 gap-3">
               {PRESET_COLORS.map((c) => (
                 <button
                   key={c}
                   onClick={() => setColor(c)}
                   className={cn(
-                    "w-8 h-8 rounded-full border-2 transition-all",
-                    color === c ? "border-slate-900 scale-110" : "border-transparent hover:scale-110"
+                    "w-full aspect-square rounded-xl border-2 transition-all flex items-center justify-center",
+                    color === c ? "border-slate-900 scale-105 shadow-sm" : "border-transparent hover:scale-105"
                   )}
                   style={{ backgroundColor: c }}
                   type="button"
-                />
+                >
+                  {color === c && <Check className="w-4 h-4 text-white" />}
+                </button>
               ))}
             </div>
           </div>
@@ -275,11 +349,114 @@ function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (na
             Cancelar
           </button>
           <button
-            onClick={() => onSave(name, color)}
+            onClick={() => onSave(name, description, color)}
             disabled={!name.trim()}
-            className="px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Criar Projeto
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function EditProjectModal({ 
+  project, 
+  onClose, 
+  onSave 
+}: { 
+  project: Project; 
+  onClose: () => void; 
+  onSave: (id: string, name: string, description: string, color: string) => Promise<void> 
+}) {
+  const [name, setName] = useState(project.name);
+  const [description, setDescription] = useState(project.description || '');
+  const [color, setColor] = useState(project.color);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    await onSave(project.id, name, description, color);
+    setIsSaving(false);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+      >
+        <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
+            <h3 className="font-bold text-lg text-slate-800">Editar Projeto</h3>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="p-6 space-y-6">
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-1">Nome do Projeto</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ex: Trabalho, Pessoal, Estudos..."
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-1">Descrição</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Descreva o objetivo deste projeto..."
+              rows={3}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-2">Cor do Projeto</label>
+            <div className="grid grid-cols-4 gap-3">
+              {PRESET_COLORS.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setColor(c)}
+                  className={cn(
+                    "w-full aspect-square rounded-xl border-2 transition-all flex items-center justify-center",
+                    color === c ? "border-slate-900 scale-105 shadow-sm" : "border-transparent hover:scale-105"
+                  )}
+                  style={{ backgroundColor: c }}
+                  type="button"
+                >
+                  {color === c && <Check className="w-4 h-4 text-white" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!name.trim() || isSaving}
+            className="px-6 py-2 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+            Salvar Alterações
           </button>
         </div>
       </motion.div>
