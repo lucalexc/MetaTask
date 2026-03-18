@@ -6,37 +6,49 @@ import { Button } from '@/src/components/ui/button';
 import { supabase } from '@/src/lib/supabase';
 import { useAuth } from '@/src/lib/AuthContext';
 
-export type Routine = {
+import { toast } from 'sonner';
+
+export type RoutineActivity = {
   id: string;
+  routine_id: string;
   user_id: string;
   title: string;
   time: string;
-  period: 'morning' | 'afternoon' | 'evening' | 'night';
   is_completed: boolean;
   created_at: string;
   updated_at: string;
 };
 
-const getPeriodInfo = (period: string) => {
-  switch (period) {
-    case 'morning': return { label: 'Manhã', icon: '☀️' };
-    case 'afternoon': return { label: 'Tarde', icon: '☕' };
-    case 'evening': return { label: 'Noite', icon: '🌙' };
-    case 'night': return { label: 'Madrugada', icon: '🌌' };
-    default: return { label: 'Manhã', icon: '☀️' };
-  }
+export type Routine = {
+  id: string;
+  user_id: string;
+  name: string;
+  days_of_week: number[];
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  activities?: RoutineActivity[];
 };
 
-const getPeriodFromTime = (time: string): 'morning' | 'afternoon' | 'evening' | 'night' => {
-  if (!time) return 'morning';
+const DAYS = [
+  { id: 0, label: 'D', full: 'Domingo' },
+  { id: 1, label: 'S', full: 'Segunda' },
+  { id: 2, label: 'T', full: 'Terça' },
+  { id: 3, label: 'Q', full: 'Quarta' },
+  { id: 4, label: 'Q', full: 'Quinta' },
+  { id: 5, label: 'S', full: 'Sexta' },
+  { id: 6, label: 'S', full: 'Sábado' },
+];
+
+const getPeriodInfo = (time: string) => {
   const hour = parseInt(time.split(':')[0], 10);
-  if (hour >= 5 && hour < 12) return 'morning';
-  if (hour >= 12 && hour < 18) return 'afternoon';
-  if (hour >= 18 && hour < 24) return 'evening';
-  return 'night';
+  if (hour >= 5 && hour < 12) return { label: 'Manhã', icon: '☀️' };
+  if (hour >= 12 && hour < 18) return { label: 'Tarde', icon: '☕' };
+  if (hour >= 18 && hour < 24) return { label: 'Noite', icon: '🌙' };
+  return { label: 'Madrugada', icon: '🌌' };
 };
 
-const NewRoutineModal = ({ 
+const RoutineManagerModal = ({ 
   isOpen, 
   onClose, 
   onSave, 
@@ -44,22 +56,44 @@ const NewRoutineModal = ({
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
-  onSave: (routine: Partial<Routine>) => void;
+  onSave: (routine: Partial<Routine>, activities: Partial<RoutineActivity>[]) => void;
   editingRoutine: Routine | null;
 }) => {
-  const [title, setTitle] = useState(editingRoutine?.title || '');
-  const [time, setTime] = useState(editingRoutine?.time || '08:00');
+  const [name, setName] = useState(editingRoutine?.name || '');
+  const [daysOfWeek, setDaysOfWeek] = useState<number[]>(editingRoutine?.days_of_week || []);
+  const [activities, setActivities] = useState<Partial<RoutineActivity>[]>(
+    editingRoutine?.activities?.map(a => ({ title: a.title, time: a.time, id: a.id })) || []
+  );
 
   useEffect(() => {
     if (isOpen) {
-      setTitle(editingRoutine?.title || '');
-      setTime(editingRoutine?.time || '08:00');
+      setName(editingRoutine?.name || '');
+      setDaysOfWeek(editingRoutine?.days_of_week || []);
+      setActivities(editingRoutine?.activities?.map(a => ({ title: a.title, time: a.time, id: a.id })) || []);
     }
   }, [isOpen, editingRoutine]);
 
+  const toggleDay = (dayId: number) => {
+    setDaysOfWeek(prev => 
+      prev.includes(dayId) ? prev.filter(d => d !== dayId) : [...prev, dayId].sort()
+    );
+  };
+
+  const addActivity = () => {
+    setActivities(prev => [...prev, { title: '', time: '08:00' }]);
+  };
+
+  const updateActivity = (index: number, field: keyof RoutineActivity, value: string) => {
+    setActivities(prev => prev.map((a, i) => i === index ? { ...a, [field]: value } : a));
+  };
+
+  const removeActivity = (index: number) => {
+    setActivities(prev => prev.filter((_, i) => i !== index));
+  };
+
   if (!isOpen) return null;
 
-  const isSaveDisabled = !title.trim() || !time;
+  const isSaveDisabled = !name.trim() || daysOfWeek.length === 0 || activities.length === 0;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
@@ -67,63 +101,110 @@ const NewRoutineModal = ({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col"
+        className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
       >
-        <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
           <h3 className="font-bold text-lg text-slate-800">
-            {editingRoutine ? 'Editar Rotina' : 'Nova Rotina'}
+            {editingRoutine ? 'Editar Bloco de Rotina' : 'Novo Bloco de Rotina'}
           </h3>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 flex flex-col gap-6">
+        <div className="p-6 flex flex-col gap-8 overflow-y-auto">
+          {/* Routine Name */}
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Qual a atividade?</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nome da Rotina</label>
             <input 
               type="text" 
-              placeholder="Ex: Leitura, Academia..." 
+              placeholder="Ex: Rotina Matinal, Faxina de Sábado..." 
               className="w-full text-base font-medium text-slate-900 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
+              value={name}
+              onChange={e => setName(e.target.value)}
               autoFocus
             />
           </div>
 
+          {/* Days of Week */}
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Horário</label>
-            <div className="relative">
-              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input 
-                type="time" 
-                lang="pt-BR"
-                step="60"
-                className="w-full text-base font-medium text-slate-900 border border-slate-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-                value={time}
-                onChange={e => setTime(e.target.value)}
-              />
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Dias da Semana</label>
+            <div className="flex justify-between gap-2">
+              {DAYS.map(day => (
+                <button
+                  key={day.id}
+                  onClick={() => toggleDay(day.id)}
+                  className={cn(
+                    "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all",
+                    daysOfWeek.includes(day.id)
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                      : "bg-slate-100 text-slate-400 hover:bg-slate-200"
+                  )}
+                >
+                  {day.label}
+                </button>
+              ))}
             </div>
-            <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
-              O sistema detectará automaticamente se é manhã, tarde ou noite.
-            </p>
+          </div>
+
+          {/* Activity Builder */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Atividades</label>
+              <button 
+                onClick={addActivity}
+                className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+              >
+                <Plus className="w-3 h-3" /> Adicionar Atividade
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              {activities.map((activity, index) => (
+                <div key={index} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 group">
+                  <input 
+                    type="time" 
+                    className="bg-transparent text-sm font-bold text-slate-700 w-20 focus:outline-none"
+                    value={activity.time}
+                    onChange={e => updateActivity(index, 'time', e.target.value)}
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="Nome da atividade"
+                    className="flex-1 bg-transparent text-sm font-medium text-slate-900 focus:outline-none"
+                    value={activity.title}
+                    onChange={e => updateActivity(index, 'title', e.target.value)}
+                  />
+                  <button 
+                    onClick={() => removeActivity(index)}
+                    className="text-slate-300 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+              {activities.length === 0 && (
+                <div className="text-center py-6 border-2 border-dashed border-slate-100 rounded-xl">
+                  <p className="text-sm text-slate-400">Nenhuma atividade adicionada.</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="p-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50">
+        <div className="p-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50 sticky bottom-0">
           <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">
             Cancelar
           </button>
           <button 
             disabled={isSaveDisabled}
-            onClick={() => {
+            onClick={async () => {
               if (isSaveDisabled) return;
-              onSave({ title, time });
-              onClose();
+              await onSave({ name, days_of_week: daysOfWeek }, activities);
             }}
             className="px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm"
           >
-            Salvar Rotina
+            {editingRoutine ? 'Atualizar Rotina' : 'Criar Rotina'}
           </button>
         </div>
       </motion.div>
@@ -161,14 +242,24 @@ export default function RoutinesDashboard({
   const fetchRoutines = async () => {
     setIsLoading(true);
     try {
+      const todayDay = new Date().getDay();
+      
+      // Fetch routines with their activities
       const { data, error } = await supabase
         .from('routines')
-        .select('*')
+        .select('*, routine_activities(*)')
         .eq('user_id', user?.id)
-        .order('time', { ascending: true });
+        .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setRoutines(data || []);
+      
+      // Sort activities by time
+      const processedData = (data || []).map(routine => ({
+        ...routine,
+        activities: routine.routine_activities?.sort((a: any, b: any) => a.time.localeCompare(b.time))
+      }));
+
+      setRoutines(processedData);
     } catch (error) {
       console.error('Error fetching routines:', error);
     } finally {
@@ -176,68 +267,76 @@ export default function RoutinesDashboard({
     }
   };
 
-  const handleSaveRoutine = async (routineData: Partial<Routine>) => {
+  const handleSaveRoutine = async (routineData: Partial<Routine>, activitiesData: Partial<RoutineActivity>[]) => {
     if (!user) return;
 
-    const period = getPeriodFromTime(routineData.time || '08:00');
+    try {
+      let routineId = editingRoutine?.id;
 
-    if (editingRoutine) {
-      const updatedRoutine = {
-        ...editingRoutine,
-        title: routineData.title,
-        time: routineData.time,
-        period,
-      };
-
-      // Optimistic update
-      setRoutines(routines.map(r => r.id === editingRoutine.id ? updatedRoutine : r));
-
-      try {
-        const { error } = await supabase
+      if (editingRoutine) {
+        // Update routine
+        const { error: routineError } = await supabase
           .from('routines')
           .update({
-            title: routineData.title,
-            time: routineData.time,
-            period,
+            name: routineData.name,
+            days_of_week: routineData.days_of_week,
           })
           .eq('id', editingRoutine.id);
 
-        if (error) throw error;
-      } catch (error) {
-        console.error('Error updating routine:', error);
-        fetchRoutines(); // Revert on error
-      }
-    } else {
-      const newRoutine = {
-        user_id: user.id,
-        title: routineData.title || '',
-        time: routineData.time || '08:00',
-        period,
-        is_completed: false,
-      };
+        if (routineError) throw routineError;
 
-      try {
-        const { data, error } = await supabase
+        // Update activities: simple approach - delete all and re-insert
+        const { error: deleteError } = await supabase
+          .from('routine_activities')
+          .delete()
+          .eq('routine_id', editingRoutine.id);
+
+        if (deleteError) throw deleteError;
+      } else {
+        // Create routine - Passo A
+        const { data: newRoutine, error: routineError } = await supabase
           .from('routines')
-          .insert([newRoutine])
+          .insert([{
+            user_id: user.id,
+            name: routineData.name || '',
+            days_of_week: routineData.days_of_week || [],
+            is_active: true,
+          }])
           .select()
           .single();
 
-        if (error) throw error;
-        if (data) {
-          setRoutines([...routines, data].sort((a, b) => a.time.localeCompare(b.time)));
-        }
-      } catch (error) {
-        console.error('Error creating routine:', error);
+        if (routineError) throw routineError;
+        routineId = newRoutine.id;
       }
+
+      // Insert activities - Passo B
+      if (routineId && activitiesData.length > 0) {
+        const activitiesToInsert = activitiesData.map(a => ({
+          routine_id: routineId,
+          user_id: user.id,
+          title: a.title,
+          time: a.time,
+          is_completed: false,
+        }));
+
+        const { error: activitiesError } = await supabase
+          .from('routine_activities')
+          .insert(activitiesToInsert);
+
+        if (activitiesError) throw activitiesError;
+      }
+
+      toast.success(editingRoutine ? 'Rotina atualizada com sucesso!' : 'Rotina criada com sucesso!');
+      setIsCreateModalOpen(false);
+      setEditingRoutine(null);
+      fetchRoutines();
+    } catch (error: any) {
+      console.error('Error saving routine:', error);
+      toast.error(error.message || 'Erro ao salvar rotina. Tente novamente.');
     }
-    setEditingRoutine(null);
   };
 
   const handleDeleteRoutine = async (id: string) => {
-    // Optimistic update
-    setRoutines(routines.filter(r => r.id !== id));
-
     try {
       const { error } = await supabase
         .from('routines')
@@ -245,32 +344,38 @@ export default function RoutinesDashboard({
         .eq('id', id);
 
       if (error) throw error;
+      setRoutines(routines.filter(r => r.id !== id));
     } catch (error) {
       console.error('Error deleting routine:', error);
-      fetchRoutines(); // Revert on error
     }
   };
 
-  const toggleCompletion = async (id: string) => {
-    const routine = routines.find(r => r.id === id);
-    if (!routine) return;
+  const toggleActivityCompletion = async (routineId: string, activityId: string) => {
+    const routine = routines.find(r => r.id === routineId);
+    const activity = routine?.activities?.find(a => a.id === activityId);
+    if (!activity) return;
 
-    const newCompletedStatus = !routine.is_completed;
+    const newCompletedStatus = !activity.is_completed;
 
     // Optimistic update
     setRoutines(routines.map(r => 
-      r.id === id ? { ...r, is_completed: newCompletedStatus } : r
+      r.id === routineId 
+        ? { 
+            ...r, 
+            activities: r.activities?.map(a => a.id === activityId ? { ...a, is_completed: newCompletedStatus } : a) 
+          } 
+        : r
     ));
 
     try {
       const { error } = await supabase
-        .from('routines')
+        .from('routine_activities')
         .update({ is_completed: newCompletedStatus })
-        .eq('id', id);
+        .eq('id', activityId);
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error updating routine completion:', error);
+      console.error('Error updating activity completion:', error);
       fetchRoutines(); // Revert on error
     }
   };
@@ -285,20 +390,26 @@ export default function RoutinesDashboard({
     setIsCreateModalOpen(false);
   };
 
-  // Today's routines
-  const todaysRoutines = routines;
+  // Filter routines for today
+  const todayDay = new Date().getDay();
+  const activeRoutinesToday = routines.filter(r => r.is_active && r.days_of_week?.includes(todayDay));
 
-  const groupedToday = todaysRoutines.reduce((acc, routine) => {
-    const period = routine.period;
-    if (!acc[period]) {
-      const info = getPeriodInfo(period);
-      acc[period] = { label: info.label, icon: info.icon, items: [] };
+  // Group activities by period for today's view
+  const allActivitiesToday = activeRoutinesToday.flatMap(r => 
+    r.activities?.map(a => ({ ...a, routineName: r.name, routineId: r.id })) || []
+  ).sort((a, b) => a.time.localeCompare(b.time));
+
+  const groupedToday = allActivitiesToday.reduce((acc, activity) => {
+    const periodInfo = getPeriodInfo(activity.time);
+    const periodLabel = periodInfo.label;
+    if (!acc[periodLabel]) {
+      acc[periodLabel] = { label: periodLabel, icon: periodInfo.icon, items: [] };
     }
-    acc[period].items.push(routine);
+    acc[periodLabel].items.push(activity);
     return acc;
-  }, {} as Record<string, { label: string, icon: string, items: Routine[] }>);
+  }, {} as Record<string, { label: string, icon: string, items: any[] }>);
 
-  const periodOrder = ['morning', 'afternoon', 'evening', 'night'];
+  const periodOrder = ['Manhã', 'Tarde', 'Noite', 'Madrugada'];
 
   return (
     <main className="flex-1 flex overflow-y-auto bg-white">
@@ -323,7 +434,7 @@ export default function RoutinesDashboard({
                 className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors"
               >
                 <Settings className="w-4 h-4" />
-                Todas as Rotinas
+                Gerenciar Rotinas
               </button>
             </header>
 
@@ -332,7 +443,7 @@ export default function RoutinesDashboard({
                 <Loader2 className="w-6 h-6 animate-spin mb-2" />
                 <p className="text-sm">Carregando rotinas...</p>
               </div>
-            ) : todaysRoutines.length === 0 ? (
+            ) : allActivitiesToday.length === 0 ? (
               <div className="text-center py-20">
                 <p className="text-slate-500">Nenhuma rotina programada para hoje.</p>
                 <Button 
@@ -341,28 +452,28 @@ export default function RoutinesDashboard({
                   className="mt-4 text-blue-600 border-blue-200 hover:bg-blue-50"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Adicionar Rotina
+                  Configurar Rotinas
                 </Button>
               </div>
             ) : (
               <div className="space-y-8">
-                {periodOrder.map(periodId => {
-                  const group = groupedToday[periodId];
+                {periodOrder.map(periodLabel => {
+                  const group = groupedToday[periodLabel];
                   if (!group || group.items.length === 0) return null;
 
                   return (
-                    <div key={periodId}>
+                    <div key={periodLabel}>
                       <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-6 mb-2 flex items-center gap-2">
                         <span>{group.icon}</span> {group.label}
                       </h3>
                       <div className="flex flex-col">
-                        {group.items.map(routine => {
-                          const isCompleted = routine.is_completed;
+                        {group.items.map(activity => {
+                          const isCompleted = activity.is_completed;
                           return (
                             <div 
-                              key={routine.id}
+                              key={activity.id}
                               className="flex items-center gap-3 py-3 border-b border-slate-100 group transition-colors hover:bg-slate-50/50 -mx-4 px-4 rounded-lg cursor-pointer"
-                              onClick={() => toggleCompletion(routine.id)}
+                              onClick={() => toggleActivityCompletion(activity.routineId, activity.id)}
                             >
                               <button 
                                 className={cn(
@@ -374,14 +485,19 @@ export default function RoutinesDashboard({
                               >
                                 {isCompleted && <Check className="w-3 h-3" />}
                               </button>
-                              <span className={cn(
-                                "text-sm font-medium flex-1 transition-colors",
-                                isCompleted ? "text-slate-400 line-through" : "text-slate-800"
-                              )}>
-                                {routine.title}
-                              </span>
+                              <div className="flex-1 min-w-0">
+                                <p className={cn(
+                                  "text-sm font-medium transition-colors truncate",
+                                  isCompleted ? "text-slate-400 line-through" : "text-slate-800"
+                                )}>
+                                  {activity.title}
+                                </p>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                                  {activity.routineName}
+                                </p>
+                              </div>
                               <span className="text-xs font-medium text-slate-400 shrink-0">
-                                {routine.time}
+                                {activity.time}
                               </span>
                             </div>
                           );
@@ -410,7 +526,7 @@ export default function RoutinesDashboard({
                   Voltar para Hoje
                 </button>
                 <h1 className="text-3xl font-display font-bold text-slate-900 tracking-tight">
-                  Configuração de Rotinas
+                  Gerenciador de Rotinas
                 </h1>
               </div>
               <Button 
@@ -418,11 +534,11 @@ export default function RoutinesDashboard({
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Adicionar Rotina
+                Novo Bloco
               </Button>
             </header>
 
-            <div className="space-y-10">
+            <div className="grid grid-cols-1 gap-4">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-12 text-slate-400">
                   <Loader2 className="w-6 h-6 animate-spin mb-2" />
@@ -430,40 +546,65 @@ export default function RoutinesDashboard({
                 </div>
               ) : routines.length === 0 ? (
                 <div className="text-center py-20 text-slate-500">
-                  Nenhuma rotina configurada.
+                  Nenhum bloco de rotina configurado.
                 </div>
               ) : (
-                <div className="flex flex-col">
-                  {routines.map(routine => (
-                    <div 
-                      key={routine.id}
-                      className="flex items-center gap-3 py-2.5 group transition-colors hover:bg-slate-50 -mx-2 px-2 rounded-md"
-                    >
-                      <span className="text-xs font-medium text-slate-400 w-10 shrink-0">
-                        {routine.time}
-                      </span>
-                      <span className="text-sm font-medium text-slate-700 flex-1">
-                        {routine.title}
-                      </span>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
+                routines.map(routine => (
+                  <div 
+                    key={routine.id}
+                    className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all group"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="text-lg font-bold text-slate-900 mb-2">{routine.name}</h3>
+                        <div className="flex gap-1">
+                          {DAYS.map(day => (
+                            <span 
+                              key={day.id}
+                              className={cn(
+                                "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border",
+                                routine.days_of_week?.includes(day.id)
+                                  ? "bg-blue-50 border-blue-200 text-blue-600"
+                                  : "bg-slate-50 border-slate-100 text-slate-300"
+                              )}
+                            >
+                              {day.label}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
                         <button 
                           onClick={() => openEditModal(routine)} 
-                          className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
-                          title="Editar"
+                          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         >
-                          <Edit2 className="w-3.5 h-3.5" />
+                          <Edit2 className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleDeleteRoutine(routine.id)} 
-                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"
-                          title="Excluir"
+                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                  ))}
-                </div>
+                    
+                    <div className="space-y-2">
+                      {routine.activities?.slice(0, 3).map(activity => (
+                        <div key={activity.id} className="flex items-center gap-2 text-sm text-slate-500">
+                          <Clock className="w-3 h-3" />
+                          <span className="font-bold w-10">{activity.time}</span>
+                          <span className="truncate">{activity.title}</span>
+                        </div>
+                      ))}
+                      {(routine.activities?.length || 0) > 3 && (
+                        <p className="text-xs text-slate-400 font-medium pl-5">
+                          + {(routine.activities?.length || 0) - 3} outras atividades
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))
               )}
             </div>
           </motion.div>
@@ -473,7 +614,7 @@ export default function RoutinesDashboard({
 
       <AnimatePresence>
         {isCreateModalOpen && (
-          <NewRoutineModal 
+          <RoutineManagerModal 
             isOpen={isCreateModalOpen} 
             onClose={closeEditModal} 
             onSave={handleSaveRoutine}

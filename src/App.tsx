@@ -45,6 +45,8 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+import { Toaster } from 'sonner';
+
 export default function App() {
   return (
     <AuthProvider>
@@ -54,6 +56,7 @@ export default function App() {
           <Route path="/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         </Routes>
       </Router>
+      <Toaster position="top-right" richColors />
     </AuthProvider>
   );
 }

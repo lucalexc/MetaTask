@@ -8,7 +8,7 @@ import MissionsMapDashboard from '@/src/components/MissionsMapDashboard';
 import IdentityDashboard from '@/src/components/IdentityDashboard';
 import SettingsDashboard from '@/src/components/SettingsDashboard';
 import { cn } from '@/src/lib/utils';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'motion/react';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'tasks' | 'projects' | 'goals' | 'routines' | 'missions' | 'identity' | 'settings'>('tasks');

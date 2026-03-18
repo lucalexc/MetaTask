@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   CheckCircle2, Circle, Plus, Calendar as CalendarIcon, 
-  ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause
+  ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause, Trash2
 } from 'lucide-react';
 import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, addDays, startOfMonth, endOfMonth, getDay, addMonths, subMonths, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -172,11 +172,14 @@ const TaskCard: React.FC<{
           </div>
           
           <button 
-            onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
-            className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all shrink-0"
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              onDelete(task.id);
+            }}
+            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all shrink-0"
             title="Excluir tarefa"
           >
-            <X className="w-4 h-4" />
+            <Trash2 className="w-4 h-4" />
           </button>
         </div>
 
@@ -336,11 +339,14 @@ const TaskCard: React.FC<{
       </div>
 
       <button 
-        onClick={() => onDelete(task.id)}
-        className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all"
+        onClick={(e) => { 
+          e.stopPropagation(); 
+          onDelete(task.id);
+        }}
+        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all"
         title="Excluir tarefa"
       >
-        <X className="w-4 h-4" />
+        <Trash2 className="w-4 h-4" />
       </button>
     </motion.div>
   );
@@ -837,6 +843,34 @@ const TaskHistoryModal = ({ isOpen, onClose, task }: { isOpen: boolean; onClose:
   );
 };
 
+const ConfirmDeleteModal = ({ isOpen, onClose, onConfirm }: { isOpen: boolean; onClose: () => void; onConfirm: () => void }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
+      >
+        <div className="p-6 text-center">
+          <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
+            <Trash2 className="w-6 h-6" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-900 mb-2">Excluir Tarefa</h3>
+          <p className="text-sm text-slate-500">
+            Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.
+          </p>
+        </div>
+        <div className="p-4 bg-slate-50 flex justify-end gap-2">
+          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button className="bg-red-600 hover:bg-red-700 text-white" onClick={onConfirm}>Excluir</Button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
 // --- Main Component ---
 
 export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen }: { isCreateModalOpen: boolean, setIsCreateModalOpen: (v: boolean) => void }) {
@@ -855,6 +889,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
   const [isRecurrenceModalOpen, setIsRecurrenceModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [selectedTaskForModal, setSelectedTaskForModal] = useState<Task | null>(null);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   // Drag and Drop State
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
@@ -993,6 +1028,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
   const handleDeleteTask = async (id: string) => {
     // Optimistic update
     setTasks(tasks.filter(t => t.id !== id));
+    setTaskToDelete(null);
 
     try {
       const { error } = await supabase
@@ -1484,7 +1520,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                             task={task} 
                             project={projects.find(p => p.id === task.project_id)}
                             onToggle={handleToggleTask} 
-                            onDelete={handleDeleteTask}
+                            onDelete={setTaskToDelete}
                             onOpenTimeModal={openTimeModal}
                             onOpenRecurrenceModal={openRecurrenceModal}
                             onToggleTimer={handleToggleTimer}
@@ -1511,7 +1547,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                         task={task} 
                         project={projects.find(p => p.id === task.project_id)}
                         onToggle={handleToggleTask} 
-                        onDelete={handleDeleteTask}
+                        onDelete={setTaskToDelete}
                         onOpenTimeModal={openTimeModal}
                         onOpenRecurrenceModal={openRecurrenceModal}
                         onToggleTimer={handleToggleTimer}
@@ -1547,7 +1583,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                 </div>
                 <div className="space-y-3">
                   {projectFilteredTasks.filter(t => t.status === 'pending' && !t.is_running).map(task => (
-                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={handleDeleteTask} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
+                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={setTaskToDelete} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
                   ))}
                 </div>
               </div>
@@ -1568,7 +1604,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                 </div>
                 <div className="space-y-3">
                   {projectFilteredTasks.filter(t => t.status === 'pending' && t.is_running).map(task => (
-                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={handleDeleteTask} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
+                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={setTaskToDelete} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
                   ))}
                 </div>
               </div>
@@ -1589,7 +1625,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                 </div>
                 <div className="space-y-3 opacity-60">
                   {projectFilteredTasks.filter(t => t.status === 'completed').map(task => (
-                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={handleDeleteTask} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
+                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={setTaskToDelete} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
                   ))}
                 </div>
               </div>
@@ -1726,6 +1762,13 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               isOpen={isHistoryModalOpen}
               onClose={() => setIsHistoryModalOpen(false)}
               task={selectedTaskForModal}
+            />
+          )}
+          {taskToDelete && (
+            <ConfirmDeleteModal
+              isOpen={!!taskToDelete}
+              onClose={() => setTaskToDelete(null)}
+              onConfirm={() => handleDeleteTask(taskToDelete)}
             />
           )}
         </AnimatePresence>
