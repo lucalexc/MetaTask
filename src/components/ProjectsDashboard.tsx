@@ -32,6 +32,26 @@ export default function ProjectsDashboard() {
   useEffect(() => {
     if (user) {
       fetchProjects();
+
+      // Subscribe to task changes to update project task counts in real-time
+      const channel = supabase
+        .channel('tasks_changes_for_projects')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'tasks',
+          },
+          () => {
+            fetchProjects();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 

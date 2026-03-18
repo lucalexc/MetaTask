@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, Plus, Trash2, Loader2 } from 'lucide-react';
+import { Check, Plus, Trash2, Loader2, XCircle } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { Button } from '@/src/components/ui/button';
 import { supabase } from '@/src/lib/supabase';
@@ -164,7 +164,6 @@ const NewGoalModal = ({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: (
                 if (isSaveDisabled) return;
                 onSave({ title, description: JSON.stringify({ totalDays: parseInt(totalDays) || 30, dailyGoal, currentDay: 1 }) });
                 setTitle(''); setTotalDays('30'); setDailyGoal(1);
-                onClose();
               }}
               className="px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm"
             >
@@ -181,6 +180,14 @@ export default function GoalsDashboard({ isCreateModalOpen, setIsCreateModalOpen
   const { user } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [toastMsg, setToastMsg] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+
+  useEffect(() => {
+    if (toastMsg) {
+      const timer = setTimeout(() => setToastMsg(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMsg]);
 
   useEffect(() => {
     if (user) {
@@ -271,10 +278,13 @@ export default function GoalsDashboard({ isCreateModalOpen, setIsCreateModalOpen
       if (error) throw error;
       
       if (data) {
-        setGoals([data, ...goals]);
+        setGoals(prev => [data, ...prev]);
+        setIsCreateModalOpen(false);
+        setToastMsg({ message: 'Meta criada com sucesso!', type: 'success' });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating goal:', error);
+      setToastMsg({ message: `Erro: ${error.message || 'Falha ao criar meta'}`, type: 'error' });
     }
   };
 
@@ -333,6 +343,28 @@ export default function GoalsDashboard({ isCreateModalOpen, setIsCreateModalOpen
             onClose={() => setIsCreateModalOpen(false)} 
             onSave={handleSaveGoal} 
           />
+        )}
+      </AnimatePresence>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className={cn(
+              "fixed bottom-20 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full shadow-2xl z-50 flex items-center gap-3",
+              toastMsg.type === 'error' ? "bg-red-600 text-white" : "bg-slate-900 text-white"
+            )}
+          >
+            {toastMsg.type === 'error' ? (
+              <XCircle className="w-5 h-5 text-white" />
+            ) : (
+              <Check className="w-5 h-5 text-emerald-400" />
+            )}
+            <span className="font-medium">{toastMsg.message}</span>
+          </motion.div>
         )}
       </AnimatePresence>
     </main>
