@@ -20,11 +20,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Check if there's an auth hash in the URL
+    const hasAuthHash = window.location.hash.includes('access_token=') || 
+                        window.location.hash.includes('refresh_token=') ||
+                        window.location.hash.includes('error_description=');
+
+    let timeoutId: NodeJS.Timeout;
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setIsLoading(false);
+      
+      // If there's a hash, wait for onAuthStateChange to handle it
+      // unless getSession already resolved the session
+      if (!hasAuthHash || session) {
+        setIsLoading(false);
+      } else {
+        // Fallback timeout if onAuthStateChange doesn't fire
+        timeoutId = setTimeout(() => {
+          setIsLoading(false);
+        }, 3000);
+      }
     });
 
     // Listen for auth changes
@@ -34,9 +51,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
+      if (timeoutId) clearTimeout(timeoutId);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   return (
