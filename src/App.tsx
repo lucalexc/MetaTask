@@ -46,11 +46,29 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 }
 
 import { Toaster } from 'sonner';
+import { supabase } from './lib/supabase';
+import { useNavigate } from 'react-router-dom';
+
+function AuthListener() {
+  const navigate = useNavigate();
+  
+  React.useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        navigate('/app');
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  return null;
+}
 
 export default function App() {
   return (
     <AuthProvider>
       <Router>
+        <AuthListener />
         <Routes>
           <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
           <Route path="/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

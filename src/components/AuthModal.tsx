@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, Lock, User, AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { X, Mail, Lock, User, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { cn } from '../lib/utils';
+import { toast } from 'sonner';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -20,27 +20,23 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
   React.useEffect(() => {
     if (isOpen) {
       setAuthMode(initialMode);
       setIsOtpMode(false);
       setOtpCode('');
-      setErrorMsg('');
     }
   }, [isOpen, initialMode]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg('');
     setIsLoading(true);
 
     try {
       if (authMode === 'register') {
-        const { data, error: signUpError } = await supabase.auth.signUp({
+        const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -51,28 +47,29 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         });
 
         if (signUpError) {
-          setErrorMsg(signUpError.message);
+          toast.error(signUpError.message);
           return;
         }
         
         // Se o signup for bem sucedido, muda para o modo OTP
         setIsOtpMode(true);
+        toast.success('Código enviado para seu e-mail!');
       } else {
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (signInError) {
-          setErrorMsg(signInError.message);
+          toast.error(signInError.message);
           return;
         }
 
         onClose();
-        navigate('/app');
+        // Redirect is handled by AuthListener in App.tsx
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Ocorreu um erro durante a autenticação.');
+      toast.error(err.message || 'Ocorreu um erro durante a autenticação.');
     } finally {
       setIsLoading(false);
     }
@@ -80,25 +77,24 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg('');
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
+      const { error } = await supabase.auth.verifyOtp({
         email,
         token: otpCode,
         type: 'signup'
       });
 
       if (error) {
-        setErrorMsg(error.message);
+        toast.error(error.message);
         return;
       }
 
       onClose();
-      navigate('/app');
+      // Redirect is handled by AuthListener in App.tsx
     } catch (err: any) {
-      setErrorMsg(err.message || 'Erro ao verificar o código.');
+      toast.error(err.message || 'Erro ao verificar o código.');
     } finally {
       setIsLoading(false);
     }
@@ -113,11 +109,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         }
       });
       if (error) {
-        setErrorMsg(error.message);
+        toast.error(error.message);
         return;
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Erro ao conectar com o Google.');
+      toast.error(err.message || 'Erro ao conectar com o Google.');
     }
   };
 
@@ -171,26 +167,18 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                         required
                         maxLength={6}
                         value={otpCode}
-                        onChange={(e) => {
-                          setOtpCode(e.target.value.replace(/\D/g, ''));
-                          setErrorMsg('');
-                        }}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
                         className="block w-full pl-9 pr-3 py-3 text-center tracking-[0.5em] text-lg font-mono border border-slate-200 rounded-xl text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-slate-50 focus:bg-white"
                         placeholder="000000"
                       />
                     </div>
 
-                    {errorMsg && (
-                      <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg text-center border border-red-100 mb-4">
-                        {errorMsg}
-                      </div>
-                    )}
-
                     <button
                       type="submit"
                       disabled={isLoading || otpCode.length !== 6}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 text-sm rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 text-sm rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
+                      {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                       {isLoading ? 'Verificando...' : 'Confirmar Código'}
                     </button>
                     
@@ -205,16 +193,30 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                 </div>
               ) : (
                 <>
-                  {/* Header */}
-                  <div className="text-center mb-6">
-                    <h2 className="text-xl font-bold text-slate-800 tracking-tight mb-1.5">
-                      {authMode === 'login' ? 'Bem-vindo de volta' : 'Crie sua conta'}
-                    </h2>
-                    <p className="text-slate-500 text-sm">
-                      {authMode === 'login' 
-                        ? 'Faça login para continuar sua evolução pessoal.' 
-                        : 'Dê o primeiro passo rumo ao amadurecimento.'}
-                    </p>
+                  {/* Header Tabs */}
+                  <div className="flex bg-slate-100 p-1 rounded-lg mb-6">
+                    <button
+                      onClick={() => setAuthMode('login')}
+                      className={cn(
+                        "flex-1 py-1.5 text-sm font-medium rounded-md transition-all",
+                        authMode === 'login' 
+                          ? "bg-white text-slate-900 shadow-sm" 
+                          : "text-slate-500 hover:text-slate-700"
+                      )}
+                    >
+                      Entrar
+                    </button>
+                    <button
+                      onClick={() => setAuthMode('register')}
+                      className={cn(
+                        "flex-1 py-1.5 text-sm font-medium rounded-md transition-all",
+                        authMode === 'register' 
+                          ? "bg-white text-slate-900 shadow-sm" 
+                          : "text-slate-500 hover:text-slate-700"
+                      )}
+                    >
+                      Criar Conta
+                    </button>
                   </div>
 
                   {/* Google Button */}
@@ -273,10 +275,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                               type="text"
                               required
                               value={name}
-                              onChange={(e) => {
-                                setName(e.target.value);
-                                setErrorMsg('');
-                              }}
+                              onChange={(e) => setName(e.target.value)}
                               className="block w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all bg-slate-50 focus:bg-white"
                               placeholder="Nome completo"
                             />
@@ -293,10 +292,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                         type="email"
                         required
                         value={email}
-                        onChange={(e) => {
-                          setEmail(e.target.value);
-                          setErrorMsg('');
-                        }}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="block w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all bg-slate-50 focus:bg-white"
                         placeholder="E-mail"
                       />
@@ -310,54 +306,21 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                         type="password"
                         required
                         value={password}
-                        onChange={(e) => {
-                          setPassword(e.target.value);
-                          setErrorMsg('');
-                        }}
+                        onChange={(e) => setPassword(e.target.value)}
                         className="block w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all bg-slate-50 focus:bg-white"
                         placeholder="Senha"
                       />
                     </div>
 
-                    {errorMsg && (
-                      <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg text-center border border-red-100 mb-4">
-                        {errorMsg}
-                      </div>
-                    )}
-
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 text-sm rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 text-sm rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
+                      {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                       {isLoading ? 'Aguarde...' : (authMode === 'login' ? 'Entrar' : 'Cadastrar')}
                     </button>
                   </form>
-
-                  {/* Footer */}
-                  <div className="mt-6 text-center text-sm text-slate-500">
-                    {authMode === 'login' ? (
-                      <p>
-                        Ainda não tem uma conta?{' '}
-                        <button
-                          onClick={() => setAuthMode('register')}
-                          className="text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-all"
-                        >
-                          Cadastre-se
-                        </button>
-                      </p>
-                    ) : (
-                      <p>
-                        Já tem uma conta?{' '}
-                        <button
-                          onClick={() => setAuthMode('login')}
-                          className="text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-all"
-                        >
-                          Faça Login
-                        </button>
-                      </p>
-                    )}
-                  </div>
                 </>
               )}
             </motion.div>
