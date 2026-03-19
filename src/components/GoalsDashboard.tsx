@@ -10,11 +10,20 @@ export type Goal = {
   id: string;
   user_id: string;
   title: string;
-  description?: string; // JSON string containing { dailyGoal, totalDays, currentDay }
-  progress: number;
+  description?: string; // JSON string containing { dailyGoal, totalDays }
   status: 'active' | 'completed' | 'abandoned';
   created_at: string;
   updated_at: string;
+  // Dynamic fields calculated after fetch
+  daily_progress?: number;
+  current_day?: number;
+};
+
+export type GoalLog = {
+  id: string;
+  goal_id: string;
+  user_id: string;
+  created_at: string;
 };
 
 const getMetadata = (goal: Goal) => {
@@ -25,13 +34,27 @@ const getMetadata = (goal: Goal) => {
   } catch (e) {
     // ignore
   }
-  return { dailyGoal: 1, totalDays: 30, currentDay: 1 };
+  return { dailyGoal: 1, totalDays: 30 };
+};
+
+const calculateCurrentDay = (createdAt: string) => {
+  const start = new Date(createdAt);
+  start.setHours(0, 0, 0, 0);
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  
+  const diffTime = Math.abs(now.getTime() - start.getTime());
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  return diffDays + 1; // Day 1 is the day it was created
 };
 
 const GoalCard: React.FC<{ goal: Goal, onIncrement: (id: string) => void, onDelete: (id: string) => void }> = ({ goal, onIncrement, onDelete }) => {
   const meta = getMetadata(goal);
-  const isCompleted = goal.progress >= meta.dailyGoal;
-  const progressPercent = Math.min(100, (goal.progress / meta.dailyGoal) * 100);
+  const progress = goal.daily_progress || 0;
+  const currentDay = goal.current_day || 1;
+  const isCompleted = progress >= meta.dailyGoal;
+  const progressPercent = Math.min(100, (progress / meta.dailyGoal) * 100);
 
   return (
     <motion.div 
@@ -44,9 +67,9 @@ const GoalCard: React.FC<{ goal: Goal, onIncrement: (id: string) => void, onDele
       <div className="w-1/3 shrink-0">
         <h4 className="text-sm font-bold text-slate-800">{goal.title}</h4>
         <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
-          <span>{goal.progress}/{meta.dailyGoal} vezes hoje</span>
+          <span>{progress}/{meta.dailyGoal} vezes hoje</span>
           <span>•</span>
-          <span>Dia {meta.currentDay} de {meta.totalDays}</span>
+          <span>Dia {currentDay} de {meta.totalDays}</span>
         </div>
       </div>
 
@@ -162,7 +185,7 @@ const NewGoalModal = ({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: (
               disabled={isSaveDisabled}
               onClick={() => {
                 if (isSaveDisabled) return;
-                onSave({ title, description: JSON.stringify({ totalDays: parseInt(totalDays) || 30, dailyGoal, currentDay: 1 }) });
+                onSave({ title, description: JSON.stringify({ totalDays: parseInt(totalDays) || 30, dailyGoal }) });
                 setTitle(''); setTotalDays('30'); setDailyGoal(1);
               }}
               className="px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm"
@@ -196,16 +219,44 @@ export default function GoalsDashboard({ isCreateModalOpen, setIsCreateModalOpen
   }, [user]);
 
   const fetchGoals = async () => {
+    if (!user) return;
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      // 1. Fetch Goals
+      const { data: goalsData, error: goalsError } = await supabase
         .from('goals')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setGoals(data || []);
+      if (goalsError) throw goalsError;
+
+      // 2. Fetch Logs for Today
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const { data: logsData, error: logsError } = await supabase
+        .from('goal_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('created_at', startOfDay.toISOString())
+        .lte('created_at', endOfDay.toISOString());
+
+      if (logsError) throw logsError;
+
+      // 3. Map progress and current day
+      const enrichedGoals = (goalsData || []).map(goal => {
+        const dailyLogs = (logsData || []).filter(log => log.goal_id === goal.id);
+        return {
+          ...goal,
+          daily_progress: dailyLogs.length,
+          current_day: calculateCurrentDay(goal.created_at)
+        };
+      });
+
+      setGoals(enrichedGoals);
     } catch (error) {
       console.error('Error fetching goals:', error);
     } finally {
@@ -214,28 +265,30 @@ export default function GoalsDashboard({ isCreateModalOpen, setIsCreateModalOpen
   };
 
   const handleIncrement = async (id: string) => {
+    if (!user) return;
     const goal = goals.find(g => g.id === id);
     if (!goal) return;
 
     const meta = getMetadata(goal);
-    if (goal.progress >= meta.dailyGoal) return;
-
-    const newProgress = goal.progress + 1;
+    const currentProgress = goal.daily_progress || 0;
+    if (currentProgress >= meta.dailyGoal) return;
 
     // Optimistic update
     setGoals(goals.map(g => 
-      g.id === id ? { ...g, progress: newProgress } : g
+      g.id === id ? { ...g, daily_progress: currentProgress + 1 } : g
     ));
 
     try {
       const { error } = await supabase
-        .from('goals')
-        .update({ progress: newProgress })
-        .eq('id', id);
+        .from('goal_logs')
+        .insert([{
+          goal_id: id,
+          user_id: user.id
+        }]);
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error updating goal:', error);
+      console.error('Error logging goal completion:', error);
       fetchGoals(); // Revert on error
     }
   };
@@ -264,7 +317,6 @@ export default function GoalsDashboard({ isCreateModalOpen, setIsCreateModalOpen
       user_id: user.id,
       title: goalData.title || 'Nova Meta',
       description: goalData.description,
-      progress: 0,
       status: 'active'
     };
 
@@ -278,7 +330,13 @@ export default function GoalsDashboard({ isCreateModalOpen, setIsCreateModalOpen
       if (error) throw error;
       
       if (data) {
-        setGoals(prev => [data, ...prev]);
+        // Initialize with 0 progress and day 1
+        const enrichedNewGoal = {
+          ...data,
+          daily_progress: 0,
+          current_day: 1
+        };
+        setGoals(prev => [enrichedNewGoal, ...prev]);
         setIsCreateModalOpen(false);
         setToastMsg({ message: 'Meta criada com sucesso!', type: 'success' });
       }

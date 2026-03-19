@@ -208,13 +208,63 @@ export default function IdentityDashboard() {
   const [necrologioVersions, setNecrologioVersions] = useState<NecrologioVersion[]>([]);
   const [isSavingNecrologio, setIsSavingNecrologio] = useState(false);
   const [isLoadingNecrologio, setIsLoadingNecrologio] = useState(false);
+  const [isLoadingTemperament, setIsLoadingTemperament] = useState(false);
+  const [isLoadingLayers, setIsLoadingLayers] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
 
   useEffect(() => {
-    if (user && activeTab === 'necrologio') {
-      fetchNecrologioVersions();
+    if (user) {
+      if (activeTab === 'necrologio') fetchNecrologioVersions();
+      if (activeTab === 'temperamento') fetchTemperamentResult();
+      if (activeTab === 'camadas') fetchLayerResult();
     }
   }, [user, activeTab]);
+
+  const fetchTemperamentResult = async () => {
+    if (!user) return;
+    setIsLoadingTemperament(true);
+    try {
+      const { data, error } = await supabase
+        .from('identity_temperaments')
+        .select('result')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+
+      if (data) {
+        setFinalResult(data.result as TemperamentType);
+        setTestStatus('finished');
+      }
+    } catch (error) {
+      console.error('Error fetching temperament:', error);
+    } finally {
+      setIsLoadingTemperament(false);
+    }
+  };
+
+  const fetchLayerResult = async () => {
+    if (!user) return;
+    setIsLoadingLayers(true);
+    try {
+      const { data, error } = await supabase
+        .from('identity_layers')
+        .select('result')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+
+      if (data) {
+        setLayerFinalResult(data.result as LayerType);
+        setLayerTestStatus('finished');
+      }
+    } catch (error) {
+      console.error('Error fetching layers:', error);
+    } finally {
+      setIsLoadingLayers(false);
+    }
+  };
 
   const fetchNecrologioVersions = async () => {
     if (!user) return;
@@ -289,9 +339,6 @@ export default function IdentityDashboard() {
   });
   const [finalResult, setFinalResult] = useState<TemperamentType | null>(null);
 
-  // States for tests (Mocking "Completed" for demo purposes)
-  const [hasDoneCamadas, setHasDoneCamadas] = useState(true);
-
   // Layer Test State
   const [layerTestStatus, setLayerTestStatus] = useState<TestStatus>('idle');
   const [currentLayerQuestion, setCurrentLayerQuestion] = useState(0);
@@ -303,7 +350,7 @@ export default function IdentityDashboard() {
   });
   const [layerFinalResult, setLayerFinalResult] = useState<LayerType | null>(null);
 
-  const handleAnswer = (type: string) => {
+  const handleAnswer = async (type: string) => {
     const tType = type as TemperamentType;
     const newScores = { ...scores, [tType]: scores[tType] + 1 };
     setScores(newScores);
@@ -320,8 +367,29 @@ export default function IdentityDashboard() {
           winner = key;
         }
       });
+      
       setFinalResult(winner);
       setTestStatus('finished');
+
+      // Save to Supabase
+      if (user) {
+        try {
+          const { error } = await supabase
+            .from('identity_temperaments')
+            .upsert({ 
+              user_id: user.id, 
+              result: winner 
+            }, { onConflict: 'user_id' });
+
+          if (error) throw error;
+          setToastMsg('Resultado salvo com sucesso!');
+          setTimeout(() => setToastMsg(''), 3000);
+        } catch (error) {
+          console.error('Error saving temperament:', error);
+          setToastMsg('Erro ao salvar resultado.');
+          setTimeout(() => setToastMsg(''), 3000);
+        }
+      }
     }
   };
 
@@ -332,7 +400,7 @@ export default function IdentityDashboard() {
     setFinalResult(null);
   };
 
-  const handleLayerAnswer = (type: string) => {
+  const handleLayerAnswer = async (type: string) => {
     const lType = type as LayerType;
     const newScores = { ...layerScores, [lType]: layerScores[lType] + 1 };
     setLayerScores(newScores);
@@ -348,8 +416,29 @@ export default function IdentityDashboard() {
           winner = key;
         }
       });
+      
       setLayerFinalResult(winner);
       setLayerTestStatus('finished');
+
+      // Save to Supabase
+      if (user) {
+        try {
+          const { error } = await supabase
+            .from('identity_layers')
+            .upsert({ 
+              user_id: user.id, 
+              result: winner 
+            }, { onConflict: 'user_id' });
+
+          if (error) throw error;
+          setToastMsg('Anamnese salva com sucesso!');
+          setTimeout(() => setToastMsg(''), 3000);
+        } catch (error) {
+          console.error('Error saving layers:', error);
+          setToastMsg('Erro ao salvar anamnese.');
+          setTimeout(() => setToastMsg(''), 3000);
+        }
+      }
     }
   };
 
@@ -362,21 +451,6 @@ export default function IdentityDashboard() {
 
   const renderNecrologio = () => (
     <div className="flex h-full gap-8 relative">
-      {/* Toast */}
-      <AnimatePresence>
-        {toastMsg && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium flex items-center gap-2"
-          >
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            {toastMsg}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Main Editor */}
       <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-slate-50 flex justify-between items-center">
@@ -467,6 +541,17 @@ export default function IdentityDashboard() {
   );
 
   const renderTemperamento = () => {
+    if (isLoadingTemperament) {
+      return (
+        <div className="h-full flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin" />
+            <p className="text-slate-500 font-medium">Carregando seu perfil...</p>
+          </div>
+        </div>
+      );
+    }
+
     if (testStatus === 'idle') {
       return (
         <div className="h-full flex flex-col items-center justify-center max-w-2xl mx-auto text-center gap-8">
@@ -596,6 +681,17 @@ export default function IdentityDashboard() {
   };
 
   const renderCamadas = () => {
+    if (isLoadingLayers) {
+      return (
+        <div className="h-full flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+            <p className="text-slate-500 font-medium">Carregando sua anamnese...</p>
+          </div>
+        </div>
+      );
+    }
+
     if (layerTestStatus === 'idle') {
       return (
         <div className="h-full flex flex-col items-center justify-center max-w-2xl mx-auto text-center gap-8">
@@ -725,7 +821,22 @@ export default function IdentityDashboard() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-slate-50/50 overflow-hidden">
+    <div className="flex-1 flex flex-col h-full bg-slate-50/50 overflow-hidden relative">
+      {/* Toast */}
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-3 border border-white/10"
+          >
+            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+            {toastMsg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="px-6 pt-5 bg-white border-b border-slate-200 shrink-0">
         <div className="flex items-center gap-3 mb-4">
