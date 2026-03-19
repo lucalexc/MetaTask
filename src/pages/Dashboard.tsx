@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, Plus, Inbox, Sword, RefreshCcw, Map, Fingerprint, Settings, Folder, Menu, X } from 'lucide-react';
+import { Target, Plus, Inbox, Sword, RefreshCcw, Map, Fingerprint, Settings, Folder, Menu, X, BarChart2 } from 'lucide-react';
 import TasksDashboard from '@/src/components/TasksDashboard';
 import ProjectsDashboard from '@/src/components/ProjectsDashboard';
 import GoalsDashboard from '@/src/components/GoalsDashboard';
@@ -7,11 +7,12 @@ import RoutinesDashboard from '@/src/components/RoutinesDashboard';
 import MissionsMapDashboard from '@/src/components/MissionsMapDashboard';
 import IdentityDashboard from '@/src/components/IdentityDashboard';
 import SettingsDashboard from '@/src/components/SettingsDashboard';
+import InsightsDashboard from '@/src/components/InsightsDashboard';
 import { cn } from '@/src/lib/utils';
 import { AnimatePresence, motion } from 'motion/react';
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<'tasks' | 'projects' | 'goals' | 'routines' | 'missions' | 'identity' | 'settings'>('tasks');
+  const [activeTab, setActiveTab] = useState<'tasks' | 'projects' | 'goals' | 'routines' | 'missions' | 'identity' | 'insights' | 'settings'>('tasks');
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [isRoutineModalOpen, setIsRoutineModalOpen] = useState(false);
@@ -112,6 +113,16 @@ export default function Dashboard() {
             <Fingerprint className={cn("w-4 h-4", activeTab === 'identity' ? "text-blue-600" : "text-slate-500")} />
             Identidade
           </button>
+          <button 
+            onClick={() => handleTabChange('insights')}
+            className={cn(
+              "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
+              activeTab === 'insights' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
+            )}
+          >
+            <BarChart2 className={cn("w-4 h-4", activeTab === 'insights' ? "text-blue-600" : "text-slate-500")} />
+            Estatísticas
+          </button>
         </nav>
 
         <div className="p-3 mt-auto border-t border-slate-100">
@@ -148,6 +159,9 @@ export default function Dashboard() {
         <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'routines' && "hidden")}>
           <RoutinesDashboard isCreateModalOpen={isRoutineModalOpen} setIsCreateModalOpen={setIsRoutineModalOpen} />
         </div>
+        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'insights' && "hidden")}>
+          <InsightsDashboard />
+        </div>
         <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'settings' && "hidden")}>
           <SettingsDashboard />
         </div>
@@ -178,7 +192,7 @@ export default function Dashboard() {
           <Map className="w-5 h-5" />
           <span className="text-[10px] mt-1 font-medium">Metas</span>
         </button>
-        <button onClick={() => setIsMobileMenuOpen(true)} className={cn("flex flex-col items-center justify-center w-16 h-16", ['routines', 'missions', 'identity', 'settings'].includes(activeTab) ? "text-blue-600" : "text-slate-500")}>
+        <button onClick={() => setIsMobileMenuOpen(true)} className={cn("flex flex-col items-center justify-center w-16 h-16", ['routines', 'missions', 'identity', 'insights', 'settings'].includes(activeTab) ? "text-blue-600" : "text-slate-500")}>
           <Menu className="w-5 h-5" />
           <span className="text-[10px] mt-1 font-medium">Mais</span>
         </button>
@@ -229,6 +243,13 @@ export default function Dashboard() {
                 >
                   <Fingerprint className={cn("w-5 h-5", activeTab === 'identity' ? "text-blue-600" : "text-slate-400")} />
                   <span className="font-medium">Identidade</span>
+                </button>
+                <button 
+                  onClick={() => handleTabChange('insights')}
+                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'insights' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
+                >
+                  <BarChart2 className={cn("w-5 h-5", activeTab === 'insights' ? "text-blue-600" : "text-slate-400")} />
+                  <span className="font-medium">Estatísticas</span>
                 </button>
                 <div className="h-px bg-slate-100 my-2 mx-3" />
                 <button 
