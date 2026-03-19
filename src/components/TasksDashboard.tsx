@@ -66,6 +66,12 @@ const TaskCard: React.FC<{
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
+    
+    if (task.status === 'completed') {
+      setCurrentElapsed(task.elapsed_time || 0);
+      return;
+    }
+
     if (task.is_running && task.last_started_at) {
       const start = new Date(task.last_started_at).getTime();
       if (!isNaN(start)) {
@@ -88,7 +94,7 @@ const TaskCard: React.FC<{
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [task.is_running, task.last_started_at, task.elapsed_time]);
+  }, [task.is_running, task.last_started_at, task.elapsed_time, task.status]);
 
   const formatTime = (totalSeconds: number) => {
     const validSeconds = Math.max(0, totalSeconds);
@@ -878,6 +884,29 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
   const [view, setView] = useState<'list' | 'kanban' | 'calendar'>('list');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [weekDirection, setWeekDirection] = useState(0);
+
+  useEffect(() => {
+    const start = startOfWeek(selectedDate, { weekStartsOn: 1 });
+    setCurrentWeekStart((prev) => {
+      if (start.getTime() !== prev.getTime()) {
+        setWeekDirection(start > prev ? 1 : -1);
+        return start;
+      }
+      return prev;
+    });
+  }, [selectedDate]);
+
+  const handlePrevWeek = () => {
+    setWeekDirection(-1);
+    setCurrentWeekStart(prev => addDays(prev, -7));
+  };
+
+  const handleNextWeek = () => {
+    setWeekDirection(1);
+    setCurrentWeekStart(prev => addDays(prev, 7));
+  };
   
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<{ id: string, name: string, color: string }[]>([]);
@@ -947,12 +976,29 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
       completedDateIso = completedDate.toISOString();
     }
 
+    // Auto-pause logic
+    let newIsRunning = task.is_running;
+    let newElapsed = task.elapsed_time || 0;
+    let timerStoppedNow = false;
+    let diffSeconds = 0;
+
+    if (newStatus === 'completed' && task.is_running) {
+      newIsRunning = false;
+      timerStoppedNow = true;
+      const now = new Date();
+      const start = task.last_started_at ? new Date(task.last_started_at) : now;
+      diffSeconds = Math.max(0, Math.floor((now.getTime() - start.getTime()) / 1000));
+      newElapsed += diffSeconds;
+    }
+
     // Optimistic update
     setTasks(tasks.map(t => {
       if (t.id === id) {
         return { 
           ...t, 
           status: newStatus,
+          is_running: newIsRunning,
+          elapsed_time: newElapsed,
           // If completing a recurring task, remove recurrence from this instance
           ...(isCompletingRecurring ? { recurrence: 'none', due_date: completedDateIso } : {})
         };
@@ -961,7 +1007,11 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
     }));
 
     try {
-      const updatePayload: any = { status: newStatus };
+      const updatePayload: any = { 
+        status: newStatus,
+        is_running: newIsRunning,
+        elapsed_time: newElapsed
+      };
       if (isCompletingRecurring) {
         updatePayload.recurrence = 'none';
         // Update the due_date of the completed instance to the currently selected date
@@ -975,6 +1025,16 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
         .eq('id', id);
 
       if (error) throw error;
+
+      // Update time log if timer was stopped
+      if (timerStoppedNow) {
+        const now = new Date();
+        const { error: logError } = await supabase.from('task_time_logs')
+          .update({ ended_at: now.toISOString(), duration: diffSeconds })
+          .eq('task_id', id)
+          .is('ended_at', null);
+        if (logError) console.error('Error updating log:', logError);
+      }
 
       // If completing a recurring task, create the next instance
       if (isCompletingRecurring && user) {
@@ -1362,11 +1422,6 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
   const pendingTasks = filteredTasks.filter(t => t.status === 'pending');
   const completedTasks = filteredTasks.filter(t => t.status === 'completed');
 
-  // Calendar Logic for List View Strip
-  const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
-  const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
-
   // Calendar Logic for Month View
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -1465,33 +1520,69 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               className="space-y-6"
             >
               {/* Horizontal Days Strip */}
-              <div className="flex justify-between items-center bg-white py-2 border-b border-slate-100">
-                {weekDays.map(day => {
-                  const isSelected = isSameDay(day, selectedDate);
-                  const isToday = isSameDay(day, new Date());
-                  return (
-                    <button
-                      key={day.toISOString()}
-                      onClick={() => setSelectedDate(day)}
-                      className={cn(
-                        "flex flex-col items-center justify-center w-10 h-12 rounded-lg transition-all",
-                        isSelected 
-                          ? "bg-blue-50 text-blue-600 font-bold" 
-                          : "hover:bg-slate-50 text-slate-600"
-                      )}
-                    >
-                      <span className="text-[10px] uppercase tracking-wider mb-0.5">
-                        {format(day, 'EEE', { locale: ptBR }).substring(0, 3)}
-                      </span>
-                      <span className={cn(
-                        "text-sm",
-                        isToday && !isSelected && "text-blue-600 font-bold"
-                      )}>
-                        {format(day, 'd')}
-                      </span>
-                    </button>
-                  );
-                })}
+              <div className="flex items-center bg-white py-3 px-2 border-b border-slate-100">
+                <Button variant="ghost" size="icon" onClick={handlePrevWeek} className="text-slate-400 hover:text-slate-600 shrink-0">
+                  <ChevronLeft className="w-5 h-5" />
+                </Button>
+                
+                <div className="flex-1 flex flex-col overflow-hidden px-2">
+                  {/* Static Labels */}
+                  <div className="flex justify-around mb-2">
+                    {['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'].map(day => (
+                      <div key={day} className="w-10 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Animated Numbers */}
+                  <div className="relative h-10">
+                    <AnimatePresence mode="popLayout" custom={weekDirection}>
+                      <motion.div
+                        key={currentWeekStart.toISOString()}
+                        custom={weekDirection}
+                        variants={{
+                          initial: (dir: number) => ({ x: dir > 0 ? 50 : -50, opacity: 0 }),
+                          animate: { x: 0, opacity: 1 },
+                          exit: (dir: number) => ({ x: dir > 0 ? -50 : 50, opacity: 0 })
+                        }}
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="absolute inset-0 flex justify-around"
+                      >
+                        {eachDayOfInterval({ start: currentWeekStart, end: addDays(currentWeekStart, 6) }).map(day => {
+                          const isSelected = isSameDay(day, selectedDate);
+                          const isToday = isSameDay(day, new Date());
+                          return (
+                            <button
+                              key={day.toISOString()}
+                              onClick={() => setSelectedDate(day)}
+                              className={cn(
+                                "flex items-center justify-center w-10 h-10 rounded-lg transition-all",
+                                isSelected 
+                                  ? "bg-blue-50 text-blue-600 font-bold shadow-sm" 
+                                  : "hover:bg-slate-50 text-slate-600"
+                              )}
+                            >
+                              <span className={cn(
+                                "text-sm",
+                                isToday && !isSelected && "text-blue-600 font-bold"
+                              )}>
+                                {format(day, 'd')}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                </div>
+
+                <Button variant="ghost" size="icon" onClick={handleNextWeek} className="text-slate-400 hover:text-slate-600 shrink-0">
+                  <ChevronRight className="w-5 h-5" />
+                </Button>
               </div>
 
               {/* Active Missions Area */}
