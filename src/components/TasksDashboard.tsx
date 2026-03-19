@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   CheckCircle2, Circle, Plus, Calendar as CalendarIcon, 
-  ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause, Trash2
+  ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause, Trash2, Tag
 } from 'lucide-react';
 import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, addDays, startOfMonth, endOfMonth, getDay, addMonths, subMonths, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cn } from '@/src/lib/utils';
 import { supabase } from '@/src/lib/supabase';
 import { useAuth } from '@/src/lib/AuthContext';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // --- Types ---
 export type Task = {
@@ -27,10 +28,18 @@ export type Task = {
   last_started_at?: string;
   estimated_time?: number;
   project_id?: string;
+  tag_id?: string;
   // UI only fields for now (not in DB schema)
   priority?: string;
   time?: string;
   recurrence?: string;
+};
+
+export type TaskTag = {
+  id: string;
+  user_id: string;
+  name: string;
+  color?: string;
 };
 
 // --- Subcomponents ---
@@ -359,6 +368,8 @@ const TaskCard: React.FC<{
 };
 
 const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: boolean; onClose: () => void; onSave: (task: any) => void; projects: {id: string, name: string, color: string}[]; taskToEdit?: Task | null }) => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -370,6 +381,49 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
   const [recurrence, setRecurrence] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
   const [taskDate, setTaskDate] = useState<Date>(new Date());
   const [projectId, setProjectId] = useState<string>('none');
+  const [tagId, setTagId] = useState<string>('none');
+  const [isCreatingTag, setIsCreatingTag] = useState(false);
+  const [newTagName, setNewTagName] = useState('');
+
+  const { data: tags = [] } = useQuery({
+    queryKey: ['task_tags', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('task_tags')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('name');
+      if (error) throw error;
+      return data as TaskTag[];
+    },
+    enabled: !!user,
+  });
+
+  const createTagMutation = useMutation({
+    mutationFn: async (name: string) => {
+      if (!user) throw new Error('User not logged in');
+      const { data, error } = await supabase
+        .from('task_tags')
+        .insert([{ user_id: user.id, name, color: '#3b82f6' }])
+        .select()
+        .single();
+      if (error) throw error;
+      return data as TaskTag;
+    },
+    onSuccess: (newTag) => {
+      queryClient.invalidateQueries({ queryKey: ['task_tags'] });
+      setTagId(newTag.id);
+      setIsCreatingTag(false);
+      setNewTagName('');
+    }
+  });
+
+  const handleCreateTag = () => {
+    if (newTagName.trim()) {
+      createTagMutation.mutate(newTagName.trim());
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -382,6 +436,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
         setRecurrence((taskToEdit.recurrence as any) || 'none');
         setTaskDate(taskToEdit.due_date ? new Date(taskToEdit.due_date) : new Date());
         setProjectId(taskToEdit.project_id || 'none');
+        setTagId(taskToEdit.tag_id || 'none');
       } else {
         setTitle('');
         setDescription('');
@@ -391,6 +446,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
         setRecurrence('none');
         setTaskDate(new Date());
         setProjectId('none');
+        setTagId('none');
       }
     }
   }, [isOpen, taskToEdit]);
@@ -595,6 +651,58 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
                 </Select>
               )}
 
+              <div className="flex items-center gap-1">
+                <Select value={tagId} onValueChange={setTagId}>
+                  <SelectTrigger className="w-auto h-9 border-slate-200 bg-transparent hover:bg-slate-50 focus:ring-0 focus:ring-offset-0 border rounded-lg px-3">
+                    <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600">
+                      <Tag className="w-4 h-4 text-slate-400" />
+                      {tagId === 'none' ? 'Categoria' : tags.find((t: TaskTag) => t.id === tagId)?.name}
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="z-[110]">
+                    <SelectItem value="none">Nenhuma categoria</SelectItem>
+                    {tags.map((t: TaskTag) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: t.color || '#3b82f6' }} />
+                          {t.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                {isCreatingTag ? (
+                  <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 h-9">
+                    <input 
+                      type="text" 
+                      value={newTagName} 
+                      onChange={e => setNewTagName(e.target.value)}
+                      placeholder="Nome da tag"
+                      className="w-24 text-sm bg-transparent focus:outline-none"
+                      autoFocus
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') handleCreateTag();
+                        if (e.key === 'Escape') setIsCreatingTag(false);
+                      }}
+                    />
+                    <button onClick={handleCreateTag} className="text-blue-600 hover:text-blue-700 p-1">
+                      <CheckCircle className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => setIsCreatingTag(false)} className="text-slate-400 hover:text-slate-600 p-1">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => setIsCreatingTag(true)}
+                    className="h-9 w-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
                 <Timer className="w-4 h-4 text-slate-400" />
                 <input type="text" value={duration} onChange={e => setDuration(e.target.value)} className="w-12 bg-transparent focus:outline-none text-center" placeholder="30" />
@@ -610,8 +718,8 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
               disabled={isSaveDisabled}
               onClick={() => {
                 if (isSaveDisabled) return;
-                onSave({ id: taskToEdit?.id, title, description, priority, estimated_time: parseInt(duration) || 30, time: time || undefined, recurrence, date: taskDate, project_id: projectId === 'none' ? null : projectId });
-                setTitle(''); setDescription(''); setTime(''); setRecurrence('none'); setPriority('P4'); setDuration('30'); setProjectId('none');
+                onSave({ id: taskToEdit?.id, title, description, priority, estimated_time: parseInt(duration) || 30, time: time || undefined, recurrence, date: taskDate, project_id: projectId === 'none' ? null : projectId, tag_id: tagId === 'none' ? null : tagId });
+                setTitle(''); setDescription(''); setTime(''); setRecurrence('none'); setPriority('P4'); setDuration('30'); setProjectId('none'); setTagId('none');
                 setIsDatePickerOpen(false); setIsTimePickerOpen(false); setIsRecurrencePickerOpen(false);
                 onClose();
               }}
@@ -1219,6 +1327,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
       time: taskData.time,
       recurrence: taskData.recurrence,
       project_id: taskData.project_id || null,
+      tag_id: taskData.tag_id || null,
       priority: taskData.priority || 'P4'
     };
 

@@ -8,6 +8,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import { AuthProvider, useAuth } from './lib/AuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, isLoading } = useAuth();
@@ -66,15 +69,17 @@ function AuthListener() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <AuthListener />
-        <Routes>
-          <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
-          <Route path="/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        </Routes>
-      </Router>
-      <Toaster position="top-right" richColors />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router>
+          <AuthListener />
+          <Routes>
+            <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+            <Route path="/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          </Routes>
+        </Router>
+        <Toaster position="top-right" richColors />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

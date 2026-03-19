@@ -62,6 +62,7 @@ CREATE TABLE tasks (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
+  tag_id UUID REFERENCES task_tags(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
   description TEXT,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'completed')),
@@ -237,3 +238,56 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- 6. Task Tags Table
+CREATE TABLE task_tags (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS for task_tags
+ALTER TABLE task_tags ENABLE ROW LEVEL SECURITY;
+
+-- Task Tags Policies
+CREATE POLICY "Users can view own task tags" ON task_tags
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own task tags" ON task_tags
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own task tags" ON task_tags
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own task tags" ON task_tags
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- 7. Daily Energy Table
+CREATE TABLE daily_energy (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  level INTEGER NOT NULL CHECK (level >= 1 AND level <= 5),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  UNIQUE(user_id, date)
+);
+
+-- Enable RLS for daily_energy
+ALTER TABLE daily_energy ENABLE ROW LEVEL SECURITY;
+
+-- Daily Energy Policies
+CREATE POLICY "Users can view own daily energy" ON daily_energy
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own daily energy" ON daily_energy
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own daily energy" ON daily_energy
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own daily energy" ON daily_energy
+  FOR DELETE USING (auth.uid() = user_id);
+
+CREATE TRIGGER update_daily_energy_modtime BEFORE UPDATE ON daily_energy FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
