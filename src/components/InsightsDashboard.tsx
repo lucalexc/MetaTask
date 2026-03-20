@@ -145,7 +145,7 @@ export default function InsightsDashboard() {
     // Tag Distribution
     const tagCounts: Record<string, number> = {};
     completedTasks.forEach(t => {
-      const tagName = t.task_tags?.name || 'Sem Categoria';
+      const tagName = (Array.isArray(t.task_tags) ? t.task_tags[0]?.name : (t.task_tags as any)?.name) || 'Sem Categoria';
       tagCounts[tagName] = (tagCounts[tagName] || 0) + 1;
     });
 

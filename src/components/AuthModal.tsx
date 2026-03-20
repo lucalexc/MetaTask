@@ -136,7 +136,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', duration: 0.5, bounce: 0.3 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 relative overflow-y-auto max-h-[90vh]"
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative overflow-y-auto max-h-[90vh]"
             >
               {/* Close Button */}
               <button

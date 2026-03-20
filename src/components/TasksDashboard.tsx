@@ -687,7 +687,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
                       }}
                     />
                     <button onClick={handleCreateTag} className="text-blue-600 hover:text-blue-700 p-1">
-                      <CheckCircle className="w-4 h-4" />
+                      <CheckCircle2 className="w-4 h-4" />
                     </button>
                     <button onClick={() => setIsCreatingTag(false)} className="text-slate-400 hover:text-slate-600 p-1">
                       <X className="w-4 h-4" />

@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import AuthModal from '@/src/components/AuthModal';
 import { cn } from '@/src/lib/utils';
 
-const Reveal = ({ children, delay = 0, className }: { children: React.ReactNode, delay?: number, className?: string }) => (
+const Reveal = ({ children, delay = 0, className }: { children: React.ReactNode, delay?: number, className?: string, key?: React.Key }) => (
   <motion.div
     initial={{ opacity: 0, y: 30 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -81,13 +81,6 @@ export default function LandingPage() {
         {/* Hero Section */}
         <section className="pt-40 pb-24 px-6 relative">
           <div className="max-w-5xl mx-auto text-center">
-            <Reveal>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-blue-400 text-sm font-medium mb-8 backdrop-blur-sm">
-                <Sparkles className="w-4 h-4" />
-                O Sistema Operacional da Sua Vida
-              </div>
-            </Reveal>
-            
             <Reveal delay={0.1}>
               <h1 className="text-5xl sm:text-7xl md:text-8xl font-display font-extrabold tracking-tight text-white mb-8 leading-[1.1]">
                 Transforme suas metas em <br className="hidden md:block" />
@@ -380,4 +373,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
