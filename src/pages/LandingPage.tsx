@@ -24,7 +24,6 @@ const Reveal = ({ children, delay = 0, className }: { children: React.ReactNode,
 export default function LandingPage() {
   const navigate = useNavigate();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [scrolled, setScrolled] = useState(false);
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
@@ -35,14 +34,13 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const openAuthModal = (mode: 'login' | 'register') => {
-    setAuthMode(mode);
+  const openAuthModal = () => {
     setIsAuthModalOpen(true);
   };
 
   return (
     <div className="min-h-screen bg-[#06080F] text-slate-300 font-sans selection:bg-blue-500/30 overflow-hidden">
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} initialMode={authMode} />
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
       
       {/* Background Effects */}
       <div className="fixed inset-0 z-0 pointer-events-none">
@@ -64,14 +62,11 @@ export default function LandingPage() {
             <span className="font-display font-bold text-2xl tracking-tight text-white">MetaTask</span>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" className="hidden sm:inline-flex text-slate-300 hover:text-white hover:bg-white/5" onClick={() => openAuthModal('login')}>
-              Entrar
-            </Button>
             <Button 
               className="bg-white text-black hover:bg-slate-200 shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:shadow-[0_0_30px_rgba(255,255,255,0.4)]"
-              onClick={() => openAuthModal('register')}
+              onClick={() => openAuthModal()}
             >
-              Começar Jornada
+              Acessar Plataforma
             </Button>
           </div>
         </div>
@@ -101,9 +96,9 @@ export default function LandingPage() {
                 <Button 
                   size="lg" 
                   className="w-full sm:w-auto text-lg h-16 px-10 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border-0 shadow-[0_0_40px_rgba(59,130,246,0.4)] hover:shadow-[0_0_60px_rgba(59,130,246,0.6)] transition-all duration-300 rounded-2xl"
-                  onClick={() => openAuthModal('register')}
+                  onClick={() => openAuthModal()}
                 >
-                  Começar Jornada - R$ 18/mês
+                  Acessar Plataforma
                   <ArrowRight className="ml-2 w-6 h-6" />
                 </Button>
                 <Button 
@@ -344,9 +339,9 @@ export default function LandingPage() {
                 <Button 
                   size="lg" 
                   className="text-lg h-16 px-12 bg-white text-black hover:bg-slate-200 rounded-2xl shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all hover:scale-105"
-                  onClick={() => openAuthModal('register')}
+                  onClick={() => openAuthModal()}
                 >
-                  Começar Jornada - R$ 18/mês
+                  Acessar Plataforma
                 </Button>
                 <p className="mt-6 text-sm text-blue-300/70">Garantia incondicional de 7 dias.</p>
               </div>

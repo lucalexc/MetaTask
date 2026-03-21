@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Settings, Plus, Edit2, Trash2, X, Clock, ArrowLeft, Check, Loader2 } from 'lucide-react';
+import { startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/src/lib/utils';
 import { Button } from '@/src/components/ui/button';
 import { supabase } from '@/src/lib/supabase';
@@ -223,6 +224,7 @@ export default function RoutinesDashboard({
   const [view, setView] = useState<'today' | 'settings'>('today');
   
   const [routines, setRoutines] = useState<Routine[]>([]);
+  const [routineLogs, setRoutineLogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingRoutine, setEditingRoutine] = useState<Routine | null>(null);
 
@@ -243,23 +245,35 @@ export default function RoutinesDashboard({
     setIsLoading(true);
     try {
       const todayDay = new Date().getDay();
+      const start = startOfDay(new Date()).toISOString();
+      const end = endOfDay(new Date()).toISOString();
       
-      // Fetch routines with their activities
-      const { data, error } = await supabase
-        .from('routines')
-        .select('*, routine_activities(*)')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: true });
+      // Fetch routines with their activities and routine logs
+      const [routinesResponse, logsResponse] = await Promise.all([
+        supabase
+          .from('routines')
+          .select('*, routine_activities(*)')
+          .eq('user_id', user?.id)
+          .order('created_at', { ascending: true }),
+        supabase
+          .from('routine_logs')
+          .select('*')
+          .eq('user_id', user?.id)
+          .gte('created_at', start)
+          .lte('created_at', end)
+      ]);
 
-      if (error) throw error;
+      if (routinesResponse.error) throw routinesResponse.error;
+      if (logsResponse.error) throw logsResponse.error;
       
       // Sort activities by time
-      const processedData = (data || []).map(routine => ({
+      const processedData = (routinesResponse.data || []).map(routine => ({
         ...routine,
         activities: routine.routine_activities?.sort((a: any, b: any) => a.time.localeCompare(b.time))
       }));
 
       setRoutines(processedData);
+      setRoutineLogs(logsResponse.data || []);
     } catch (error) {
       console.error('Error fetching routines:', error);
     } finally {
@@ -350,33 +364,44 @@ export default function RoutinesDashboard({
     }
   };
 
-  const toggleActivityCompletion = async (routineId: string, activityId: string) => {
-    const routine = routines.find(r => r.id === routineId);
-    const activity = routine?.activities?.find(a => a.id === activityId);
-    if (!activity) return;
+  const toggleRoutineCompletion = async (routineId: string) => {
+    const isCompleted = routineLogs.some(log => log.routine_id === routineId);
+    const start = startOfDay(new Date()).toISOString();
+    const end = endOfDay(new Date()).toISOString();
 
-    const newCompletedStatus = !activity.is_completed;
+    if (isCompleted) {
+      // Optimistic update
+      setRoutineLogs(routineLogs.filter(log => log.routine_id !== routineId));
+      
+      try {
+        const { error } = await supabase
+          .from('routine_logs')
+          .delete()
+          .eq('routine_id', routineId)
+          .eq('user_id', user?.id)
+          .gte('created_at', start)
+          .lte('created_at', end);
 
-    // Optimistic update
-    setRoutines(routines.map(r => 
-      r.id === routineId 
-        ? { 
-            ...r, 
-            activities: r.activities?.map(a => a.id === activityId ? { ...a, is_completed: newCompletedStatus } : a) 
-          } 
-        : r
-    ));
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error deleting routine log:', error);
+        fetchRoutines(); // Revert
+      }
+    } else {
+      // Optimistic update
+      const newLog = { id: 'temp', routine_id: routineId, user_id: user?.id, created_at: new Date().toISOString() };
+      setRoutineLogs([...routineLogs, newLog]);
+      
+      try {
+        const { error } = await supabase
+          .from('routine_logs')
+          .insert({ routine_id: routineId, user_id: user?.id });
 
-    try {
-      const { error } = await supabase
-        .from('routine_activities')
-        .update({ is_completed: newCompletedStatus })
-        .eq('id', activityId);
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error updating activity completion:', error);
-      fetchRoutines(); // Revert on error
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error inserting routine log:', error);
+        fetchRoutines(); // Revert
+      }
     }
   };
 
@@ -468,12 +493,12 @@ export default function RoutinesDashboard({
                       </h3>
                       <div className="flex flex-col">
                         {group.items.map(activity => {
-                          const isCompleted = activity.is_completed;
+                          const isCompleted = routineLogs.some(log => log.routine_id === activity.routineId);
                           return (
                             <div 
                               key={activity.id}
                               className="flex items-center gap-3 py-3 border-b border-slate-100 group transition-colors hover:bg-slate-50/50 -mx-4 px-4 rounded-lg cursor-pointer"
-                              onClick={() => toggleActivityCompletion(activity.routineId, activity.id)}
+                              onClick={() => toggleRoutineCompletion(activity.routineId)}
                             >
                               <button 
                                 className={cn(
