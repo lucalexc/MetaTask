@@ -426,10 +426,6 @@ function ProjectDetailView({
   const [description, setDescription] = useState(project.description || '');
   const [color, setColor] = useState(project.color);
   const [isSaving, setIsSaving] = useState(false);
-  
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [editingTaskTitle, setEditingTaskTitle] = useState('');
 
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: ['projectTasks', project.id],
@@ -443,81 +439,6 @@ function ProjectDetailView({
       
       if (error) throw error;
       return data || [];
-    }
-  });
-
-  const createTaskMutation = useMutation({
-    mutationFn: async (title: string) => {
-      if (!user) throw new Error('User not authenticated');
-      const { data, error } = await supabase
-        .from('tasks')
-        .insert([{
-          user_id: user.id,
-          project_id: project.id,
-          title,
-          status: 'pending',
-          elapsed_time: 0,
-          is_running: false
-        }])
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projectTasks', project.id] });
-      setNewTaskTitle('');
-      toast.success('Tarefa criada com sucesso!');
-    },
-    onError: (error) => {
-      console.error('Error creating task:', error);
-      toast.error('Erro ao criar tarefa.');
-    }
-  });
-
-  const updateTaskMutation = useMutation({
-    mutationFn: async ({ id, title }: { id: string, title: string }) => {
-      const { data, error } = await supabase
-        .from('tasks')
-        .update({ title })
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projectTasks', project.id] });
-      setEditingTaskId(null);
-      toast.success('Tarefa atualizada com sucesso!');
-    },
-    onError: (error) => {
-      console.error('Error updating task:', error);
-      toast.error('Erro ao atualizar tarefa.');
-    }
-  });
-
-  const toggleTaskStatusMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { data, error } = await supabase
-        .from('tasks')
-        .update({ status: 'completed' })
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projectTasks', project.id] });
-      toast.success('Tarefa concluída!');
-    },
-    onError: (error) => {
-      console.error('Error completing task:', error);
-      toast.error('Erro ao concluir tarefa.');
     }
   });
 
@@ -539,18 +460,6 @@ function ProjectDetailView({
       toast.error('Erro ao excluir tarefa.');
     }
   });
-
-  const handleCreateTask = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTaskTitle.trim()) return;
-    createTaskMutation.mutate(newTaskTitle.trim());
-  };
-
-  const handleUpdateTask = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingTaskId || !editingTaskTitle.trim()) return;
-    updateTaskMutation.mutate({ id: editingTaskId, title: editingTaskTitle.trim() });
-  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -587,26 +496,6 @@ function ProjectDetailView({
           <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100 flex flex-col h-[600px]">
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 shrink-0">Tarefas Abertas</h2>
             
-            <form onSubmit={handleCreateTask} className="mb-4 shrink-0">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                  placeholder="Adicionar nova tarefa..."
-                  className="w-full pl-4 pr-10 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-400 font-medium transition-all shadow-sm"
-                  disabled={createTaskMutation.isPending}
-                />
-                <button
-                  type="submit"
-                  disabled={!newTaskTitle.trim() || createTaskMutation.isPending}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {createTaskMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-            </form>
-
             <div className="flex-1 overflow-y-auto pr-2 space-y-3">
               {isLoadingTasks ? (
                 <div className="flex items-center justify-center py-10">
@@ -614,39 +503,10 @@ function ProjectDetailView({
                 </div>
               ) : tasks && tasks.length > 0 ? (
                 tasks.map((task: any) => (
-                  <div key={task.id} className="group flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-white shadow-sm hover:border-slate-300 transition-colors">
-                    <button 
-                      onClick={() => toggleTaskStatusMutation.mutate(task.id)}
-                      disabled={toggleTaskStatusMutation.isPending}
-                      className="mt-0.5 shrink-0 text-slate-300 hover:text-green-500 transition-colors"
-                      title="Concluir tarefa"
-                    >
-                      <Circle className="w-4 h-4" />
-                    </button>
-                    
-                    {editingTaskId === task.id ? (
-                      <form onSubmit={handleUpdateTask} className="flex-1 flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={editingTaskTitle}
-                          onChange={(e) => setEditingTaskTitle(e.target.value)}
-                          className="flex-1 px-2 py-1 text-sm border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-400"
-                          autoFocus
-                          onBlur={() => setEditingTaskId(null)}
-                        />
-                        <button type="submit" className="hidden" />
-                      </form>
-                    ) : (
-                      <span 
-                        className="flex-1 text-sm text-slate-700 font-medium leading-tight cursor-pointer"
-                        onClick={() => {
-                          setEditingTaskId(task.id);
-                          setEditingTaskTitle(task.title);
-                        }}
-                      >
-                        {task.title}
-                      </span>
-                    )}
+                  <div key={task.id} className="group flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white shadow-sm hover:border-slate-300 transition-colors">
+                    <span className="flex-1 text-sm text-slate-700 font-medium leading-tight">
+                      {task.title}
+                    </span>
 
                     <button
                       onClick={() => deleteTaskMutation.mutate(task.id)}
