@@ -493,12 +493,12 @@ export default function RoutinesDashboard({
                       </h3>
                       <div className="flex flex-col">
                         {group.items.map(activity => {
-                          const isCompleted = routineLogs.some(log => log.routine_id === activity.routineId);
+                          const isCompleted = routineLogs.some(log => log.routine_id === activity.id);
                           return (
                             <div 
                               key={activity.id}
                               className="flex items-center gap-3 py-3 border-b border-slate-100 group transition-colors hover:bg-slate-50/50 -mx-4 px-4 rounded-lg cursor-pointer"
-                              onClick={() => toggleRoutineCompletion(activity.routineId)}
+                              onClick={() => toggleRoutineCompletion(activity.id)}
                             >
                               <button 
                                 className={cn(
