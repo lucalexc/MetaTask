@@ -415,6 +415,8 @@ export default function RoutinesDashboard({
   });
 
   const toggleRoutineCompletion = (routineId: string) => {
+    if (!routineId) return;
+    console.log("Enviando toggle para rotina:", routineId);
     const isCompleted = routineLogs.some(log => log.routine_id === routineId);
     toggleRoutineMutation.mutate({ routineId, isCompleted });
   };
@@ -507,12 +509,12 @@ export default function RoutinesDashboard({
                       </h3>
                       <div className="flex flex-col">
                         {group.items.map(activity => {
-                          const isCompleted = routineLogs.some(log => log.routine_id === activity.id);
+                          const isCompleted = routineLogs.some(log => log.routine_id === activity.routineId);
                           return (
                             <div 
                               key={activity.id}
                               className="flex items-center gap-3 py-3 border-b border-slate-100 group transition-colors hover:bg-slate-50/50 -mx-4 px-4 rounded-lg cursor-pointer"
-                              onClick={() => toggleRoutineCompletion(activity.id)}
+                              onClick={() => toggleRoutineCompletion(activity.routineId)}
                             >
                               <button 
                                 className={cn(
