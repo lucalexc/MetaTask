@@ -8,6 +8,7 @@ import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, addDays, 
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/src/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/src/components/ui/popover';
 import { cn } from '@/src/lib/utils';
 import { supabase } from '@/src/lib/supabase';
 import { useAuth } from '@/src/lib/AuthContext';
@@ -518,61 +519,63 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
             <div className="flex flex-wrap items-center gap-2 mt-2 relative">
               {/* Date Button & Popover */}
               <div className="relative">
-                <button 
-                  onClick={() => {
-                    setIsDatePickerOpen(!isDatePickerOpen);
-                    setIsTimePickerOpen(false);
-                    setIsRecurrencePickerOpen(false);
-                  }}
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors",
-                    isDatePickerOpen ? "border-blue-500 text-blue-600 bg-blue-50" : "border-slate-200 text-slate-600 hover:bg-slate-50"
-                  )}
-                >
-                  <CalendarIcon className={cn("w-4 h-4", isDatePickerOpen ? "text-blue-500" : "text-slate-400")} />
-                  {isSameDay(taskDate, new Date()) ? 'Hoje' : format(taskDate, 'dd/MM')}
-                </button>
-                <AnimatePresence>
-                  {isDatePickerOpen && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                      className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 z-[100] overflow-hidden"
+                <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+                  <PopoverTrigger asChild>
+                    <button 
+                      onClick={() => {
+                        setIsTimePickerOpen(false);
+                        setIsRecurrencePickerOpen(false);
+                      }}
+                      className={cn(
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors",
+                        isDatePickerOpen ? "border-blue-500 text-blue-600 bg-blue-50" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                      )}
                     >
-                      <div className="p-2 space-y-1 border-b border-slate-100">
-                        <button onClick={() => { setTaskDate(addDays(new Date(), 1)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg text-left"><Sun className="w-4 h-4 text-orange-500" /> Amanhã</button>
-                        <button onClick={() => { setTaskDate(addDays(new Date(), 7)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg text-left"><CalendarDays className="w-4 h-4 text-blue-500" /> Próxima semana</button>
-                        <button onClick={() => { setTaskDate(addDays(new Date(), 5)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg text-left"><Coffee className="w-4 h-4 text-purple-500" /> Próximo fim de semana</button>
-                        <button onClick={() => { setTaskDate(new Date()); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg text-left"><Ban className="w-4 h-4 text-slate-400" /> Sem vencimento</button>
-                      </div>
-                      <div className="p-4">
-                        <div className="flex items-center justify-between mb-4">
-                          <span className="font-bold text-sm">Março 2026</span>
-                          <div className="flex gap-1">
-                            <button className="p-1 hover:bg-slate-100 rounded"><ChevronLeft className="w-4 h-4" /></button>
-                            <button className="p-1 hover:bg-slate-100 rounded"><ChevronRight className="w-4 h-4" /></button>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-7 gap-1 text-center text-xs mb-2 text-slate-400 font-medium">
-                          <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
-                        </div>
-                        <div className="grid grid-cols-7 gap-1 text-center text-sm">
-                          {Array.from({length: 31}).map((_, i) => {
-                            const newDate = new Date(2026, 2, i + 1);
-                            return (
-                              <button 
-                                key={i} 
-                                onClick={() => { setTaskDate(newDate); setIsDatePickerOpen(false); }}
-                                className={cn("w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-100", isSameDay(newDate, taskDate) && "bg-blue-600 text-white hover:bg-blue-700")}
-                              >
-                                {i + 1}
-                              </button>
-                            );
-                          })}
+                      <CalendarIcon className={cn("w-4 h-4", isDatePickerOpen ? "text-blue-500" : "text-slate-400")} />
+                      {isSameDay(taskDate, new Date()) ? 'Hoje' : format(taskDate, 'dd/MM')}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    side="left" 
+                    align="start" 
+                    sideOffset={16} 
+                    avoidCollisions={true}
+                    className="w-72 p-0 bg-white rounded-xl shadow-xl border border-slate-200 z-[100] overflow-hidden"
+                  >
+                    <div className="p-2 space-y-1 border-b border-slate-100">
+                      <button onClick={() => { setTaskDate(addDays(new Date(), 1)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg text-left"><Sun className="w-4 h-4 text-orange-500" /> Amanhã</button>
+                      <button onClick={() => { setTaskDate(addDays(new Date(), 7)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg text-left"><CalendarDays className="w-4 h-4 text-blue-500" /> Próxima semana</button>
+                      <button onClick={() => { setTaskDate(addDays(new Date(), 5)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg text-left"><Coffee className="w-4 h-4 text-purple-500" /> Próximo fim de semana</button>
+                      <button onClick={() => { setTaskDate(new Date()); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg text-left"><Ban className="w-4 h-4 text-slate-400" /> Sem vencimento</button>
+                    </div>
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="font-bold text-sm">Março 2026</span>
+                        <div className="flex gap-1">
+                          <button className="p-1 hover:bg-slate-100 rounded"><ChevronLeft className="w-4 h-4" /></button>
+                          <button className="p-1 hover:bg-slate-100 rounded"><ChevronRight className="w-4 h-4" /></button>
                         </div>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      <div className="grid grid-cols-7 gap-1 text-center text-xs mb-2 text-slate-400 font-medium">
+                        <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
+                      </div>
+                      <div className="grid grid-cols-7 gap-1 text-center text-sm">
+                        {Array.from({length: 31}).map((_, i) => {
+                          const newDate = new Date(2026, 2, i + 1);
+                          return (
+                            <button 
+                              key={i} 
+                              onClick={() => { setTaskDate(newDate); setIsDatePickerOpen(false); }}
+                              className={cn("w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-100", isSameDay(newDate, taskDate) && "bg-blue-600 text-white hover:bg-blue-700")}
+                            >
+                              {i + 1}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {/* Time Input */}
