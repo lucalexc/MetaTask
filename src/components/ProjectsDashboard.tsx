@@ -5,7 +5,7 @@ import { useAuth } from '@/src/lib/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/src/lib/utils';
 import { toast } from 'sonner';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 
 interface Project {
   id: string;
@@ -13,6 +13,8 @@ interface Project {
   description?: string;
   color: string;
   task_count?: number;
+  completed_task_count?: number;
+  total_elapsed_time?: number;
 }
 
 const PRESET_COLORS = [
@@ -31,7 +33,7 @@ export default function ProjectsDashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -70,31 +72,58 @@ export default function ProjectsDashboard() {
 
       if (projectsError) throw projectsError;
 
-      // Fetch task counts
+      // Fetch task counts and metrics
       const { data: tasksData, error: tasksError } = await supabase
         .from('tasks')
-        .select('project_id');
+        .select('project_id, status, elapsed_time');
 
       if (tasksError) throw tasksError;
 
-      const taskCounts = tasksData.reduce((acc: any, task: any) => {
+      const projectStats = tasksData.reduce((acc: any, task: any) => {
         if (task.project_id) {
-          acc[task.project_id] = (acc[task.project_id] || 0) + 1;
+          if (!acc[task.project_id]) {
+            acc[task.project_id] = { total: 0, completed: 0, elapsed: 0 };
+          }
+          acc[task.project_id].total += 1;
+          if (task.status === 'completed') {
+            acc[task.project_id].completed += 1;
+          }
+          acc[task.project_id].elapsed += (task.elapsed_time || 0);
         }
         return acc;
       }, {});
 
       const projectsWithCounts = (projectsData || []).map(p => ({
         ...p,
-        task_count: taskCounts[p.id] || 0
+        task_count: projectStats[p.id]?.total || 0,
+        completed_task_count: projectStats[p.id]?.completed || 0,
+        total_elapsed_time: projectStats[p.id]?.elapsed || 0
       }));
 
       setProjects(projectsWithCounts);
+      
+      // Update selected project if it exists
+      setSelectedProject(prev => {
+        if (prev) {
+          return projectsWithCounts.find(p => p.id === prev.id) || prev;
+        }
+        return prev;
+      });
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const formatTime = (totalSeconds: number) => {
+    const validSeconds = Math.max(0, totalSeconds);
+    const hours = Math.floor(validSeconds / 3600);
+    const minutes = Math.floor((validSeconds % 3600) / 60);
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
   };
 
   const handleCreateProject = async (name: string, description: string, color: string) => {
@@ -130,7 +159,6 @@ export default function ProjectsDashboard() {
 
       if (error) throw error;
       
-      setEditingProject(null);
       fetchProjects();
       toast.success('Projeto atualizado com sucesso!');
     } catch (error) {
@@ -160,6 +188,17 @@ export default function ProjectsDashboard() {
   }
 
   const canCreateMore = projects.length < 7;
+
+  if (selectedProject) {
+    return (
+      <ProjectDetailView
+        project={selectedProject}
+        onClose={() => setSelectedProject(null)}
+        onUpdate={handleUpdateProject}
+        onDelete={handleDeleteProject}
+      />
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col bg-white h-screen overflow-hidden">
@@ -207,7 +246,7 @@ export default function ProjectsDashboard() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    onClick={() => setEditingProject(project)}
+                    onClick={() => setSelectedProject(project)}
                     className="group relative bg-white border border-slate-200 rounded-xl p-5 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer overflow-hidden"
                   >
                     {/* Colored sidebar */}
@@ -246,10 +285,27 @@ export default function ProjectsDashboard() {
                       <div className="flex items-center text-xs font-bold text-slate-400 uppercase tracking-wider">
                         <span>{project.task_count} {project.task_count === 1 ? 'tarefa' : 'tarefas'}</span>
                       </div>
-                      <div className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-slate-100 transition-colors">
-                        <Edit2 className="w-3 h-3 text-slate-400" />
+                      <div className="flex items-center text-xs font-bold text-slate-400">
+                        <span>⏱️ {formatTime(project.total_elapsed_time || 0)}</span>
                       </div>
                     </div>
+                    {(project.task_count || 0) > 0 && (
+                      <div className="mt-4">
+                        <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
+                          <span>Progresso</span>
+                          <span>{Math.round(((project.completed_task_count || 0) / (project.task_count || 1)) * 100)}%</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{ 
+                              width: `${((project.completed_task_count || 0) / (project.task_count || 1)) * 100}%`,
+                              backgroundColor: project.color
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -263,13 +319,6 @@ export default function ProjectsDashboard() {
           <NewProjectModal
             onClose={() => setIsModalOpen(false)}
             onSave={handleCreateProject}
-          />
-        )}
-        {editingProject && (
-          <EditProjectModal
-            project={editingProject}
-            onClose={() => setEditingProject(null)}
-            onSave={handleUpdateProject}
           />
         )}
       </AnimatePresence>
@@ -360,19 +409,27 @@ function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (na
   );
 }
 
-function EditProjectModal({ 
-  project, 
-  onClose, 
-  onSave 
-}: { 
-  project: Project; 
-  onClose: () => void; 
-  onSave: (id: string, name: string, description: string, color: string) => Promise<void> 
+function ProjectDetailView({
+  project,
+  onClose,
+  onUpdate,
+  onDelete
+}: {
+  project: Project;
+  onClose: () => void;
+  onUpdate: (id: string, name: string, description: string, color: string) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
 }) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [name, setName] = useState(project.name);
   const [description, setDescription] = useState(project.description || '');
   const [color, setColor] = useState(project.color);
   const [isSaving, setIsSaving] = useState(false);
+  
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editingTaskTitle, setEditingTaskTitle] = useState('');
 
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: ['projectTasks', project.id],
@@ -389,109 +446,283 @@ function EditProjectModal({
     }
   });
 
+  const createTaskMutation = useMutation({
+    mutationFn: async (title: string) => {
+      if (!user) throw new Error('User not authenticated');
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert([{
+          user_id: user.id,
+          project_id: project.id,
+          title,
+          status: 'pending',
+          elapsed_time: 0,
+          is_running: false
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projectTasks', project.id] });
+      setNewTaskTitle('');
+      toast.success('Tarefa criada com sucesso!');
+    },
+    onError: (error) => {
+      console.error('Error creating task:', error);
+      toast.error('Erro ao criar tarefa.');
+    }
+  });
+
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({ id, title }: { id: string, title: string }) => {
+      const { data, error } = await supabase
+        .from('tasks')
+        .update({ title })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projectTasks', project.id] });
+      setEditingTaskId(null);
+      toast.success('Tarefa atualizada com sucesso!');
+    },
+    onError: (error) => {
+      console.error('Error updating task:', error);
+      toast.error('Erro ao atualizar tarefa.');
+    }
+  });
+
+  const toggleTaskStatusMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from('tasks')
+        .update({ status: 'completed' })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projectTasks', project.id] });
+      toast.success('Tarefa concluída!');
+    },
+    onError: (error) => {
+      console.error('Error completing task:', error);
+      toast.error('Erro ao concluir tarefa.');
+    }
+  });
+
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projectTasks', project.id] });
+      toast.success('Tarefa excluída!');
+    },
+    onError: (error) => {
+      console.error('Error deleting task:', error);
+      toast.error('Erro ao excluir tarefa.');
+    }
+  });
+
+  const handleCreateTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTaskTitle.trim()) return;
+    createTaskMutation.mutate(newTaskTitle.trim());
+  };
+
+  const handleUpdateTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTaskId || !editingTaskTitle.trim()) return;
+    updateTaskMutation.mutate({ id: editingTaskId, title: editingTaskTitle.trim() });
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
-    await onSave(project.id, name, description, color);
+    await onUpdate(project.id, name, description, color);
     setIsSaving(false);
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.98, y: 10 }}
-        className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]"
-      >
-        <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-            <h3 className="font-semibold text-base text-slate-900">Editar Projeto</h3>
-          </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-50 transition-colors">
-            <X className="w-4 h-4" />
+    <div className="flex-1 flex flex-col bg-white h-full overflow-hidden">
+      <header className="px-4 md:px-8 py-4 md:py-6 border-b border-slate-100 flex justify-between items-center shrink-0">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-500"
+          >
+            ← Voltar para Projetos
           </button>
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: project.color }} />
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{project.name}</h1>
+          </div>
         </div>
-        
-        <div className="p-5 space-y-5 overflow-y-auto">
-          <div>
-            <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1.5">Nome do Projeto</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Ex: Trabalho, Pessoal..."
-              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-400 font-medium transition-all"
-            />
-          </div>
+        <button
+          onClick={() => onDelete(project.id)}
+          className="px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-md transition-colors"
+        >
+          Excluir Projeto
+        </button>
+      </header>
 
-          <div>
-            <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1.5">Descrição</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Opcional..."
-              rows={2}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-400 text-sm resize-none transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-2.5">Cor do Projeto</label>
-            <div className="flex flex-wrap gap-2.5">
-              {PRESET_COLORS.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setColor(c)}
-                  className={cn(
-                    "w-6 h-6 rounded-full transition-all relative group",
-                    color === c ? "ring-2 ring-offset-2 ring-slate-400 scale-110" : "hover:scale-110"
-                  )}
-                  style={{ backgroundColor: c }}
-                  type="button"
+      <div className="flex-1 overflow-y-auto p-4 md:p-8">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Left Column: Tasks */}
+          <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100 flex flex-col h-[600px]">
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 shrink-0">Tarefas Abertas</h2>
+            
+            <form onSubmit={handleCreateTask} className="mb-4 shrink-0">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                  placeholder="Adicionar nova tarefa..."
+                  className="w-full pl-4 pr-10 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-400 font-medium transition-all shadow-sm"
+                  disabled={createTaskMutation.isPending}
                 />
-              ))}
-            </div>
-          </div>
+                <button
+                  type="submit"
+                  disabled={!newTaskTitle.trim() || createTaskMutation.isPending}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {createTaskMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </form>
 
-          <div>
-            <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-2.5">Tarefas Abertas</label>
-            <div className="max-h-48 overflow-y-auto pr-1 space-y-2">
+            <div className="flex-1 overflow-y-auto pr-2 space-y-3">
               {isLoadingTasks ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />
+                <div className="flex items-center justify-center py-10">
+                  <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
                 </div>
               ) : tasks && tasks.length > 0 ? (
                 tasks.map((task: any) => (
-                  <div key={task.id} className="flex items-start gap-2 p-2 rounded-lg border border-slate-100 bg-slate-50/50">
-                    <Circle className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
-                    <span className="text-sm text-slate-700 leading-tight">{task.title}</span>
+                  <div key={task.id} className="group flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-white shadow-sm hover:border-slate-300 transition-colors">
+                    <button 
+                      onClick={() => toggleTaskStatusMutation.mutate(task.id)}
+                      disabled={toggleTaskStatusMutation.isPending}
+                      className="mt-0.5 shrink-0 text-slate-300 hover:text-green-500 transition-colors"
+                      title="Concluir tarefa"
+                    >
+                      <Circle className="w-4 h-4" />
+                    </button>
+                    
+                    {editingTaskId === task.id ? (
+                      <form onSubmit={handleUpdateTask} className="flex-1 flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={editingTaskTitle}
+                          onChange={(e) => setEditingTaskTitle(e.target.value)}
+                          className="flex-1 px-2 py-1 text-sm border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-400"
+                          autoFocus
+                          onBlur={() => setEditingTaskId(null)}
+                        />
+                        <button type="submit" className="hidden" />
+                      </form>
+                    ) : (
+                      <span 
+                        className="flex-1 text-sm text-slate-700 font-medium leading-tight cursor-pointer"
+                        onClick={() => {
+                          setEditingTaskId(task.id);
+                          setEditingTaskTitle(task.title);
+                        }}
+                      >
+                        {task.title}
+                      </span>
+                    )}
+
+                    <button
+                      onClick={() => deleteTaskMutation.mutate(task.id)}
+                      disabled={deleteTaskMutation.isPending}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all shrink-0"
+                      title="Excluir tarefa"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-slate-400 italic py-2">Nenhuma tarefa aberta neste projeto</p>
+                <div className="text-center py-10">
+                  <p className="text-sm text-slate-400 italic">Nenhuma tarefa aberta neste projeto.</p>
+                </div>
               )}
             </div>
           </div>
-        </div>
 
-        <div className="px-5 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-2 shrink-0">
-          <button
-            onClick={onClose}
-            className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={!name.trim() || isSaving}
-            className="px-4 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-md hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex items-center gap-2"
-          >
-            {isSaving && <Loader2 className="w-3 h-3 animate-spin" />}
-            Salvar Alterações
-          </button>
+          {/* Right Column: Metadata */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm h-fit space-y-6">
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Detalhes do Projeto</h2>
+            
+            <div>
+              <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1.5">Nome do Projeto</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ex: Trabalho, Pessoal..."
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-400 font-medium transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1.5">Descrição</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Opcional..."
+                rows={3}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-400 text-sm resize-none transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-2.5">Cor do Projeto</label>
+              <div className="flex flex-wrap gap-2.5">
+                {PRESET_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setColor(c)}
+                    className={cn(
+                      "w-8 h-8 rounded-full transition-all relative group",
+                      color === c ? "ring-2 ring-offset-2 ring-slate-400 scale-110" : "hover:scale-110"
+                    )}
+                    style={{ backgroundColor: c }}
+                    type="button"
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={handleSave}
+                disabled={!name.trim() || isSaving}
+                className="px-6 py-2 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex items-center gap-2"
+              >
+                {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                Salvar Alterações
+              </button>
+            </div>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
