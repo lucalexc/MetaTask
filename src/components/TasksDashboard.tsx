@@ -135,7 +135,7 @@ const TaskCard: React.FC<{
         {/* Top line: Checkbox + Title */}
         <div className="flex items-start gap-3">
           <button 
-            onClick={(e) => { e.stopPropagation(); onToggle(task.id, task.status); }}
+            onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(task.id, task.status); }}
             className={cn(
               "mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0",
               task.status === 'completed' 
@@ -168,13 +168,13 @@ const TaskCard: React.FC<{
               {(task.time || (task.recurrence && task.recurrence !== 'none')) && (
                 <div className="flex items-center gap-2 text-[10px] text-slate-500">
                   {task.time && (
-                    <span className="flex items-center gap-1 hover:text-slate-700 transition-colors" onClick={(e) => { e.stopPropagation(); onOpenTimeModal(task); }}>
+                    <span className="flex items-center gap-1 hover:text-slate-700 transition-colors" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenTimeModal(task); }}>
                       <Clock className="w-3 h-3" />
                       {task.time}
                     </span>
                   )}
                   {task.recurrence && task.recurrence !== 'none' && (
-                    <span className="flex items-center gap-1 hover:text-slate-700 transition-colors" onClick={(e) => { e.stopPropagation(); onOpenRecurrenceModal(task); }}>
+                    <span className="flex items-center gap-1 hover:text-slate-700 transition-colors" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenRecurrenceModal(task); }}>
                       <Repeat className="w-3 h-3" />
                       {task.recurrence === 'daily' ? 'Diário' : 
                        task.recurrence === 'weekly' ? 'Semanal' : 
@@ -189,6 +189,7 @@ const TaskCard: React.FC<{
           <button 
             onClick={(e) => { 
               e.stopPropagation(); 
+              e.preventDefault();
               onDelete(task.id);
             }}
             className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all shrink-0"
@@ -202,7 +203,11 @@ const TaskCard: React.FC<{
         <div className="flex justify-between items-center mt-2 pt-3 border-t border-slate-100">
           <div className="flex items-center gap-2">
             {/* Priority Flag */}
-            <div className="flex items-center justify-center p-1.5 rounded-md bg-slate-50 border border-slate-100" title={`Prioridade ${task.priority || 'P4'}`}>
+            <div 
+              onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+              className="flex items-center justify-center p-1.5 rounded-md bg-slate-50 border border-slate-100" 
+              title={`Prioridade ${task.priority || 'P4'}`}
+            >
               <Flag className={cn("w-3.5 h-3.5", 
                 task.priority === 'P1' ? "text-red-500" : 
                 task.priority === 'P2' ? "text-orange-500" : 
@@ -214,7 +219,7 @@ const TaskCard: React.FC<{
             {(task.estimated_time || currentElapsed > 0 || task.is_running) && (
               <div className="flex items-center gap-2 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
                 <button 
-                  onClick={(e) => { e.stopPropagation(); onToggleTimer(task); }}
+                  onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggleTimer(task); }}
                   className="hover:bg-slate-200 p-1 rounded transition-colors"
                 >
                   {task.is_running ? (
@@ -236,7 +241,7 @@ const TaskCard: React.FC<{
           
           {(task.estimated_time || currentElapsed > 0 || task.is_running) && (
             <button 
-              onClick={(e) => { e.stopPropagation(); onOpenHistory(task); }}
+              onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenHistory(task); }}
               className="hover:bg-slate-100 p-1.5 rounded-md transition-colors text-slate-400 hover:text-slate-600"
               title="Ver Histórico"
             >
@@ -261,7 +266,7 @@ const TaskCard: React.FC<{
       </div>
       
       <button 
-        onClick={(e) => { e.stopPropagation(); onToggle(task.id, task.status); }}
+        onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(task.id, task.status); }}
         className={cn(
           "w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0",
           task.status === 'completed' 
@@ -294,13 +299,13 @@ const TaskCard: React.FC<{
         {(task.time || (task.recurrence && task.recurrence !== 'none')) && (
           <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
             {task.time && (
-              <span className="flex items-center gap-1 cursor-pointer hover:text-slate-700 transition-colors" onClick={() => onOpenTimeModal(task)}>
+              <span className="flex items-center gap-1 cursor-pointer hover:text-slate-700 transition-colors" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenTimeModal(task); }}>
                 <Clock className="w-3 h-3" />
                 {task.time}
               </span>
             )}
             {task.recurrence && task.recurrence !== 'none' && (
-              <span className="flex items-center gap-1 cursor-pointer hover:text-slate-700 transition-colors" onClick={() => onOpenRecurrenceModal(task)}>
+              <span className="flex items-center gap-1 cursor-pointer hover:text-slate-700 transition-colors" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenRecurrenceModal(task); }}>
                 <Repeat className="w-3 h-3" />
                 {task.recurrence === 'daily' ? 'Diário' : 
                  task.recurrence === 'weekly' ? 'Semanal' : 
@@ -314,7 +319,11 @@ const TaskCard: React.FC<{
       {/* Timer Controls & Priority */}
       <div className="flex items-center gap-3 mr-2">
         {/* Priority Flag */}
-        <div className="flex items-center justify-center p-1.5 rounded-md bg-slate-50 border border-slate-100" title={`Prioridade ${task.priority || 'P4'}`}>
+        <div 
+          onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+          className="flex items-center justify-center p-1.5 rounded-md bg-slate-50 border border-slate-100" 
+          title={`Prioridade ${task.priority || 'P4'}`}
+        >
           <Flag className={cn("w-3.5 h-3.5", 
             task.priority === 'P1' ? "text-red-500" : 
             task.priority === 'P2' ? "text-orange-500" : 
@@ -326,7 +335,7 @@ const TaskCard: React.FC<{
         {(task.estimated_time || currentElapsed > 0 || task.is_running) && (
           <div className="flex items-center gap-2 bg-slate-100/50 px-2 py-1 rounded-md">
             <button 
-              onClick={() => onToggleTimer(task)}
+              onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggleTimer(task); }}
               className="hover:bg-slate-200 p-1 rounded transition-colors"
             >
               {task.is_running ? (
@@ -343,7 +352,7 @@ const TaskCard: React.FC<{
               {task.estimated_time ? ` / ${task.estimated_time}:00` : ''}
             </span>
             <button 
-              onClick={() => onOpenHistory(task)}
+              onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenHistory(task); }}
               className="hover:bg-slate-200 p-1 rounded transition-colors"
               title="Ver Histórico"
             >
@@ -356,6 +365,7 @@ const TaskCard: React.FC<{
       <button 
         onClick={(e) => { 
           e.stopPropagation(); 
+          e.preventDefault();
           onDelete(task.id);
         }}
         className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all"
