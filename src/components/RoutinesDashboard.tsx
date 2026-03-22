@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'motion/react';
 import { Settings, Plus, Edit2, Trash2, X, Clock, ArrowLeft, Check, Loader2 } from 'lucide-react';
 import { startOfDay, endOfDay } from 'date-fns';
@@ -223,9 +224,7 @@ export default function RoutinesDashboard({
   const { user } = useAuth();
   const [view, setView] = useState<'today' | 'settings'>('today');
   
-  const [routines, setRoutines] = useState<Routine[]>([]);
-  const [routineLogs, setRoutineLogs] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [editingRoutine, setEditingRoutine] = useState<Routine | null>(null);
 
   const today = new Date();
@@ -235,51 +234,46 @@ export default function RoutinesDashboard({
     month: 'long'
   }).format(today);
 
-  useEffect(() => {
-    if (user) {
-      fetchRoutines();
-    }
-  }, [user]);
+  const { data: routines = [], isLoading: isLoadingRoutines } = useQuery({
+    queryKey: ['routines', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('routines')
+        .select('*, routine_activities(*)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true });
 
-  const fetchRoutines = async () => {
-    setIsLoading(true);
-    try {
-      const todayDay = new Date().getDay();
-      const start = startOfDay(new Date()).toISOString();
-      const end = endOfDay(new Date()).toISOString();
+      if (error) throw error;
       
-      // Fetch routines with their activities and routine logs
-      const [routinesResponse, logsResponse] = await Promise.all([
-        supabase
-          .from('routines')
-          .select('*, routine_activities(*)')
-          .eq('user_id', user?.id)
-          .order('created_at', { ascending: true }),
-        supabase
-          .from('routine_logs')
-          .select('*')
-          .eq('user_id', user?.id)
-          .gte('created_at', start)
-          .lte('created_at', end)
-      ]);
-
-      if (routinesResponse.error) throw routinesResponse.error;
-      if (logsResponse.error) throw logsResponse.error;
-      
-      // Sort activities by time
-      const processedData = (routinesResponse.data || []).map(routine => ({
+      return data.map(routine => ({
         ...routine,
         activities: routine.routine_activities?.sort((a: any, b: any) => a.time.localeCompare(b.time))
       }));
+    },
+    enabled: !!user?.id
+  });
 
-      setRoutines(processedData);
-      setRoutineLogs(logsResponse.data || []);
-    } catch (error) {
-      console.error('Error fetching routines:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: routineLogs = [], isLoading: isLoadingLogs } = useQuery({
+    queryKey: ['routine_logs', user?.id, startOfDay(new Date()).toISOString()],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const start = startOfDay(new Date()).toISOString();
+      const end = endOfDay(new Date()).toISOString();
+      const { data, error } = await supabase
+        .from('routine_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('created_at', start)
+        .lte('created_at', end);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id
+  });
+
+  const isLoading = isLoadingRoutines || isLoadingLogs;
 
   const handleSaveRoutine = async (routineData: Partial<Routine>, activitiesData: Partial<RoutineActivity>[]) => {
     if (!user) return;
@@ -343,7 +337,7 @@ export default function RoutinesDashboard({
       toast.success(editingRoutine ? 'Rotina atualizada com sucesso!' : 'Rotina criada com sucesso!');
       setIsCreateModalOpen(false);
       setEditingRoutine(null);
-      fetchRoutines();
+      queryClient.invalidateQueries({ queryKey: ['routines'] });
     } catch (error: any) {
       console.error('Error saving routine:', error);
       toast.error(error.message || 'Erro ao salvar rotina. Tente novamente.');
@@ -358,22 +352,18 @@ export default function RoutinesDashboard({
         .eq('id', id);
 
       if (error) throw error;
-      setRoutines(routines.filter(r => r.id !== id));
+      queryClient.invalidateQueries({ queryKey: ['routines'] });
     } catch (error) {
       console.error('Error deleting routine:', error);
     }
   };
 
-  const toggleRoutineCompletion = async (routineId: string) => {
-    const isCompleted = routineLogs.some(log => log.routine_id === routineId);
-    const start = startOfDay(new Date()).toISOString();
-    const end = endOfDay(new Date()).toISOString();
-
-    if (isCompleted) {
-      // Optimistic update
-      setRoutineLogs(routineLogs.filter(log => log.routine_id !== routineId));
+  const toggleRoutineMutation = useMutation({
+    mutationFn: async ({ routineId, isCompleted }: { routineId: string, isCompleted: boolean }) => {
+      const start = startOfDay(new Date()).toISOString();
+      const end = endOfDay(new Date()).toISOString();
       
-      try {
+      if (isCompleted) {
         const { error } = await supabase
           .from('routine_logs')
           .delete()
@@ -381,28 +371,52 @@ export default function RoutinesDashboard({
           .eq('user_id', user?.id)
           .gte('created_at', start)
           .lte('created_at', end);
-
         if (error) throw error;
-      } catch (error) {
-        console.error('Error deleting routine log:', error);
-        fetchRoutines(); // Revert
-      }
-    } else {
-      // Optimistic update
-      const newLog = { id: 'temp', routine_id: routineId, user_id: user?.id, created_at: new Date().toISOString() };
-      setRoutineLogs([...routineLogs, newLog]);
-      
-      try {
+      } else {
         const { error } = await supabase
           .from('routine_logs')
-          .insert({ routine_id: routineId, user_id: user?.id });
-
+          .insert({ 
+            routine_id: routineId, 
+            user_id: user?.id,
+            created_at: new Date().toISOString()
+          });
         if (error) throw error;
-      } catch (error) {
-        console.error('Error inserting routine log:', error);
-        fetchRoutines(); // Revert
       }
+    },
+    onMutate: async ({ routineId, isCompleted }) => {
+      const queryKey = ['routine_logs', user?.id, startOfDay(new Date()).toISOString()];
+      await queryClient.cancelQueries({ queryKey });
+      
+      const previousLogs = queryClient.getQueryData<any[]>(queryKey);
+      
+      if (isCompleted) {
+        queryClient.setQueryData<any[]>(queryKey, old => 
+          old ? old.filter(log => log.routine_id !== routineId) : []
+        );
+      } else {
+        const newLog = { id: 'temp-' + Date.now(), routine_id: routineId, user_id: user?.id, created_at: new Date().toISOString() };
+        queryClient.setQueryData<any[]>(queryKey, old => 
+          old ? [...old, newLog] : [newLog]
+        );
+      }
+      
+      return { previousLogs };
+    },
+    onError: (err, newTodo, context) => {
+      console.error('Error toggling routine log:', err);
+      const queryKey = ['routine_logs', user?.id, startOfDay(new Date()).toISOString()];
+      queryClient.setQueryData(queryKey, context?.previousLogs);
+      toast.error('Erro ao atualizar rotina');
+    },
+    onSettled: () => {
+      const queryKey = ['routine_logs', user?.id, startOfDay(new Date()).toISOString()];
+      queryClient.invalidateQueries({ queryKey });
     }
+  });
+
+  const toggleRoutineCompletion = (routineId: string) => {
+    const isCompleted = routineLogs.some(log => log.routine_id === routineId);
+    toggleRoutineMutation.mutate({ routineId, isCompleted });
   };
 
   const openEditModal = (routine: Routine) => {
