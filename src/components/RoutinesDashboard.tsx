@@ -254,26 +254,7 @@ export default function RoutinesDashboard({
     enabled: !!user?.id
   });
 
-  const { data: routineLogs = [], isLoading: isLoadingLogs } = useQuery({
-    queryKey: ['routine_logs', user?.id, startOfDay(new Date()).toISOString()],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const start = startOfDay(new Date()).toISOString();
-      const end = endOfDay(new Date()).toISOString();
-      const { data, error } = await supabase
-        .from('routine_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('created_at', start)
-        .lte('created_at', end);
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id
-  });
-
-  const isLoading = isLoadingRoutines || isLoadingLogs;
+  const isLoading = isLoadingRoutines;
 
   const handleSaveRoutine = async (routineData: Partial<Routine>, activitiesData: Partial<RoutineActivity>[]) => {
     if (!user) return;
@@ -359,66 +340,110 @@ export default function RoutinesDashboard({
   };
 
   const toggleRoutineMutation = useMutation({
-    mutationFn: async ({ routineId, isCompleted }: { routineId: string, isCompleted: boolean }) => {
+    mutationFn: async ({ activityId, routineId, isCompleted }: { activityId: string, routineId: string, isCompleted: boolean }) => {
+      if (!user?.id) throw new Error('User not found');
       const start = startOfDay(new Date()).toISOString();
       const end = endOfDay(new Date()).toISOString();
+      const now = new Date().toISOString();
       
-      if (isCompleted) {
-        const { error } = await supabase
+      // 1. Update the individual activity
+      const { error: activityError } = await supabase
+        .from('routine_activities')
+        .update({ 
+          is_completed: !isCompleted,
+          updated_at: now
+        })
+        .eq('id', activityId);
+        
+      if (activityError) throw activityError;
+
+      // 2. Check if all activities in this routine block are completed today
+      const { data: siblingActivities, error: siblingsError } = await supabase
+        .from('routine_activities')
+        .select('id, is_completed, updated_at')
+        .eq('routine_id', routineId);
+        
+      if (siblingsError) throw siblingsError;
+
+      // We need to simulate the updated state for the current activity
+      const allCompletedToday = siblingActivities.every(act => {
+        if (act.id === activityId) return !isCompleted;
+        return act.is_completed && new Date(act.updated_at) >= new Date(start);
+      });
+
+      // 3. Update routine_logs for the parent block
+      if (allCompletedToday) {
+        // Check if log already exists
+        const { data: existingLog } = await supabase
+          .from('routine_logs')
+          .select('id')
+          .eq('routine_id', routineId)
+          .eq('user_id', user?.id)
+          .gte('created_at', start)
+          .lte('created_at', end)
+          .maybeSingle();
+          
+        if (!existingLog) {
+          await supabase
+            .from('routine_logs')
+            .insert({ 
+              routine_id: routineId, 
+              user_id: user?.id,
+              created_at: now
+            });
+        }
+      } else {
+        // Remove log if not all activities are completed
+        await supabase
           .from('routine_logs')
           .delete()
           .eq('routine_id', routineId)
           .eq('user_id', user?.id)
           .gte('created_at', start)
           .lte('created_at', end);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('routine_logs')
-          .insert({ 
-            routine_id: routineId, 
-            user_id: user?.id,
-            created_at: new Date().toISOString()
-          });
-        if (error) throw error;
       }
     },
-    onMutate: async ({ routineId, isCompleted }) => {
-      const queryKey = ['routine_logs', user?.id, startOfDay(new Date()).toISOString()];
+    onMutate: async ({ activityId, routineId, isCompleted }) => {
+      const queryKey = ['routines', user?.id];
       await queryClient.cancelQueries({ queryKey });
       
-      const previousLogs = queryClient.getQueryData<any[]>(queryKey);
+      const previousRoutines = queryClient.getQueryData<any[]>(queryKey);
       
-      if (isCompleted) {
-        queryClient.setQueryData<any[]>(queryKey, old => 
-          old ? old.filter(log => log.routine_id !== routineId) : []
-        );
-      } else {
-        const newLog = { id: 'temp-' + Date.now(), routine_id: routineId, user_id: user?.id, created_at: new Date().toISOString() };
-        queryClient.setQueryData<any[]>(queryKey, old => 
-          old ? [...old, newLog] : [newLog]
-        );
-      }
+      // Optimistically update the activity
+      queryClient.setQueryData<any[]>(queryKey, old => {
+        if (!old) return old;
+        return old.map(routine => {
+          if (routine.id === routineId) {
+            return {
+              ...routine,
+              activities: routine.activities?.map((act: any) => 
+                act.id === activityId 
+                  ? { ...act, is_completed: !isCompleted, updated_at: new Date().toISOString() } 
+                  : act
+              )
+            };
+          }
+          return routine;
+        });
+      });
       
-      return { previousLogs };
+      return { previousRoutines };
     },
-    onError: (err, newTodo, context) => {
-      console.error('Error toggling routine log:', err);
-      const queryKey = ['routine_logs', user?.id, startOfDay(new Date()).toISOString()];
-      queryClient.setQueryData(queryKey, context?.previousLogs);
+    onError: (err, variables, context) => {
+      console.error('Error toggling routine activity:', err);
+      const queryKey = ['routines', user?.id];
+      queryClient.setQueryData(queryKey, context?.previousRoutines);
       toast.error('Erro ao atualizar rotina');
     },
     onSettled: () => {
-      const queryKey = ['routine_logs', user?.id, startOfDay(new Date()).toISOString()];
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ['routines'] });
+      queryClient.invalidateQueries({ queryKey: ['routine_logs'] });
     }
   });
 
-  const toggleRoutineCompletion = (routineId: string) => {
-    if (!routineId) return;
-    console.log("Enviando toggle para rotina:", routineId);
-    const isCompleted = routineLogs.some(log => log.routine_id === routineId);
-    toggleRoutineMutation.mutate({ routineId, isCompleted });
+  const toggleRoutineCompletion = (activityId: string, routineId: string, isCompleted: boolean) => {
+    if (!activityId || !routineId) return;
+    toggleRoutineMutation.mutate({ activityId, routineId, isCompleted });
   };
 
   const openEditModal = (routine: Routine) => {
@@ -509,12 +534,13 @@ export default function RoutinesDashboard({
                       </h3>
                       <div className="flex flex-col">
                         {group.items.map(activity => {
-                          const isCompleted = routineLogs.some(log => log.routine_id === activity.routineId);
+                          const start = startOfDay(new Date()).toISOString();
+                          const isCompleted = activity.is_completed && new Date(activity.updated_at) >= new Date(start);
                           return (
                             <div 
                               key={activity.id}
                               className="flex items-center gap-3 py-3 border-b border-slate-100 group transition-colors hover:bg-slate-50/50 -mx-4 px-4 rounded-lg cursor-pointer"
-                              onClick={() => toggleRoutineCompletion(activity.routineId)}
+                              onClick={() => toggleRoutineCompletion(activity.id, activity.routineId, isCompleted)}
                             >
                               <button 
                                 className={cn(

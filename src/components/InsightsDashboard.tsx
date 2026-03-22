@@ -104,9 +104,9 @@ export default function InsightsDashboard() {
         .select('*')
         .eq('user_id', user?.id)
         .eq('date', today)
-        .single();
+        .maybeSingle(); // FIX: Changed from .single() to .maybeSingle() to avoid 406 Not Acceptable error when no record is found
       
-      if (error && error.code !== 'PGRST116') throw error; // Ignore not found error
+      if (error) throw error; // FIX: maybeSingle() returns null data instead of throwing PGRST116, so we can just throw real errors
       return data;
     },
     enabled: !!user,
