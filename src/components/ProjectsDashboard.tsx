@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, X, Folder, Loader2, Edit2, Check } from 'lucide-react';
+import { Plus, X, Folder, Loader2, Edit2, Check, Circle } from 'lucide-react';
 import { supabase } from '@/src/lib/supabase';
 import { useAuth } from '@/src/lib/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/src/lib/utils';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 
 interface Project {
   id: string;
@@ -373,6 +374,21 @@ function EditProjectModal({
   const [color, setColor] = useState(project.color);
   const [isSaving, setIsSaving] = useState(false);
 
+  const { data: tasks, isLoading: isLoadingTasks } = useQuery({
+    queryKey: ['projectTasks', project.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('id, title, status')
+        .eq('project_id', project.id)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
   const handleSave = async () => {
     setIsSaving(true);
     await onSave(project.id, name, description, color);
@@ -385,9 +401,9 @@ function EditProjectModal({
         initial={{ opacity: 0, scale: 0.98, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.98, y: 10 }}
-        className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200"
+        className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]"
       >
-        <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
+        <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
             <h3 className="font-semibold text-base text-slate-900">Editar Projeto</h3>
@@ -397,7 +413,7 @@ function EditProjectModal({
           </button>
         </div>
         
-        <div className="p-5 space-y-5">
+        <div className="p-5 space-y-5 overflow-y-auto">
           <div>
             <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1.5">Nome do Projeto</label>
             <input
@@ -437,9 +453,29 @@ function EditProjectModal({
               ))}
             </div>
           </div>
+
+          <div>
+            <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-2.5">Tarefas Abertas</label>
+            <div className="max-h-48 overflow-y-auto pr-1 space-y-2">
+              {isLoadingTasks ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />
+                </div>
+              ) : tasks && tasks.length > 0 ? (
+                tasks.map((task: any) => (
+                  <div key={task.id} className="flex items-start gap-2 p-2 rounded-lg border border-slate-100 bg-slate-50/50">
+                    <Circle className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
+                    <span className="text-sm text-slate-700 leading-tight">{task.title}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-400 italic py-2">Nenhuma tarefa aberta neste projeto</p>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="px-5 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-2">
+        <div className="px-5 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-2 shrink-0">
           <button
             onClick={onClose}
             className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-md transition-colors"

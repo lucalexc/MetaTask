@@ -56,9 +56,6 @@ export default function LandingPage() {
       )}>
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.5)]">
-              <Target className="w-6 h-6 text-white" />
-            </div>
             <span className="font-display font-bold text-2xl tracking-tight text-white">MetaTask</span>
           </div>
           <div className="flex items-center gap-4">
@@ -150,15 +147,15 @@ export default function LandingPage() {
               </p>
             </Reveal>
 
-            <div className="grid md:grid-cols-3 gap-8 text-left">
+            <div className="grid md:grid-cols-3 gap-8 text-left items-stretch">
               {[
                 { icon: Brain, title: "Sobrecarga Cognitiva", desc: "Ver 50 tarefas de uma vez paralisa seu cérebro." },
                 { icon: Activity, title: "Falta de Dopamina", desc: "Riscar um item no papel não libera a química da motivação." },
                 { icon: Clock, title: "Ausência de Contexto", desc: "Tarefas sem tempo definido viram buracos negros de produtividade." }
               ].map((item, i) => (
-                <Reveal key={i} delay={i * 0.1}>
-                  <div className="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                    <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center mb-6 border border-red-500/20">
+                <Reveal key={i} delay={i * 0.1} className="h-full">
+                  <div className="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm h-full flex flex-col">
+                    <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center mb-6 border border-red-500/20 shrink-0">
                       <item.icon className="w-6 h-6 text-red-400" />
                     </div>
                     <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
