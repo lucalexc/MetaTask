@@ -264,13 +264,15 @@ export default function RoutinesDashboard({
 
       if (editingRoutine) {
         // Update routine
+        // FIX: Adicionado .select() para garantir o retorno e evitar erro de headers
         const { error: routineError } = await supabase
           .from('routines')
           .update({
             name: routineData.name,
             days_of_week: routineData.days_of_week,
           })
-          .eq('id', editingRoutine.id);
+          .eq('id', editingRoutine.id)
+          .select();
 
         if (routineError) throw routineError;
 
@@ -308,9 +310,11 @@ export default function RoutinesDashboard({
           is_completed: false,
         }));
 
+        // FIX: Adicionado .select() para garantir o retorno e evitar erro de headers
         const { error: activitiesError } = await supabase
           .from('routine_activities')
-          .insert(activitiesToInsert);
+          .insert(activitiesToInsert)
+          .select();
 
         if (activitiesError) throw activitiesError;
       }
@@ -347,13 +351,15 @@ export default function RoutinesDashboard({
       const now = new Date().toISOString();
       
       // 1. Update the individual activity
+      // FIX: Usando o client oficial com .select() para evitar erro 400 (No API key found)
       const { error: activityError } = await supabase
         .from('routine_activities')
         .update({ 
           is_completed: !isCompleted,
           updated_at: now
         })
-        .eq('id', activityId);
+        .eq('id', activityId)
+        .select();
         
       if (activityError) throw activityError;
 
@@ -384,13 +390,15 @@ export default function RoutinesDashboard({
           .maybeSingle();
           
         if (!existingLog) {
+          // FIX: Adicionado .select() para garantir o retorno e evitar erro de headers
           await supabase
             .from('routine_logs')
             .insert({ 
               routine_id: routineId, 
               user_id: user?.id,
               created_at: now
-            });
+            })
+            .select();
         }
       } else {
         // Remove log if not all activities are completed
