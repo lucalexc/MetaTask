@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Fingerprint, 
   History, 
@@ -590,10 +589,9 @@ export default function IdentityDashboard() {
               <span className="text-xs font-semibold text-slate-400">{Math.round(progress)}%</span>
             </div>
             <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-              <motion.div 
-                initial={{ width: `${((currentQuestion - 1) / temperamentQuestions.length) * 100}%` }}
-                animate={{ width: `${progress}%` }}
-                className="h-full bg-blue-600 rounded-full"
+              <div 
+                style={{ width: `${progress}%` }}
+                className="h-full bg-blue-600 rounded-full transition-all duration-300"
               />
             </div>
           </div>
@@ -730,10 +728,9 @@ export default function IdentityDashboard() {
               <span className="text-xs font-semibold text-slate-400">{Math.round(progress)}%</span>
             </div>
             <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-              <motion.div 
-                initial={{ width: `${((currentLayerQuestion - 1) / layerQuestions.length) * 100}%` }}
-                animate={{ width: `${progress}%` }}
-                className="h-full bg-blue-600 rounded-full"
+              <div 
+                style={{ width: `${progress}%` }}
+                className="h-full bg-blue-600 rounded-full transition-all duration-300"
               />
             </div>
           </div>
@@ -823,19 +820,14 @@ export default function IdentityDashboard() {
   return (
     <div className="flex-1 flex flex-col h-full bg-slate-50/50 overflow-hidden relative">
       {/* Toast */}
-      <AnimatePresence>
-        {toastMsg && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-3 border border-white/10"
-          >
-            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-            {toastMsg}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {toastMsg && (
+        <div
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-3 border border-white/10 animate-in slide-in-from-bottom-5 fade-in duration-300"
+        >
+          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          {toastMsg}
+        </div>
+      )}
 
       {/* Header */}
       <div className="px-6 pt-5 bg-white border-b border-slate-200 shrink-0">
@@ -867,8 +859,7 @@ export default function IdentityDashboard() {
               <tab.icon className="w-4 h-4" />
               {tab.label}
               {activeTab === tab.id && (
-                <motion.div 
-                  layoutId="activeTab"
+                <div 
                   className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900"
                 />
               )}
@@ -879,17 +870,14 @@ export default function IdentityDashboard() {
 
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto p-6">
-        <motion.div
+        <div
           key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="h-full"
+          className="h-full animate-in fade-in slide-in-from-bottom-4 duration-300"
         >
           {activeTab === 'necrologio' && renderNecrologio()}
           {activeTab === 'temperamento' && renderTemperamento()}
           {activeTab === 'camadas' && renderCamadas()}
-        </motion.div>
+        </div>
       </div>
     </div>
   );

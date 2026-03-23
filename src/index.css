@@ -1,9 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --animate-marquee: marquee 20s linear infinite;
+  
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+}
+
+:root {
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #FAFAFA;
+  --bg-tertiary: #F5F5F5;
+  --bg-hover: #F0F0F0;
+
+  --text-primary: #1A1A1A;
+  --text-secondary: #808080;
+  --text-tertiary: #B3B3B3;
+
+  --border-default: #E8E8E8;
+  --border-light: #F0F0F0;
+
+  --accent-primary: #DC4C3E;
+  --accent-hover: #C53727;
+
+  --color-success: #058527;
+  --color-warning: #EB8909;
+  --color-danger: #DC4C3E;
+  --color-info: #246FE0;
+
+  --tag-routine-bg: #F5F5F5;
+  --tag-routine-text: #808080;
+  --tag-goal-bg: #F0E6FF;
+  --tag-goal-text: #7B3EBF;
+  --tag-xp-bg: #E6F2FF;
+  --tag-xp-text: #246FE0;
+  --tag-streak-bg: #FFF3E0;
+  --tag-streak-text: #EB8909;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {

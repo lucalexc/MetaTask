@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Plus, X, Folder, Loader2, Edit2, Check, Circle } from 'lucide-react';
 import { supabase } from '@/src/lib/supabase';
 import { useAuth } from '@/src/lib/AuthContext';
-import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/src/lib/utils';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
@@ -238,16 +237,11 @@ export default function ProjectsDashboard() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <AnimatePresence>
                 {projects.map((project) => (
-                  <motion.div
+                  <div
                     key={project.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
                     onClick={() => setSelectedProject(project)}
-                    className="group relative bg-white border border-slate-200 rounded-xl p-5 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer overflow-hidden"
+                    className="group relative bg-white border border-slate-200 rounded-xl p-5 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer overflow-hidden animate-in fade-in zoom-in-95 duration-200"
                   >
                     {/* Colored sidebar */}
                     <div 
@@ -306,22 +300,19 @@ export default function ProjectsDashboard() {
                         </div>
                       </div>
                     )}
-                  </motion.div>
+                  </div>
                 ))}
-              </AnimatePresence>
             </div>
           )}
         </div>
       </main>
 
-      <AnimatePresence>
-        {isModalOpen && (
+      {isModalOpen && (
           <NewProjectModal
             onClose={() => setIsModalOpen(false)}
             onSave={handleCreateProject}
           />
         )}
-      </AnimatePresence>
     </div>
   );
 }
@@ -332,12 +323,9 @@ function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (na
   const [color, setColor] = useState(PRESET_COLORS[4]); // Default blue
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.98, y: 10 }}
-        className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200"
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div
+        className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200"
       >
         <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
           <h3 className="font-semibold text-base text-slate-900">Novo Projeto</h3>
@@ -404,7 +392,7 @@ function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (na
             Criar Projeto
           </button>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

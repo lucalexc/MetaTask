@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { X, Target, Repeat, Clock, Calendar, Trophy } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { Button } from '@/src/components/ui/button';
@@ -61,20 +60,14 @@ export default function CreateActivityModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div
         onClick={onClose}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
       />
       
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-lg bg-[#0C1020] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+      <div
+        className="relative w-full max-w-lg bg-[#0C1020] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
       >
         <div className="flex items-center justify-between p-6 border-b border-white/5">
           <h2 className="text-xl font-bold text-white">Nova Atividade</h2>
@@ -184,14 +177,10 @@ export default function CreateActivityModal({
           </div>
 
           {/* Goal Specific Fields */}
-          <AnimatePresence>
-            {type === 'goal' && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="grid grid-cols-2 gap-4 overflow-hidden"
-              >
+          {type === 'goal' && (
+            <div
+              className="grid grid-cols-2 gap-4 overflow-hidden animate-in slide-in-from-top-4 fade-in duration-200"
+            >
                 <div className="space-y-2 pt-2">
                   <label className="text-sm font-bold text-slate-300">Duração (Dias)</label>
                   <div className="relative">
@@ -218,10 +207,8 @@ export default function CreateActivityModal({
                     />
                   </div>
                 </div>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
-
           {/* Info Box */}
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-start gap-3">
             <Trophy className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
@@ -255,7 +242,7 @@ export default function CreateActivityModal({
             </Button>
           </div>
         </form>
-      </motion.div>
+      </div>
     </div>
   );
 }

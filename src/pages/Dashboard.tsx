@@ -8,7 +8,6 @@ import IdentityDashboard from '@/src/components/IdentityDashboard';
 import SettingsDashboard from '@/src/components/SettingsDashboard';
 import InsightsDashboard from '@/src/components/InsightsDashboard';
 import { cn } from '@/src/lib/utils';
-import { AnimatePresence, motion } from 'motion/react';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'tasks' | 'projects' | 'my-routine' | 'missions' | 'identity' | 'insights' | 'settings'>('tasks');
@@ -183,64 +182,55 @@ export default function Dashboard() {
       </nav>
 
       {/* Mobile More Menu Modal */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="md:hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60]"
-            />
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="md:hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-[70] overflow-hidden pb-[env(safe-area-inset-bottom)]"
-            >
-              <div className="p-4 border-b border-slate-100 flex justify-between items-center">
-                <h3 className="font-bold text-slate-800">Mais Opções</h3>
-                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="p-2 space-y-1">
-                <button 
-                  onClick={() => handleTabChange('missions')}
-                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'missions' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
-                >
-                  <Sword className={cn("w-5 h-5", activeTab === 'missions' ? "text-blue-600" : "text-slate-400")} />
-                  <span className="font-medium">Missões</span>
-                </button>
-                <button 
-                  onClick={() => handleTabChange('identity')}
-                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'identity' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
-                >
-                  <Fingerprint className={cn("w-5 h-5", activeTab === 'identity' ? "text-blue-600" : "text-slate-400")} />
-                  <span className="font-medium">Identidade</span>
-                </button>
-                <button 
-                  onClick={() => handleTabChange('insights')}
-                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'insights' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
-                >
-                  <BarChart2 className={cn("w-5 h-5", activeTab === 'insights' ? "text-blue-600" : "text-slate-400")} />
-                  <span className="font-medium">Estatísticas</span>
-                </button>
-                <div className="h-px bg-slate-100 my-2 mx-3" />
-                <button 
-                  onClick={() => handleTabChange('settings')}
-                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'settings' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
-                >
-                  <Settings className={cn("w-5 h-5", activeTab === 'settings' ? "text-blue-600" : "text-slate-400")} />
-                  <span className="font-medium">Configurações</span>
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {isMobileMenuOpen && (
+        <>
+          <div
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="md:hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] animate-in fade-in duration-200"
+          />
+          <div
+            className="md:hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-[70] overflow-hidden pb-[env(safe-area-inset-bottom)] animate-in slide-in-from-bottom duration-300"
+          >
+            <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+              <h3 className="font-bold text-slate-800">Mais Opções</h3>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-2 space-y-1">
+              <button 
+                onClick={() => handleTabChange('missions')}
+                className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'missions' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
+              >
+                <Sword className={cn("w-5 h-5", activeTab === 'missions' ? "text-blue-600" : "text-slate-400")} />
+                <span className="font-medium">Missões</span>
+              </button>
+              <button 
+                onClick={() => handleTabChange('identity')}
+                className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'identity' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
+              >
+                <Fingerprint className={cn("w-5 h-5", activeTab === 'identity' ? "text-blue-600" : "text-slate-400")} />
+                <span className="font-medium">Identidade</span>
+              </button>
+              <button 
+                onClick={() => handleTabChange('insights')}
+                className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'insights' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
+              >
+                <BarChart2 className={cn("w-5 h-5", activeTab === 'insights' ? "text-blue-600" : "text-slate-400")} />
+                <span className="font-medium">Estatísticas</span>
+              </button>
+              <div className="h-px bg-slate-100 my-2 mx-3" />
+              <button 
+                onClick={() => handleTabChange('settings')}
+                className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'settings' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
+              >
+                <Settings className={cn("w-5 h-5", activeTab === 'settings' ? "text-blue-600" : "text-slate-400")} />
+                <span className="font-medium">Configurações</span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Check, Lock, Star, Sword, Shield, Crown, Zap, X, 
   Book, User, Home, Target, Mountain, Moon, Repeat, 
@@ -201,13 +200,10 @@ const PhaseDetailsModal = ({ phase, isOpen, onClose }: { phase: Phase | null, is
   const config = ACT_CONFIG[phase.act];
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative"
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div 
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200"
         >
           {/* Header */}
           <div className={cn("p-6 text-white relative overflow-hidden bg-gradient-to-br", config.gradient)}>
@@ -240,11 +236,9 @@ const PhaseDetailsModal = ({ phase, isOpen, onClose }: { phase: Phase | null, is
               <span className={cn("text-sm font-bold", config.text)}>{phase.progress}%</span>
             </div>
             <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: `${phase.progress}%` }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className={cn("h-full rounded-full", config.bg)}
+              <div 
+                style={{ width: `${phase.progress}%` }}
+                className={cn("h-full rounded-full transition-all duration-500 ease-out", config.bg)}
               />
             </div>
           </div>
@@ -290,9 +284,9 @@ const PhaseDetailsModal = ({ phase, isOpen, onClose }: { phase: Phase | null, is
               Continuar Jornada
             </button>
           </div>
-        </motion.div>
+        </div>
       </div>
-    </AnimatePresence>
+    </>
   );
 };
 
@@ -326,27 +320,19 @@ export default function MissionsMapDashboard() {
       </div>
 
       {/* Toast Notification */}
-      <AnimatePresence>
-        {toastMessage && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20, x: '-50%' }}
-            animate={{ opacity: 1, y: 0, x: '-50%' }}
-            exit={{ opacity: 0, y: -20, x: '-50%' }}
-            className="absolute top-24 left-1/2 z-40 bg-slate-900 text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium flex items-center gap-2"
-          >
-            <Lock className="w-4 h-4 text-slate-400" />
-            {toastMessage}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {toastMessage && (
+        <div 
+          className="absolute top-24 left-1/2 -translate-x-1/2 z-40 bg-slate-900 text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium flex items-center gap-2 animate-in slide-in-from-top-5 fade-in duration-300"
+        >
+          <Lock className="w-4 h-4 text-slate-400" />
+          {toastMessage}
+        </div>
+      )}
 
       {/* Map Area */}
       <div className="flex-1 overflow-x-auto overflow-y-hidden hide-scrollbar relative">
-        <motion.div 
-          initial={{ x: 50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="min-w-max h-full p-10 flex items-center relative"
+        <div 
+          className="min-w-max h-full p-10 flex items-center relative animate-in slide-in-from-right-10 fade-in duration-500 ease-out"
         >
           {/* Connecting Line Background */}
           <div className="absolute left-10 right-10 top-1/2 -translate-y-1/2 h-1 bg-slate-200 rounded-full z-0"></div>
@@ -427,7 +413,7 @@ export default function MissionsMapDashboard() {
               );
             })}
           </div>
-        </motion.div>
+        </div>
       </div>
 
       <PhaseDetailsModal 

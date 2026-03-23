@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { Check, Plus, Loader2, Target, Repeat, Flame, Trophy, Calendar, Settings, X } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { Button } from '@/src/components/ui/button';
@@ -70,14 +69,12 @@ export default function MyRoutinePage({
             <div className="relative w-16 h-16">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40" className="stroke-white/10" strokeWidth="8" fill="none" />
-                <motion.circle 
+                <circle 
                   cx="50" cy="50" r="40" 
-                  className="stroke-blue-500" 
+                  className="stroke-blue-500 transition-all duration-1000 ease-out" 
                   strokeWidth="8" fill="none" 
                   strokeLinecap="round"
-                  initial={{ strokeDasharray: "0 251.2" }}
-                  animate={{ strokeDasharray: `${(progressPercentage / 100) * 251.2} 251.2` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
+                  style={{ strokeDasharray: `${(progressPercentage / 100) * 251.2} 251.2` }}
                 />
               </svg>
             </div>
@@ -133,7 +130,6 @@ export default function MyRoutinePage({
                   </h3>
                   
                   <div className="space-y-3">
-                    <AnimatePresence>
                       {periodActivities.map(activity => (
                         <ActivityCard 
                           key={activity.id} 
@@ -141,7 +137,6 @@ export default function MyRoutinePage({
                           onToggle={() => toggleActivity(activity)} 
                         />
                       ))}
-                    </AnimatePresence>
                   </div>
                 </div>
               );
@@ -174,13 +169,9 @@ const ActivityCard: React.FC<{ activity: DailyActivity, onToggle: () => void | P
   const hasReps = activity.reps_per_day > 1;
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
+    <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl border transition-all duration-300",
+        "group relative overflow-hidden rounded-2xl border transition-all duration-300 animate-in fade-in slide-in-from-bottom-4",
         isCompleted 
           ? "bg-[#0C1020]/50 border-white/5 opacity-60" 
           : "bg-[#0C1020] border-white/10 hover:border-white/20 hover:bg-[#111630]"
@@ -262,14 +253,12 @@ const ActivityCard: React.FC<{ activity: DailyActivity, onToggle: () => void | P
       {/* Progress Bar for Reps */}
       {hasReps && (
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/5">
-          <motion.div 
-            className="h-full bg-blue-500"
-            initial={{ width: 0 }}
-            animate={{ width: `${(activity.completed_reps / activity.reps_per_day) * 100}%` }}
-            transition={{ duration: 0.5 }}
+          <div 
+            className="h-full bg-blue-500 transition-all duration-500"
+            style={{ width: `${(activity.completed_reps / activity.reps_per_day) * 100}%` }}
           />
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
 import { Button } from '@/src/components/ui/button';
 import { 
   CheckCircle2, Target, Zap, Shield, ArrowRight, Play, 
@@ -10,23 +9,18 @@ import AuthModal from '@/src/components/AuthModal';
 import { cn } from '@/src/lib/utils';
 
 const Reveal = ({ children, delay = 0, className }: { children: React.ReactNode, delay?: number, className?: string, key?: React.Key }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-100px" }}
-    transition={{ duration: 0.7, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
-    className={className}
+  <div
+    className={cn("animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both", className)}
+    style={{ animationDelay: `${delay}s` }}
   >
     {children}
-  </motion.div>
+  </div>
 );
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { scrollYProgress } = useScroll();
-  const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -117,12 +111,10 @@ export default function LandingPage() {
           <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#06080F] to-transparent z-10" />
           <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#06080F] to-transparent z-10" />
           
-          <motion.div 
-            className="flex gap-16 items-center whitespace-nowrap opacity-50"
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{ repeat: Infinity, ease: "linear", duration: 20 }}
+          <div 
+            className="flex gap-16 items-center whitespace-nowrap opacity-50 animate-marquee"
           >
-            {[...Array(2)].map((_, i) => (
+            {[...Array(4)].map((_, i) => (
               <React.Fragment key={i}>
                 <div className="text-2xl font-display font-bold text-white">JUNTE-SE A +10.000 REALIZADORES</div>
                 <div className="w-2 h-2 rounded-full bg-blue-500" />
@@ -132,7 +124,7 @@ export default function LandingPage() {
                 <div className="w-2 h-2 rounded-full bg-cyan-500" />
               </React.Fragment>
             ))}
-          </motion.div>
+          </div>
         </section>
 
         {/* Problem Section */}

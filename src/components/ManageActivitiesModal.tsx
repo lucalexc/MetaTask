@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { X, Edit2, Trash2, Power, Target, Repeat, GripVertical } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { useActivities, Activity } from '@/src/hooks/useActivities';
@@ -21,20 +20,14 @@ export default function ManageActivitiesModal({
   const filteredActivities = activities.filter(a => filter === 'all' || a.type === filter);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div
         onClick={onClose}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
       />
       
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-2xl max-h-[80vh] flex flex-col bg-[#0C1020] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+      <div
+        className="relative w-full max-w-2xl max-h-[80vh] flex flex-col bg-[#0C1020] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
       >
         <div className="flex items-center justify-between p-6 border-b border-white/5 shrink-0">
           <div>
@@ -77,16 +70,11 @@ export default function ManageActivitiesModal({
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          <AnimatePresence>
             {filteredActivities.map(activity => (
-              <motion.div
+              <div
                 key={activity.id}
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
                 className={cn(
-                  "flex items-center gap-4 p-4 rounded-xl border transition-colors",
+                  "flex items-center gap-4 p-4 rounded-xl border transition-colors animate-in fade-in slide-in-from-bottom-4 duration-300",
                   activity.is_active 
                     ? "bg-[#111630] border-white/10" 
                     : "bg-[#111630]/50 border-white/5 opacity-60"
@@ -148,9 +136,8 @@ export default function ManageActivitiesModal({
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
-              </motion.div>
+              </div>
             ))}
-          </AnimatePresence>
           
           {filteredActivities.length === 0 && (
             <div className="text-center py-12 text-slate-500">
@@ -158,7 +145,7 @@ export default function ManageActivitiesModal({
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
