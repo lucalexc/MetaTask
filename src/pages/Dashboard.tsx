@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Target, Plus, Inbox, Sword, RefreshCcw, Map, Fingerprint, Settings, Folder, Menu, X, BarChart2 } from 'lucide-react';
 import TasksDashboard from '@/src/components/TasksDashboard';
 import ProjectsDashboard from '@/src/components/ProjectsDashboard';
-import GoalsDashboard from '@/src/components/GoalsDashboard';
-import RoutinesDashboard from '@/src/components/RoutinesDashboard';
+import MyRoutinePage from '@/src/components/MyRoutinePage';
 import MissionsMapDashboard from '@/src/components/MissionsMapDashboard';
 import IdentityDashboard from '@/src/components/IdentityDashboard';
 import SettingsDashboard from '@/src/components/SettingsDashboard';
@@ -12,15 +11,13 @@ import { cn } from '@/src/lib/utils';
 import { AnimatePresence, motion } from 'motion/react';
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<'tasks' | 'projects' | 'goals' | 'routines' | 'missions' | 'identity' | 'insights' | 'settings'>('tasks');
+  const [activeTab, setActiveTab] = useState<'tasks' | 'projects' | 'my-routine' | 'missions' | 'identity' | 'insights' | 'settings'>('tasks');
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
-  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [isRoutineModalOpen, setIsRoutineModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleFabClick = () => {
-    if (activeTab === 'goals') setIsGoalModalOpen(true);
-    else if (activeTab === 'routines') setIsRoutineModalOpen(true);
+    if (activeTab === 'my-routine') setIsRoutineModalOpen(true);
     else setIsTaskModalOpen(true); // Default to task
   };
 
@@ -37,7 +34,7 @@ export default function Dashboard() {
           <div className="w-5 h-5 rounded bg-blue-600 flex items-center justify-center">
             <Target className="w-3 h-3 text-white" />
           </div>
-          <span className="font-bold text-sm tracking-tight text-slate-900">MetaTask</span>
+          <span className="font-bold text-sm tracking-tight text-slate-900">MetaTask v2</span>
         </div>
 
         <div className="px-3 mb-4">
@@ -47,7 +44,7 @@ export default function Dashboard() {
               className="flex items-center gap-2 px-2 py-1.5 text-sm font-medium text-red-600 hover:bg-slate-100 rounded-md transition-colors w-full"
             >
               <Plus className="w-4 h-4" />
-              Adicionar {activeTab === 'tasks' ? 'tarefa' : activeTab === 'goals' ? 'meta' : 'rotina'}
+              Adicionar {activeTab === 'tasks' ? 'tarefa' : 'atividade'}
             </button>
           )}
         </div>
@@ -74,24 +71,14 @@ export default function Dashboard() {
             Projetos
           </button>
           <button 
-            onClick={() => handleTabChange('routines')}
+            onClick={() => handleTabChange('my-routine')}
             className={cn(
               "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'routines' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
+              activeTab === 'my-routine' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
             )}
           >
-            <RefreshCcw className={cn("w-4 h-4", activeTab === 'routines' ? "text-blue-600" : "text-slate-500")} />
-            Rotinas
-          </button>
-          <button 
-            onClick={() => handleTabChange('goals')}
-            className={cn(
-              "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'goals' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
-            )}
-          >
-            <Map className={cn("w-4 h-4", activeTab === 'goals' ? "text-blue-600" : "text-slate-500")} />
-            Metas
+            <RefreshCcw className={cn("w-4 h-4", activeTab === 'my-routine' ? "text-blue-600" : "text-slate-500")} />
+            Minha Rotina
           </button>
           <button 
             onClick={() => handleTabChange('missions')}
@@ -153,11 +140,8 @@ export default function Dashboard() {
         <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'projects' && "hidden")}>
           <ProjectsDashboard />
         </div>
-        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'goals' && "hidden")}>
-          <GoalsDashboard isCreateModalOpen={isGoalModalOpen} setIsCreateModalOpen={setIsGoalModalOpen} />
-        </div>
-        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'routines' && "hidden")}>
-          <RoutinesDashboard isCreateModalOpen={isRoutineModalOpen} setIsCreateModalOpen={setIsRoutineModalOpen} />
+        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'my-routine' && "hidden")}>
+          <MyRoutinePage isCreateModalOpen={isRoutineModalOpen} setIsCreateModalOpen={setIsRoutineModalOpen} />
         </div>
         <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'insights' && "hidden")}>
           <InsightsDashboard />
@@ -188,11 +172,11 @@ export default function Dashboard() {
           </button>
         </div>
 
-        <button onClick={() => handleTabChange('goals')} className={cn("flex flex-col items-center justify-center w-16 h-16", activeTab === 'goals' ? "text-blue-600" : "text-slate-500")}>
-          <Map className="w-5 h-5" />
-          <span className="text-[10px] mt-1 font-medium">Metas</span>
+        <button onClick={() => handleTabChange('my-routine')} className={cn("flex flex-col items-center justify-center w-16 h-16", activeTab === 'my-routine' ? "text-blue-600" : "text-slate-500")}>
+          <RefreshCcw className="w-5 h-5" />
+          <span className="text-[10px] mt-1 font-medium">Rotina</span>
         </button>
-        <button onClick={() => setIsMobileMenuOpen(true)} className={cn("flex flex-col items-center justify-center w-16 h-16", ['routines', 'missions', 'identity', 'insights', 'settings'].includes(activeTab) ? "text-blue-600" : "text-slate-500")}>
+        <button onClick={() => setIsMobileMenuOpen(true)} className={cn("flex flex-col items-center justify-center w-16 h-16", ['missions', 'identity', 'insights', 'settings'].includes(activeTab) ? "text-blue-600" : "text-slate-500")}>
           <Menu className="w-5 h-5" />
           <span className="text-[10px] mt-1 font-medium">Mais</span>
         </button>
@@ -223,13 +207,6 @@ export default function Dashboard() {
                 </button>
               </div>
               <div className="p-2 space-y-1">
-                <button 
-                  onClick={() => handleTabChange('routines')}
-                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'routines' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
-                >
-                  <RefreshCcw className={cn("w-5 h-5", activeTab === 'routines' ? "text-blue-600" : "text-slate-400")} />
-                  <span className="font-medium">Rotinas</span>
-                </button>
                 <button 
                   onClick={() => handleTabChange('missions')}
                   className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'missions' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}

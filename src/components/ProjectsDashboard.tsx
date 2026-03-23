@@ -5,7 +5,7 @@ import { useAuth } from '@/src/lib/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/src/lib/utils';
 import { toast } from 'sonner';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 interface Project {
   id: string;
@@ -421,7 +421,6 @@ function ProjectDetailView({
   onDelete: (id: string) => Promise<void>;
 }) {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
   const [name, setName] = useState(project.name);
   const [description, setDescription] = useState(project.description || '');
   const [color, setColor] = useState(project.color);
@@ -439,25 +438,6 @@ function ProjectDetailView({
       
       if (error) throw error;
       return data || [];
-    }
-  });
-
-  const deleteTaskMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('tasks')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projectTasks', project.id] });
-      toast.success('Tarefa excluída!');
-    },
-    onError: (error) => {
-      console.error('Error deleting task:', error);
-      toast.error('Erro ao excluir tarefa.');
     }
   });
 
@@ -507,15 +487,6 @@ function ProjectDetailView({
                     <span className="flex-1 text-sm text-slate-700 font-medium leading-tight">
                       {task.title}
                     </span>
-
-                    <button
-                      onClick={() => deleteTaskMutation.mutate(task.id)}
-                      disabled={deleteTaskMutation.isPending}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all shrink-0"
-                      title="Excluir tarefa"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
                   </div>
                 ))
               ) : (
