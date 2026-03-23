@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
 import { startOfDay, endOfDay, format } from 'date-fns';
@@ -31,6 +31,8 @@ export interface ActivityLog {
   completed_at: string;
   streak_count: number;
   xp_earned: number;
+  date: string;
+  rep_number: number;
 }
 
 export interface DailyActivity extends Activity {
@@ -45,15 +47,17 @@ export function useActivities(date: Date = new Date(), fetchAll: boolean = false
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchActivities = async () => {
+  // Use date string as dependency to avoid infinite loops from new Date() objects
+  const dateString = date.toISOString().split('T')[0];
+
+  const fetchActivities = useCallback(async () => {
     if (!user) return;
     setIsLoading(true);
     setError(null);
 
     try {
-      const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const start = startOfDay(date).toISOString();
-      const end = endOfDay(date).toISOString();
+      const targetDate = new Date(dateString);
+      const dayOfWeek = targetDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
 
       // 1. Fetch activities for the user
       let query = supabase
@@ -77,7 +81,7 @@ export function useActivities(date: Date = new Date(), fetchAll: boolean = false
         // If it's a goal, check if it's within the duration
         if (activity.type === 'goal' && activity.duration_days) {
           const startDate = new Date(activity.start_date);
-          const diffTime = Math.abs(date.getTime() - startDate.getTime());
+          const diffTime = Math.abs(targetDate.getTime() - startDate.getTime());
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
           if (diffDays > activity.duration_days) return false;
         }
@@ -85,13 +89,12 @@ export function useActivities(date: Date = new Date(), fetchAll: boolean = false
         return true;
       });
 
-      // 2. Fetch logs for today
+      // 2. Fetch logs for today using the date column
       const { data: logs, error: logsError } = await supabase
         .from('activity_logs')
         .select('*')
         .eq('user_id', user.id)
-        .gte('completed_at', start)
-        .lte('completed_at', end);
+        .eq('date', dateString);
 
       if (logsError) throw logsError;
 
@@ -128,11 +131,11 @@ export function useActivities(date: Date = new Date(), fetchAll: boolean = false
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.id, dateString, fetchAll]);
 
   useEffect(() => {
     fetchActivities();
-  }, [user, date]);
+  }, [fetchActivities]);
 
   const toggleActivity = async (activity: DailyActivity) => {
     if (!user) return;
@@ -151,6 +154,7 @@ export function useActivities(date: Date = new Date(), fetchAll: boolean = false
       // Calculate XP and Streak (simplified for now, ideally handled by DB trigger or edge function)
       const xpEarned = activity.xp_reward;
       const streakCount = activity.streak + 1; // Simplified
+      const repNumber = newCompletedReps;
 
       const { error } = await supabase
         .from('activity_logs')
@@ -158,7 +162,9 @@ export function useActivities(date: Date = new Date(), fetchAll: boolean = false
           activity_id: activity.id,
           user_id: user.id,
           xp_earned: xpEarned,
-          streak_count: streakCount
+          streak_count: streakCount,
+          date: dateString,
+          rep_number: repNumber
         }])
         .select();
 
