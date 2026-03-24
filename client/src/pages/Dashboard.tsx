@@ -48,7 +48,7 @@ export default function Dashboard() {
 
   const handleToggle = async (taskId: number) => {
     try {
-      await toggleProgress.mutateAsync(taskId);
+      await toggleProgress.mutateAsync({ taskId, date: new Date().toISOString().split('T')[0] });
     } catch (error) {
       console.error("Failed to toggle task", error);
     }
