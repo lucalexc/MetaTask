@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
 import { startOfDay, endOfDay, format } from 'date-fns';
@@ -31,8 +31,6 @@ export interface ActivityLog {
   completed_at: string;
   streak_count: number;
   xp_earned: number;
-  date: string;
-  rep_number: number;
 }
 
 export interface DailyActivity extends Activity {
@@ -41,47 +39,40 @@ export interface DailyActivity extends Activity {
   streak: number;
 }
 
-export function useActivities(date: Date = new Date(), fetchAll: boolean = false) {
+export function useActivities(date: Date = new Date()) {
   const { user } = useAuth();
   const [activities, setActivities] = useState<DailyActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Use date string as dependency to avoid infinite loops from new Date() objects
-  const dateString = date.toISOString().split('T')[0];
-
-  const fetchActivities = useCallback(async () => {
+  const fetchActivities = async () => {
     if (!user) return;
     setIsLoading(true);
     setError(null);
 
     try {
-      const targetDate = new Date(dateString);
-      const dayOfWeek = targetDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const start = startOfDay(date).toISOString();
+      const end = endOfDay(date).toISOString();
 
-      // 1. Fetch activities for the user
-      let query = supabase
+      // 1. Fetch active activities for the user
+      const { data: allActivities, error: activitiesError } = await supabase
         .from('activities')
         .select('*')
-        .eq('user_id', user.id);
-        
-      if (!fetchAll) {
-        query = query.eq('is_active', true);
-      }
-
-      const { data: allActivities, error: activitiesError } = await query;
+        .eq('user_id', user.id)
+        .eq('is_active', true);
 
       if (activitiesError) throw activitiesError;
 
-      // Filter activities that are active today (if not fetchAll)
-      const todayActivities = fetchAll ? (allActivities || []) : (allActivities || []).filter((activity: Activity) => {
+      // Filter activities that are active today
+      const todayActivities = (allActivities || []).filter((activity: Activity) => {
         // Check if it's active on this day of the week
         if (!activity.active_days || !activity.active_days[dayOfWeek]) return false;
 
         // If it's a goal, check if it's within the duration
         if (activity.type === 'goal' && activity.duration_days) {
           const startDate = new Date(activity.start_date);
-          const diffTime = Math.abs(targetDate.getTime() - startDate.getTime());
+          const diffTime = Math.abs(date.getTime() - startDate.getTime());
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
           if (diffDays > activity.duration_days) return false;
         }
@@ -89,12 +80,13 @@ export function useActivities(date: Date = new Date(), fetchAll: boolean = false
         return true;
       });
 
-      // 2. Fetch logs for today using the date column
+      // 2. Fetch logs for today
       const { data: logs, error: logsError } = await supabase
         .from('activity_logs')
         .select('*')
         .eq('user_id', user.id)
-        .eq('date', dateString);
+        .gte('completed_at', start)
+        .lte('completed_at', end);
 
       if (logsError) throw logsError;
 
@@ -131,44 +123,52 @@ export function useActivities(date: Date = new Date(), fetchAll: boolean = false
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id, dateString, fetchAll]);
+  };
 
   useEffect(() => {
     fetchActivities();
-  }, [fetchActivities]);
+  }, [user, date]);
 
   const toggleActivity = async (activity: DailyActivity) => {
     if (!user) return;
 
-    // Optimistic update
-    const newCompletedReps = activity.completed_reps + 1;
-    const newIsCompleted = newCompletedReps >= activity.reps_per_day;
+    const isCompleting = !activity.is_completed;
+    const start = startOfDay(date).toISOString();
+    const end = endOfDay(date).toISOString();
 
+    // Optimistic update
     setActivities(prev => prev.map(a => 
       a.id === activity.id 
-        ? { ...a, completed_reps: newCompletedReps, is_completed: newIsCompleted } 
+        ? { ...a, is_completed: isCompleting, completed_reps: isCompleting ? a.reps_per_day : 0 } 
         : a
     ));
 
     try {
-      // Calculate XP and Streak (simplified for now, ideally handled by DB trigger or edge function)
-      const xpEarned = activity.xp_reward;
-      const streakCount = activity.streak + 1; // Simplified
-      const repNumber = newCompletedReps;
+      if (isCompleting) {
+        // Insert log
+        const { error } = await supabase
+          .from('activity_logs')
+          .insert([{
+            activity_id: activity.id,
+            user_id: user.id,
+            xp_earned: activity.xp_reward,
+            streak_count: activity.streak + 1,
+            completed_at: date.toISOString()
+          }]);
 
-      const { error } = await supabase
-        .from('activity_logs')
-        .insert([{
-          activity_id: activity.id,
-          user_id: user.id,
-          xp_earned: xpEarned,
-          streak_count: streakCount,
-          date: dateString,
-          rep_number: repNumber
-        }])
-        .select();
+        if (error) throw error;
+      } else {
+        // Delete log for today
+        const { error } = await supabase
+          .from('activity_logs')
+          .delete()
+          .eq('activity_id', activity.id)
+          .eq('user_id', user.id)
+          .gte('completed_at', start)
+          .lte('completed_at', end);
 
-      if (error) throw error;
+        if (error) throw error;
+      }
     } catch (err) {
       console.error('Error toggling activity:', err);
       // Revert optimistic update
