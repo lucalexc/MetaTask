@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from '@/src/components/ui/button';
 import { 
   CheckCircle2, Target, Zap, Shield, ArrowRight, Play, 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, Edit2, Trash2, Power, Target, Repeat, GripVertical } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { useActivities, Activity } from '@/src/hooks/useActivities';
@@ -11,7 +11,7 @@ export default function ManageActivitiesModal({
 }: { 
   isOpen: boolean; 
   onClose: () => void;
-  onEdit: (activity: Activity) => void;
+  onEdit?: (activity: Activity) => void;
 }) {
   const { activities, updateActivity, deleteActivity, refresh } = useActivities();
   const [filter, setFilter] = useState<'all' | 'routine' | 'goal'>('all');
@@ -133,7 +133,7 @@ export default function ManageActivitiesModal({
                     <Power className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => onEdit(activity)}
+                    onClick={() => onEdit?.(activity)}
                     className="p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
                   >
                     <Edit2 className="w-4 h-4" />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, Plus, Edit2, Trash2, X, Clock, ArrowLeft, Check, Loader2 } from 'lucide-react';
 import { startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/src/lib/utils';

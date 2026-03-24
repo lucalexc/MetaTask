@@ -108,16 +108,16 @@ export default function SettingsDashboard() {
       <div className="max-w-2xl mx-auto mt-6 md:mt-10 px-4 md:px-6 pb-20">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Configurações</h1>
-          <p className="text-sm text-slate-500 mt-1">Gerencie sua conta e preferências.</p>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Configurações</h1>
+          <p className="text-sm text-gray-500 mt-1">Gerencie sua conta e preferências.</p>
         </div>
 
         {/* Section 1: Perfil do Usuário */}
-        <section className="border-b border-slate-200 pb-8 mb-8">
-          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Perfil</h2>
+        <section className="border-b border-gray-200 pb-8 mb-8">
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Perfil</h2>
           
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-8 text-slate-400">
+            <div className="flex flex-col items-center justify-center py-8 text-gray-400">
               <Loader2 className="w-6 h-6 animate-spin mb-2" />
               <p className="text-sm">Carregando perfil...</p>
             </div>
@@ -125,7 +125,7 @@ export default function SettingsDashboard() {
             <form onSubmit={handleSaveProfile}>
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                     Nome Completo
                   </label>
                   <input
@@ -133,14 +133,14 @@ export default function SettingsDashboard() {
                     id="name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="block w-full px-3 py-2 text-sm border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all bg-slate-50 focus:bg-white"
+                    className="block w-full px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#DC4C3E] focus:border-[#DC4C3E] transition-all bg-gray-50 focus:bg-white"
                     placeholder="Seu nome"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="birthDate" className="block text-sm font-medium text-slate-700 mb-1">
+                    <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">
                       Data de Nascimento
                     </label>
                     <input
@@ -150,18 +150,18 @@ export default function SettingsDashboard() {
                       onChange={handleDateChange}
                       maxLength={10}
                       placeholder="DD/MM/AAAA"
-                      className="block w-full px-3 py-2 text-sm border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all bg-slate-50 focus:bg-white"
+                      className="block w-full px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#DC4C3E] focus:border-[#DC4C3E] transition-all bg-gray-50 focus:bg-white"
                     />
                   </div>
                   <div>
-                    <label htmlFor="gender" className="block text-sm font-medium text-slate-700 mb-1">
+                    <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
                       Gênero
                     </label>
                     <select
                       id="gender"
                       value={gender}
                       onChange={(e) => setGender(e.target.value)}
-                      className="block w-full px-3 py-2 text-sm border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all bg-slate-50 focus:bg-white appearance-none"
+                      className="block w-full px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#DC4C3E] focus:border-[#DC4C3E] transition-all bg-gray-50 focus:bg-white appearance-none"
                     >
                       <option value="" disabled>Selecione</option>
                       <option value="Masculino">Masculino</option>
@@ -176,7 +176,7 @@ export default function SettingsDashboard() {
                 <button
                   type="submit"
                   disabled={saveStatus === 'saving' || saveStatus === 'saved'}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="bg-[#DC4C3E] hover:bg-[#C53727] text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#DC4C3E] focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {saveStatus === 'saving' && <Loader2 className="w-4 h-4 animate-spin" />}
                   {saveStatus === 'saving' ? 'Salvando...' : saveStatus === 'saved' ? 'Salvo!' : 'Salvar Alterações'}
@@ -187,10 +187,10 @@ export default function SettingsDashboard() {
         </section>
 
         {/* Section 2: Ajuda e Suporte */}
-        <section className="border-b border-slate-200 pb-8 mb-8">
-          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Suporte</h2>
+        <section className="border-b border-gray-200 pb-8 mb-8">
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Suporte</h2>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-gray-600">
               Precisa de ajuda ou encontrou algum problema? Nossa equipe está pronta para ajudar.
             </p>
             <button
@@ -206,7 +206,7 @@ export default function SettingsDashboard() {
 
         {/* Section 3: Conta (Logoff) */}
         <section>
-          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Conta</h2>
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Conta</h2>
           <button
             onClick={handleLogout}
             className="flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 text-sm font-semibold py-2 px-4 rounded-lg transition-colors w-fit"
