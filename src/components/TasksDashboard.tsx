@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   CheckCircle2, Circle, Plus, Calendar as CalendarIcon, 
   ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause, Trash2, Tag
@@ -120,12 +121,15 @@ const TaskCard: React.FC<{
 
   if (view === 'kanban') {
     return (
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95 }}
         onClick={() => onEdit(task)}
         draggable={true}
         onDragStart={(e) => onDragStart && onDragStart(e, task)}
         className={cn(
-          "flex flex-col gap-3 p-4 bg-white border border-slate-200 rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:shadow-md hover:border-blue-200 transition-all group animate-in fade-in slide-in-from-bottom-2 duration-300",
+          "flex flex-col gap-3 p-4 bg-white border border-slate-200 rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:shadow-md hover:border-blue-200 transition-all group",
           isDragging && "opacity-50 border-dashed"
         )}
       >
@@ -246,14 +250,17 @@ const TaskCard: React.FC<{
             </button>
           )}
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
       onClick={() => onEdit(task)}
-      className="flex items-center gap-3 py-2 border-b border-slate-100 bg-white group hover:bg-slate-50/50 transition-colors cursor-pointer animate-in fade-in slide-in-from-bottom-2 duration-300"
+      className="flex items-center gap-3 py-2 border-b border-slate-100 bg-white group hover:bg-slate-50/50 transition-colors cursor-pointer"
     >
       <div className="opacity-0 group-hover:opacity-100 cursor-grab text-slate-300 transition-opacity">
         <GripVertical className="w-4 h-4" />
@@ -367,7 +374,7 @@ const TaskCard: React.FC<{
       >
         <Trash2 className="w-4 h-4" />
       </button>
-    </div>
+    </motion.div>
   );
 };
 
@@ -486,8 +493,11 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm">
       <div className="min-h-full flex items-center justify-center p-4">
-        <div 
-          className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-visible flex flex-col relative animate-in zoom-in-95 duration-200"
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-visible flex flex-col relative"
         >
           <div className="p-6 flex flex-col gap-4">
             <input 
@@ -602,16 +612,19 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
                   <Repeat className={cn("w-4 h-4", isRecurrencePickerOpen || recurrence !== 'none' ? "text-blue-500" : "text-slate-400")} />
                   {recurrence === 'daily' ? 'Diário' : recurrence === 'weekly' ? 'Semanal' : recurrence === 'monthly' ? 'Mensal' : 'Repetir'}
                 </button>
-                {isRecurrencePickerOpen && (
-                  <div 
-                    className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-200 z-[100] p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200"
-                  >
-                    <button onClick={() => { setRecurrence('none'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100", recurrence === 'none' && "bg-blue-50 text-blue-700")}>Não repete</button>
-                    <button onClick={() => { setRecurrence('daily'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100", recurrence === 'daily' && "bg-blue-50 text-blue-700")}>Diariamente</button>
-                    <button onClick={() => { setRecurrence('weekly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100", recurrence === 'weekly' && "bg-blue-50 text-blue-700")}>Semanalmente</button>
-                    <button onClick={() => { setRecurrence('monthly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100", recurrence === 'monthly' && "bg-blue-50 text-blue-700")}>Mensalmente</button>
-                  </div>
-                )}
+                <AnimatePresence>
+                  {isRecurrencePickerOpen && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+                      className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-200 z-[100] p-2 space-y-1"
+                    >
+                      <button onClick={() => { setRecurrence('none'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100", recurrence === 'none' && "bg-blue-50 text-blue-700")}>Não repete</button>
+                      <button onClick={() => { setRecurrence('daily'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100", recurrence === 'daily' && "bg-blue-50 text-blue-700")}>Diariamente</button>
+                      <button onClick={() => { setRecurrence('weekly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100", recurrence === 'weekly' && "bg-blue-50 text-blue-700")}>Semanalmente</button>
+                      <button onClick={() => { setRecurrence('monthly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100", recurrence === 'monthly' && "bg-blue-50 text-blue-700")}>Mensalmente</button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               <Select value={priority} onValueChange={setPriority}>
@@ -728,7 +741,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
               Salvar Tarefa
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
@@ -745,9 +758,12 @@ const TimeModal = ({ isOpen, onClose, task, onSave }: { isOpen: boolean; onClose
 
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div 
-        className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200"
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
       >
         <div className="p-4 border-b border-slate-100 flex justify-between items-center">
           <h3 className="font-bold text-lg">Definir Horário</h3>
@@ -769,7 +785,7 @@ const TimeModal = ({ isOpen, onClose, task, onSave }: { isOpen: boolean; onClose
             onClose();
           }}>Salvar</Button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
@@ -785,9 +801,12 @@ const RecurrenceModal = ({ isOpen, onClose, task, onSave }: { isOpen: boolean; o
 
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div 
-        className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200"
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
       >
         <div className="p-4 border-b border-slate-100 flex justify-between items-center">
           <h3 className="font-bold text-lg">Repetir Tarefa</h3>
@@ -814,7 +833,7 @@ const RecurrenceModal = ({ isOpen, onClose, task, onSave }: { isOpen: boolean; o
             onClose();
           }}>Salvar</Button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
@@ -889,8 +908,11 @@ const TaskHistoryModal = ({ isOpen, onClose, task }: { isOpen: boolean; onClose:
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div 
-        className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200"
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]"
       >
         <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
           <div className="flex items-center gap-2">
@@ -943,7 +965,7 @@ const TaskHistoryModal = ({ isOpen, onClose, task }: { isOpen: boolean; onClose:
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
@@ -952,8 +974,11 @@ const ConfirmDeleteModal = ({ isOpen, onClose, onConfirm }: { isOpen: boolean; o
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200"
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
       >
         <div className="p-6 text-center">
           <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
@@ -968,7 +993,7 @@ const ConfirmDeleteModal = ({ isOpen, onClose, onConfirm }: { isOpen: boolean; o
           <Button variant="ghost" onClick={onClose}>Cancelar</Button>
           <Button className="bg-red-600 hover:bg-red-700 text-white" onClick={onConfirm}>Excluir</Button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
@@ -1611,8 +1636,10 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
           </header>
 
           {view === 'list' && (
-            <div 
-              className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
             >
               {/* Horizontal Days Strip */}
               <div className="flex items-center bg-white py-3 px-2 border-b border-slate-100">
@@ -1632,10 +1659,21 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                   
                   {/* Animated Numbers */}
                   <div className="relative h-10">
-                    <div
-                      key={currentWeekStart.toISOString()}
-                      className="absolute inset-0 flex justify-around animate-in fade-in duration-300"
-                    >
+                    <AnimatePresence mode="popLayout" custom={weekDirection}>
+                      <motion.div
+                        key={currentWeekStart.toISOString()}
+                        custom={weekDirection}
+                        variants={{
+                          initial: (dir: number) => ({ x: dir > 0 ? 50 : -50, opacity: 0 }),
+                          animate: { x: 0, opacity: 1 },
+                          exit: (dir: number) => ({ x: dir > 0 ? -50 : 50, opacity: 0 })
+                        }}
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="absolute inset-0 flex justify-around"
+                      >
                         {eachDayOfInterval({ start: currentWeekStart, end: addDays(currentWeekStart, 6) }).map(day => {
                           const isSelected = isSameDay(day, selectedDate);
                           const isToday = isSameDay(day, new Date());
@@ -1659,7 +1697,8 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                             </button>
                           );
                         })}
-                      </div>
+                      </motion.div>
+                    </AnimatePresence>
                   </div>
                 </div>
 
@@ -1677,13 +1716,16 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                       <p className="text-sm">Carregando tarefas...</p>
                     </div>
                   ) : (
-                    <>
+                    <AnimatePresence mode="popLayout">
                       {pendingTasks.length === 0 ? (
-                        <div 
-                          className="text-center py-8 text-sm text-slate-500 animate-in fade-in duration-300"
+                        <motion.div 
+                          initial={{ opacity: 0 }} 
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="text-center py-8 text-sm text-slate-500"
                         >
                           Nenhuma tarefa pendente. Aproveite o descanso!
-                        </div>
+                        </motion.div>
                       ) : (
                         pendingTasks.map(task => (
                           <TaskCard 
@@ -1700,7 +1742,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                           />
                         ))
                       )}
-                    </>
+                    </AnimatePresence>
                   )}
                 </div>
               </div>
@@ -1729,12 +1771,14 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                   </div>
                 </div>
               )}
-            </div>
+            </motion.div>
           )}
 
           {view === 'kanban' && (
-            <div 
-              className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full animate-in fade-in slide-in-from-bottom-4 duration-500"
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full"
             >
               {/* To Do Column */}
               <div 
@@ -1798,12 +1842,14 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                   ))}
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {view === 'calendar' && (
-            <div 
-              className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500"
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"
             >
               {/* Calendar Navigation */}
               <div className="flex items-center justify-between p-4 border-b border-slate-200">
@@ -1889,13 +1935,13 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                   );
                 })}
               </div>
-            </div>
+            </motion.div>
           )}
 
         </div>
 
         {/* Modals */}
-        <>
+        <AnimatePresence>
           {isCreateModalOpen && (
             <TaskModal 
               isOpen={isCreateModalOpen}
@@ -1938,7 +1984,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               onConfirm={() => handleDeleteTask(taskToDelete)}
             />
           )}
-        </>
+        </AnimatePresence>
     </main>
   );
 }

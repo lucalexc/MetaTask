@@ -67,76 +67,76 @@ export default function CreateActivityModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
       />
       
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl p-6 text-gray-900"
+        className="relative w-full max-w-lg bg-[#0C1020] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
       >
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-black tracking-tight text-gray-900">Nova Atividade</h2>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-full transition-all">
+        <div className="flex items-center justify-between p-6 border-b border-white/5">
+          <h2 className="text-xl font-bold text-white">Nova Atividade</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Type Selection */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
               onClick={() => setType('routine')}
               className={cn(
-                "flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all",
+                "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all",
                 type === 'routine' 
-                  ? "border-blue-500 bg-blue-50 text-blue-700" 
-                  : "border-gray-100 bg-white text-gray-400 hover:border-gray-200"
+                  ? "border-blue-500 bg-blue-500/10 text-blue-400" 
+                  : "border-white/5 bg-white/5 text-slate-400 hover:border-white/10 hover:bg-white/10"
               )}
             >
-              <Repeat className="w-8 h-8 mb-3" />
-              <span className="font-black uppercase tracking-widest text-[11px]">Rotina</span>
-              <span className="text-[10px] opacity-70 mt-1 font-medium">Hábito contínuo</span>
+              <Repeat className="w-6 h-6 mb-2" />
+              <span className="font-bold">Rotina</span>
+              <span className="text-xs opacity-70 mt-1">Hábito contínuo</span>
             </button>
             <button
               type="button"
               onClick={() => setType('goal')}
               className={cn(
-                "flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all",
+                "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all",
                 type === 'goal' 
-                  ? "border-purple-500 bg-purple-50 text-purple-700" 
-                  : "border-gray-100 bg-white text-gray-400 hover:border-gray-200"
+                  ? "border-purple-500 bg-purple-500/10 text-purple-400" 
+                  : "border-white/5 bg-white/5 text-slate-400 hover:border-white/10 hover:bg-white/10"
               )}
             >
-              <Target className="w-8 h-8 mb-3" />
-              <span className="font-black uppercase tracking-widest text-[11px]">Meta</span>
-              <span className="text-[10px] opacity-70 mt-1 font-medium">Desafio com prazo</span>
+              <Target className="w-6 h-6 mb-2" />
+              <span className="font-bold">Meta</span>
+              <span className="text-xs opacity-70 mt-1">Desafio com prazo</span>
             </button>
           </div>
 
           {/* Name */}
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Nome da Atividade</label>
+            <label className="text-sm font-bold text-slate-300">Nome da Atividade</label>
             <input
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder={type === 'routine' ? "Ex: Meditar 10 min" : "Ex: Correr 5km"}
-              className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 placeholder-gray-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-semibold"
+              className="w-full bg-[#111630] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
               required
             />
           </div>
 
           {/* Period & Time */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Período</label>
+              <label className="text-sm font-bold text-slate-300">Período</label>
               <select
                 value={period}
                 onChange={e => setPeriod(e.target.value as Period)}
-                className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none font-semibold"
+                className="w-full bg-[#111630] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none"
               >
                 {periods.map(p => (
                   <option key={p.id} value={p.id}>{p.label}</option>
@@ -144,14 +144,14 @@ export default function CreateActivityModal({
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Horário (Opcional)</label>
+              <label className="text-sm font-bold text-slate-300">Horário (Opcional)</label>
               <div className="relative">
-                <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <input
                   type="time"
                   value={scheduledTime}
                   onChange={e => setScheduledTime(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-12 pr-5 py-4 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-semibold"
+                  className="w-full bg-[#111630] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
                 />
               </div>
             </div>
@@ -159,8 +159,8 @@ export default function CreateActivityModal({
 
           {/* Active Days */}
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Dias da Semana</label>
-            <div className="flex justify-between gap-2">
+            <label className="text-sm font-bold text-slate-300">Dias da Semana</label>
+            <div className="flex justify-between gap-1">
               {daysOfWeek.map((day, index) => (
                 <button
                   key={index}
@@ -171,10 +171,10 @@ export default function CreateActivityModal({
                     setActiveDays(newDays);
                   }}
                   className={cn(
-                    "w-11 h-11 rounded-2xl flex items-center justify-center font-black text-xs transition-all",
+                    "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all",
                     activeDays[index]
-                      ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                      : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
+                      : "bg-[#111630] text-slate-500 hover:bg-white/10 hover:text-white"
                   )}
                 >
                   {day}
@@ -190,31 +190,31 @@ export default function CreateActivityModal({
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="grid grid-cols-2 gap-6 overflow-hidden"
+                className="grid grid-cols-2 gap-4 overflow-hidden"
               >
                 <div className="space-y-2 pt-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Duração (Dias)</label>
+                  <label className="text-sm font-bold text-slate-300">Duração (Dias)</label>
                   <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                     <input
                       type="number"
                       min="1"
                       value={durationDays}
                       onChange={e => setDurationDays(parseInt(e.target.value) || 1)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-12 pr-5 py-4 text-gray-900 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all font-semibold"
+                      className="w-full bg-[#111630] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
                     />
                   </div>
                 </div>
                 <div className="space-y-2 pt-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Repetições/Dia</label>
+                  <label className="text-sm font-bold text-slate-300">Repetições/Dia</label>
                   <div className="relative">
-                    <Repeat className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                    <Repeat className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                     <input
                       type="number"
                       min="1"
                       value={repsPerDay}
                       onChange={e => setRepsPerDay(parseInt(e.target.value) || 1)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-12 pr-5 py-4 text-gray-900 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all font-semibold"
+                      className="w-full bg-[#111630] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
                     />
                   </div>
                 </div>
@@ -223,32 +223,32 @@ export default function CreateActivityModal({
           </AnimatePresence>
 
           {/* Info Box */}
-          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 flex items-start gap-4">
-            <Trophy className="w-6 h-6 text-blue-600 shrink-0 mt-0.5" />
-            <p className="text-[11px] font-bold text-blue-800 leading-relaxed">
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-start gap-3">
+            <Trophy className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+            <p className="text-sm text-blue-200/80 leading-relaxed">
               {type === 'routine' 
-                ? "Rotinas rendem 10 XP por conclusão. Mantenha o streak para subir de nível mais rápido!" 
-                : "Metas rendem 25 XP por conclusão. Complete o ciclo para ganhar bônus especiais!"}
+                ? "Rotinas rendem 10 XP por conclusão. Mantenha o streak para multiplicar seus ganhos!" 
+                : "Metas rendem 25 XP por conclusão. Complete o ciclo para ganhar um bônus especial!"}
             </p>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-4 pt-6">
-            <button
+          <div className="flex gap-3 pt-4">
+            <Button
               type="button"
               onClick={onClose}
-              className="px-8 py-3 text-sm font-black uppercase tracking-widest text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-2xl transition-all"
+              className="flex-1 bg-transparent border border-white/10 text-white hover:bg-white/5 py-6 rounded-xl font-bold"
             >
               Cancelar
-            </button>
+            </Button>
             <Button
               type="submit"
               disabled={isSubmitting || !name.trim()}
               className={cn(
-                "px-10 py-7 rounded-2xl font-black uppercase tracking-widest text-xs text-white shadow-xl transition-all",
+                "flex-1 py-6 rounded-xl font-bold text-white shadow-lg transition-all",
                 type === 'routine' 
-                  ? "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20" 
-                  : "bg-purple-600 hover:bg-purple-700 shadow-purple-600/20"
+                  ? "bg-blue-600 hover:bg-blue-700 shadow-blue-900/20" 
+                  : "bg-purple-600 hover:bg-purple-700 shadow-purple-900/20"
               )}
             >
               {isSubmitting ? 'Salvando...' : 'Criar Atividade'}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Check, Lock, Star, Sword, Shield, Crown, Zap, X, 
   Book, User, Home, Target, Mountain, Moon, Repeat, 
@@ -159,12 +160,12 @@ const MOCK_PHASES: Phase[] = [
 const ACT_CONFIG = {
   1: {
     name: 'O Despertar',
-    color: 'gray',
-    bg: 'bg-gray-600',
-    text: 'text-gray-600',
-    border: 'border-gray-200',
-    gradient: 'from-gray-500 to-gray-700',
-    glow: 'shadow-gray-500/20'
+    color: 'slate',
+    bg: 'bg-slate-600',
+    text: 'text-slate-600',
+    border: 'border-slate-200',
+    gradient: 'from-slate-600 to-slate-800',
+    glow: 'shadow-slate-500/20'
   },
   2: {
     name: 'A Forja',
@@ -200,10 +201,13 @@ const PhaseDetailsModal = ({ phase, isOpen, onClose }: { phase: Phase | null, is
   const config = ACT_CONFIG[phase.act];
 
   return (
-    <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200">
-        <div 
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200"
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative"
         >
           {/* Header */}
           <div className={cn("p-6 text-white relative overflow-hidden bg-gradient-to-br", config.gradient)}>
@@ -230,22 +234,24 @@ const PhaseDetailsModal = ({ phase, isOpen, onClose }: { phase: Phase | null, is
           </div>
 
           {/* Progress */}
-          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+          <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Progresso da Fase</span>
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Progresso da Fase</span>
               <span className={cn("text-sm font-bold", config.text)}>{phase.progress}%</span>
             </div>
-            <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                style={{ width: `${phase.progress}%` }}
-                className={cn("h-full rounded-full transition-all duration-500 ease-out", config.bg)}
+            <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: `${phase.progress}%` }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className={cn("h-full rounded-full", config.bg)}
               />
             </div>
           </div>
 
           {/* Missions Checklist */}
           <div className="p-6">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Missões do Sistema</h3>
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Missões do Sistema</h3>
             <div className="space-y-3">
               {phase.missions.map((mission) => (
                 <div 
@@ -253,21 +259,21 @@ const PhaseDetailsModal = ({ phase, isOpen, onClose }: { phase: Phase | null, is
                   className={cn(
                     "flex items-start gap-3 p-3 rounded-xl border transition-all",
                     mission.completed 
-                      ? "bg-gray-50 border-gray-200" 
-                      : "bg-white border-gray-200 hover:border-blue-200 hover:shadow-sm"
+                      ? "bg-slate-50 border-slate-200" 
+                      : "bg-white border-slate-200 hover:border-blue-200 hover:shadow-sm"
                   )}
                 >
                   <div className={cn(
                     "w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 transition-colors",
                     mission.completed 
                       ? "bg-emerald-500 border-emerald-500 text-white" 
-                      : "border-gray-300"
+                      : "border-slate-300"
                   )}>
                     {mission.completed && <Check className="w-3.5 h-3.5" />}
                   </div>
                   <span className={cn(
                     "text-sm font-medium",
-                    mission.completed ? "text-gray-400 line-through" : "text-gray-700"
+                    mission.completed ? "text-slate-400 line-through" : "text-slate-700"
                   )}>
                     {mission.title}
                   </span>
@@ -276,7 +282,7 @@ const PhaseDetailsModal = ({ phase, isOpen, onClose }: { phase: Phase | null, is
             </div>
           </div>
           
-          <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+          <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
             <button 
               onClick={onClose}
               className={cn("px-6 py-2 text-white text-sm font-medium rounded-lg transition-colors", config.bg, "hover:opacity-90")}
@@ -284,9 +290,9 @@ const PhaseDetailsModal = ({ phase, isOpen, onClose }: { phase: Phase | null, is
               Continuar Jornada
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </>
+    </AnimatePresence>
   );
 };
 
@@ -312,30 +318,38 @@ export default function MissionsMapDashboard() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white overflow-hidden relative">
+    <div className="flex-1 flex flex-col h-full bg-slate-50 overflow-hidden relative">
       {/* Header */}
-      <div className="px-4 md:px-8 py-4 md:py-6 bg-white border-b border-gray-200 shrink-0 z-10">
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">A Jornada</h1>
-        <p className="text-sm text-gray-400 mt-1">Siga o caminho da disciplina. Um passo de cada vez.</p>
+      <div className="px-4 md:px-8 py-4 md:py-6 bg-white border-b border-slate-200 shrink-0 z-10">
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">A Jornada</h1>
+        <p className="text-sm text-slate-500 mt-1">Siga o caminho da disciplina. Um passo de cada vez.</p>
       </div>
 
       {/* Toast Notification */}
-      {toastMessage && (
-        <div 
-          className="absolute top-24 left-1/2 -translate-x-1/2 z-40 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium flex items-center gap-2 animate-in slide-in-from-top-5 fade-in duration-300"
-        >
-          <Lock className="w-4 h-4 text-gray-400" />
-          {toastMessage}
-        </div>
-      )}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: -20, x: '-50%' }}
+            className="absolute top-24 left-1/2 z-40 bg-slate-900 text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium flex items-center gap-2"
+          >
+            <Lock className="w-4 h-4 text-slate-400" />
+            {toastMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Map Area */}
       <div className="flex-1 overflow-x-auto overflow-y-hidden hide-scrollbar relative">
-        <div 
-          className="min-w-max h-full p-10 flex items-center relative animate-in slide-in-from-right-10 fade-in duration-500 ease-out"
+        <motion.div 
+          initial={{ x: 50, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="min-w-max h-full p-10 flex items-center relative"
         >
           {/* Connecting Line Background */}
-          <div className="absolute left-10 right-10 top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded-full z-0"></div>
+          <div className="absolute left-10 right-10 top-1/2 -translate-y-1/2 h-1 bg-slate-200 rounded-full z-0"></div>
 
           <div className="flex items-center gap-24 relative z-10 px-20">
             {MOCK_PHASES.map((phase, index) => {
@@ -355,7 +369,7 @@ export default function MissionsMapDashboard() {
                   {index < MOCK_PHASES.length - 1 && (
                     <div className={cn(
                       "absolute left-1/2 top-1/2 -translate-y-1/2 h-1 -z-10",
-                      showSolidLine ? config.bg : "border-t-2 border-dashed border-gray-300"
+                      showSolidLine ? config.bg : "border-t-2 border-dashed border-slate-300"
                     )} style={{ width: 'calc(6rem + 100%)' }}></div>
                   )}
 
@@ -374,7 +388,7 @@ export default function MissionsMapDashboard() {
                       "w-16 h-16 rounded-full flex items-center justify-center relative z-10 transition-all duration-300 shadow-sm",
                       isCompleted ? cn(config.bg, "text-white hover:opacity-90 hover:scale-105") :
                       isActive ? cn("bg-gradient-to-br text-white ring-4 ring-white/50 hover:scale-105 shadow-lg", config.gradient, config.glow) :
-                      "bg-gray-100 text-gray-400 border-2 border-gray-200 opacity-70 hover:opacity-100"
+                      "bg-slate-100 text-slate-400 border-2 border-slate-200 opacity-70 hover:opacity-100"
                     )}>
                       {isCompleted ? (
                         <Check className="w-8 h-8" />
@@ -389,21 +403,21 @@ export default function MissionsMapDashboard() {
                     <div className="absolute top-full mt-4 flex flex-col items-center w-32 text-center">
                       <span className={cn(
                         "text-xs font-bold uppercase tracking-widest opacity-50 mb-1",
-                        isActive || isCompleted ? config.text : "text-gray-400"
+                        isActive || isCompleted ? config.text : "text-slate-400"
                       )}>
                         Ato {phase.act}
                       </span>
                       <span className={cn(
                         "text-sm font-bold tracking-tight",
                         isActive ? config.text : 
-                        isCompleted ? "text-gray-700" : "text-gray-400"
+                        isCompleted ? "text-slate-700" : "text-slate-400"
                       )}>
                         {phase.title}
                       </span>
                       
                       {/* Time Gate Label */}
                       {isLocked && phase.unlocksInDays && (
-                        <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mt-1 bg-gray-100 px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mt-1 bg-slate-100 px-2 py-0.5 rounded-full">
                           Em {phase.unlocksInDays} dias
                         </span>
                       )}
@@ -413,7 +427,7 @@ export default function MissionsMapDashboard() {
               );
             })}
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <PhaseDetailsModal 

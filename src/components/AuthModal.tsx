@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
@@ -33,32 +34,39 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   };
 
   return (
-    <>
+    <AnimatePresence>
       {isOpen && (
         <>
           {/* Backdrop */}
-          <div
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+            className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
           >
             {/* Modal Container */}
-            <div
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: 'spring', duration: 0.5, bounce: 0.3 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 relative animate-in zoom-in-95 duration-200"
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 relative"
             >
               {/* Close Button */}
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
 
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-2">
+                <h2 className="text-2xl font-bold text-slate-800 tracking-tight mb-2">
                   Acessar Plataforma
                 </h2>
-                <p className="text-gray-500 text-sm">
+                <p className="text-slate-500 text-sm">
                   Faça login com sua conta Google para continuar.
                 </p>
               </div>
@@ -67,7 +75,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <button
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 py-3 text-sm border border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-all focus:outline-none focus:ring-2 focus:ring-[#DC4C3E] focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-3 py-3 text-sm border border-slate-300 rounded-xl text-slate-700 font-semibold hover:bg-slate-50 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -93,10 +101,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 )}
                 {isLoading ? 'Conectando...' : 'Continuar com o Google'}
               </button>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </>
       )}
-    </>
+    </AnimatePresence>
   );
 }

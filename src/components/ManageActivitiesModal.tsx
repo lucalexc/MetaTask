@@ -13,7 +13,7 @@ export default function ManageActivitiesModal({
   onClose: () => void;
   onEdit: (activity: Activity) => void;
 }) {
-  const { activities, updateActivity, deleteActivity } = useActivities(new Date(), true);
+  const { activities, updateActivity, deleteActivity, refresh } = useActivities();
   const [filter, setFilter] = useState<'all' | 'routine' | 'goal'>('all');
 
   if (!isOpen) return null;
@@ -27,31 +27,31 @@ export default function ManageActivitiesModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
       />
       
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-2xl max-h-[80vh] flex flex-col bg-white rounded-2xl shadow-xl p-6 text-gray-900 overflow-hidden"
+        className="relative w-full max-w-2xl max-h-[80vh] flex flex-col bg-[#0C1020] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
       >
-        <div className="flex items-center justify-between mb-8 shrink-0">
+        <div className="flex items-center justify-between p-6 border-b border-white/5 shrink-0">
           <div>
-            <h2 className="text-2xl font-black tracking-tight text-gray-900">Gerenciar Atividades</h2>
-            <p className="text-sm font-medium text-gray-500 mt-1">Edite, pause ou exclua suas rotinas e metas</p>
+            <h2 className="text-xl font-bold text-white">Gerenciar Atividades</h2>
+            <p className="text-sm text-slate-400 mt-1">Edite, pause ou exclua suas rotinas e metas</p>
           </div>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-full transition-all">
+          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="flex gap-2 mb-8 shrink-0 bg-gray-50 p-1.5 rounded-2xl">
+        <div className="p-4 border-b border-white/5 flex gap-2 shrink-0">
           <button
             onClick={() => setFilter('all')}
             className={cn(
-              "flex-1 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-              filter === 'all' ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-600"
+              "px-4 py-2 rounded-lg text-sm font-bold transition-colors",
+              filter === 'all' ? "bg-white/10 text-white" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
             )}
           >
             Todas
@@ -59,8 +59,8 @@ export default function ManageActivitiesModal({
           <button
             onClick={() => setFilter('routine')}
             className={cn(
-              "flex-1 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-              filter === 'routine' ? "bg-white text-blue-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
+              "px-4 py-2 rounded-lg text-sm font-bold transition-colors",
+              filter === 'routine' ? "bg-blue-500/20 text-blue-400" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
             )}
           >
             Rotinas
@@ -68,97 +68,94 @@ export default function ManageActivitiesModal({
           <button
             onClick={() => setFilter('goal')}
             className={cn(
-              "flex-1 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-              filter === 'goal' ? "bg-white text-purple-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
+              "px-4 py-2 rounded-lg text-sm font-bold transition-colors",
+              filter === 'goal' ? "bg-purple-500/20 text-purple-400" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
             )}
           >
             Metas
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto -mx-6 px-6">
-          <div className="flex flex-col">
-            <AnimatePresence mode="popLayout">
-              {filteredActivities.map(activity => (
-                <motion.div
-                  key={activity.id}
-                  layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className={cn(
-                    "flex items-center gap-4 py-4 border-b border-gray-100 transition-all hover:bg-gray-50/50 group",
-                    !activity.is_active && "opacity-50 grayscale"
-                  )}
-                >
-                  <div className="cursor-grab active:cursor-grabbing text-gray-200 group-hover:text-gray-400 transition-colors">
-                    <GripVertical className="w-5 h-5" />
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          <AnimatePresence>
+            {filteredActivities.map(activity => (
+              <motion.div
+                key={activity.id}
+                layout
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={cn(
+                  "flex items-center gap-4 p-4 rounded-xl border transition-colors",
+                  activity.is_active 
+                    ? "bg-[#111630] border-white/10" 
+                    : "bg-[#111630]/50 border-white/5 opacity-60"
+                )}
+              >
+                <div className="cursor-grab active:cursor-grabbing text-slate-500 hover:text-slate-300">
+                  <GripVertical className="w-5 h-5" />
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-bold text-white truncate">{activity.name}</h4>
+                    {!activity.is_active && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-white/5 px-2 py-0.5 rounded">Pausada</span>
+                    )}
                   </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-gray-900 truncate">{activity.name}</h4>
-                      {!activity.is_active && (
-                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md">Pausada</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 mt-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                      <span className="flex items-center gap-1">
-                        {activity.type === 'goal' ? <Target className="w-3 h-3" /> : <Repeat className="w-3 h-3" />}
-                        {activity.type === 'goal' ? 'Meta' : 'Rotina'}
-                      </span>
-                      <span>•</span>
-                      <span>{activity.period}</span>
-                      {activity.scheduled_time && (
-                        <>
-                          <span>•</span>
-                          <span>{activity.scheduled_time.substring(0, 5)}</span>
-                        </>
-                      )}
-                    </div>
+                  <div className="flex items-center gap-3 mt-1 text-xs text-slate-400">
+                    <span className="flex items-center gap-1">
+                      {activity.type === 'goal' ? <Target className="w-3 h-3" /> : <Repeat className="w-3 h-3" />}
+                      {activity.type === 'goal' ? 'Meta' : 'Rotina'}
+                    </span>
+                    <span>•</span>
+                    <span>{activity.period}</span>
+                    {activity.scheduled_time && (
+                      <>
+                        <span>•</span>
+                        <span>{activity.scheduled_time.substring(0, 5)}</span>
+                      </>
+                    )}
                   </div>
+                </div>
 
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => updateActivity(activity.id, { is_active: !activity.is_active })}
-                      className={cn(
-                        "p-2.5 rounded-xl transition-all",
-                        activity.is_active 
-                          ? "text-gray-400 hover:text-orange-600 hover:bg-orange-50" 
-                          : "text-green-600 bg-green-50 hover:bg-green-100"
-                      )}
-                      title={activity.is_active ? "Pausar atividade" : "Retomar atividade"}
-                    >
-                      <Power className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => onEdit(activity)}
-                      className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (window.confirm('Tem certeza que deseja excluir esta atividade?')) {
-                          deleteActivity(activity.id);
-                        }
-                      }}
-                      className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => updateActivity(activity.id, { is_active: !activity.is_active })}
+                    className={cn(
+                      "p-2 rounded-lg transition-colors",
+                      activity.is_active 
+                        ? "text-slate-400 hover:text-orange-400 hover:bg-orange-500/10" 
+                        : "text-green-400 bg-green-500/10 hover:bg-green-500/20"
+                    )}
+                    title={activity.is_active ? "Pausar atividade" : "Retomar atividade"}
+                  >
+                    <Power className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => onEdit(activity)}
+                    className="p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm('Tem certeza que deseja excluir esta atividade?')) {
+                        deleteActivity(activity.id);
+                      }
+                    }}
+                    className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
           
           {filteredActivities.length === 0 && (
-            <div className="text-center py-24">
-              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <X className="w-8 h-8 text-gray-200" />
-              </div>
-              <p className="text-gray-400 font-bold text-sm uppercase tracking-widest">Nenhuma atividade encontrada</p>
+            <div className="text-center py-12 text-slate-500">
+              Nenhuma atividade encontrada.
             </div>
           )}
         </div>

@@ -24,12 +24,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     else if (energy <= 2) energyLabel = 'Baixa';
 
     return (
-      <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100 text-sm">
-        <p className="font-bold text-gray-800 mb-1">{label}</p>
-        <p className="text-gray-600">
+      <div className="bg-white p-3 rounded-lg shadow-lg border border-slate-100 text-sm">
+        <p className="font-bold text-slate-800 mb-1">{label}</p>
+        <p className="text-slate-600">
           <span className="font-semibold text-blue-600">{tasks || 0}</span> tarefas concluídas
         </p>
-        <p className="text-gray-600">
+        <p className="text-slate-600">
           Energia: <span className="font-semibold text-orange-500">{energy || 0}/5</span> ({energy ? energyLabel : 'Não registrada'})
         </p>
       </div>
@@ -204,14 +204,14 @@ export default function InsightsDashboard() {
 
   if (isLoadingTasks || isLoadingEnergy) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gray-50">
+      <div className="flex-1 flex items-center justify-center bg-slate-50">
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8">
+    <div className="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Energy Banner */}
@@ -233,7 +233,7 @@ export default function InsightsDashboard() {
                   className={`w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all ${
                     todayEnergy?.level === level 
                       ? 'bg-orange-500 text-white shadow-md scale-110' 
-                      : 'bg-white text-gray-400 hover:bg-orange-100 hover:text-orange-600 hover:scale-105'
+                      : 'bg-white text-slate-400 hover:bg-orange-100 hover:text-orange-600 hover:scale-105'
                   }`}
                 >
                   {level === 1 && '🥱'}
@@ -250,17 +250,17 @@ export default function InsightsDashboard() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
               <BarChart2 className="w-6 h-6 text-blue-600" />
               Meus Insights
             </h1>
-            <p className="text-gray-500 mt-1">Acompanhe seu ritmo, foco e energia</p>
+            <p className="text-slate-500 mt-1">Acompanhe seu ritmo, foco e energia</p>
           </div>
           
           <select 
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value as 'week' | 'month')}
-            className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 shadow-sm"
+            className="bg-white border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 shadow-sm"
           >
             <option value="week">Últimos 7 dias</option>
             <option value="month">Este Mês</option>
@@ -277,8 +277,8 @@ export default function InsightsDashboard() {
                     <Clock className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Tempo de Foco Total</p>
-                    <h3 className="text-2xl font-bold text-gray-900">{insightsData.kpis.totalFocusTime}</h3>
+                    <p className="text-sm font-medium text-slate-500">Tempo de Foco Total</p>
+                    <h3 className="text-2xl font-bold text-slate-900">{insightsData.kpis.totalFocusTime}</h3>
                   </div>
                 </CardContent>
               </Card>
@@ -289,8 +289,8 @@ export default function InsightsDashboard() {
                     <CheckCircle className="w-6 h-6 text-emerald-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Tarefas Concluídas</p>
-                    <h3 className="text-2xl font-bold text-gray-900">{insightsData.kpis.tasksCompleted}</h3>
+                    <p className="text-sm font-medium text-slate-500">Tarefas Concluídas</p>
+                    <h3 className="text-2xl font-bold text-slate-900">{insightsData.kpis.tasksCompleted}</h3>
                   </div>
                 </CardContent>
               </Card>
@@ -301,8 +301,8 @@ export default function InsightsDashboard() {
                     <Calendar className="w-6 h-6 text-purple-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Dia Mais Produtivo</p>
-                    <h3 className="text-2xl font-bold text-gray-900 capitalize">{insightsData.kpis.bestDay}</h3>
+                    <p className="text-sm font-medium text-slate-500">Dia Mais Produtivo</p>
+                    <h3 className="text-2xl font-bold text-slate-900 capitalize">{insightsData.kpis.bestDay}</h3>
                   </div>
                 </CardContent>
               </Card>
@@ -313,8 +313,8 @@ export default function InsightsDashboard() {
                     <Zap className="w-6 h-6 text-orange-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Ofensiva Atual</p>
-                    <h3 className="text-2xl font-bold text-gray-900">{insightsData.kpis.streak}</h3>
+                    <p className="text-sm font-medium text-slate-500">Ofensiva Atual</p>
+                    <h3 className="text-2xl font-bold text-slate-900">{insightsData.kpis.streak}</h3>
                   </div>
                 </CardContent>
               </Card>
@@ -325,7 +325,7 @@ export default function InsightsDashboard() {
               {/* Tag Distribution */}
               <Card className="border-none shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-lg font-bold text-gray-800">Onde invisto meu tempo?</CardTitle>
+                  <CardTitle className="text-lg font-bold text-slate-800">Onde invisto meu tempo?</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="h-[300px] w-full flex flex-col items-center">
@@ -359,13 +359,13 @@ export default function InsightsDashboard() {
                           {insightsData.tagDistribution.map((tag) => (
                             <div key={tag.name} className="flex items-center gap-2">
                               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tag.color }} />
-                              <span className="text-sm text-gray-600 font-medium">{tag.name}</span>
+                              <span className="text-sm text-slate-600 font-medium">{tag.name}</span>
                             </div>
                           ))}
                         </div>
                       </>
                     ) : (
-                      <div className="flex items-center justify-center h-full text-gray-400">
+                      <div className="flex items-center justify-center h-full text-slate-400">
                         Nenhuma tarefa concluída no período.
                       </div>
                     )}
@@ -376,16 +376,16 @@ export default function InsightsDashboard() {
               {/* Weekly Focus Time */}
               <Card className="border-none shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-lg font-bold text-gray-800">Ritmo Diário (Minutos Focados)</CardTitle>
+                  <CardTitle className="text-lg font-bold text-slate-800">Ritmo Diário (Minutos Focados)</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="h-[300px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={insightsData.weeklyTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} dy={10} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />
+                        <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
                         <Tooltip 
-                          cursor={{ fill: '#f3f4f6' }}
+                          cursor={{ fill: '#f1f5f9' }}
                           contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                         />
                         <Bar dataKey="focusMinutes" name="Minutos" fill="#3b82f6" radius={[6, 6, 6, 6]} barSize={32} />
@@ -399,17 +399,17 @@ export default function InsightsDashboard() {
             {/* Row 3: Full Width Composed Chart */}
             <Card className="border-none shadow-sm">
               <CardHeader>
-                <CardTitle className="text-lg font-bold text-gray-800">Mapa de Produtividade vs Energia</CardTitle>
-                <p className="text-sm text-gray-500">Relação entre tarefas concluídas e seu nível de energia no dia.</p>
+                <CardTitle className="text-lg font-bold text-slate-800">Mapa de Produtividade vs Energia</CardTitle>
+                <p className="text-sm text-slate-500">Relação entre tarefas concluídas e seu nível de energia no dia.</p>
               </CardHeader>
               <CardContent>
                 <div className="h-[350px] w-full mt-4">
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart data={insightsData.weeklyTrend} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
-                      <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} dy={10} />
-                      <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />
+                      <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
+                      <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
                       <YAxis yAxisId="right" orientation="right" domain={[0, 5]} hide />
-                      <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f3f4f6' }} />
+                      <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f1f5f9' }} />
                       <Legend wrapperStyle={{ paddingTop: '20px' }} />
                       <Bar 
                         yAxisId="left" 
