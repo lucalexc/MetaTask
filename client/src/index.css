@@ -1,12 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Premium SaaS Palette (Linear/Apple inspired) */
-  --background: 210 20% 98%; /* slate-50 equivalent-ish */
+  /* Premium SaaS Palette (Linear/Apple inspired) - Mode Claro */
+  --background: 30 33% 98%; /* #FCFAF8 */
   --foreground: 222 47% 11%;
   
   --primary: 221 83% 53%; /* Vivid Blue */
@@ -42,12 +42,11 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 antialiased font-sans;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    @apply bg-[#FCFAF8] text-[#202020] antialiased font-sans;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight font-semibold text-slate-900;
+    @apply tracking-tight font-bold text-[#202020];
   }
 }
 

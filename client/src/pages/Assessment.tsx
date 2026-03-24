@@ -101,20 +101,20 @@ export default function Assessment() {
 
   if (isComputing) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FCFAF8] p-6">
         <motion.div 
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-          className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full mb-4"
+          className="w-10 h-10 border-4 border-[#1f60c2] border-t-transparent rounded-full mb-4"
         />
-        <h2 className="text-xl font-semibold">Designing your track...</h2>
-        <p className="text-muted-foreground mt-2">Based on your answers</p>
+        <h2 className="text-[14px] leading-[22px] font-bold text-[#202020]">Designing your track...</h2>
+        <p className="text-[#808080] text-[13px] leading-[18px] mt-2 font-normal">Based on your answers</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-[#FCFAF8] relative overflow-hidden">
       {/* Decorative */}
       <div className="absolute top-0 left-0 right-0 h-2">
         <ProgressBar progress={progress} className="rounded-none h-2" />
@@ -127,11 +127,11 @@ export default function Assessment() {
           animate={{ opacity: 1, y: 0 }}
           className="w-full mb-8 text-center"
         >
-          <span className="text-xs font-bold tracking-wider text-primary uppercase mb-2 block">
+          <span className="text-[12px] font-bold tracking-wider text-[#1f60c2] uppercase mb-2 block">
             Part {currentSectionIndex + 1} of {SECTIONS.length}
           </span>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">{currentSection.title}</h1>
-          <p className="text-muted-foreground">{currentSection.description}</p>
+          <h1 className="text-[26px] leading-[35px] font-bold text-[#202020] mb-2">{currentSection.title}</h1>
+          <p className="text-[#808080] text-[13px] leading-[18px] font-normal">{currentSection.description}</p>
         </motion.div>
 
         <GlassCard className="w-full min-h-[400px] flex flex-col justify-between p-8">
@@ -144,7 +144,7 @@ export default function Assessment() {
               transition={{ duration: 0.3 }}
               className="flex-1"
             >
-              <h3 className="text-xl font-medium mb-8">{currentQuestion.label}</h3>
+              <h3 className="text-[16px] md:text-[18px] font-bold text-[#202020] mb-8">{currentQuestion.label}</h3>
 
               {currentQuestion.type === "select" && (
                 <div className="grid gap-3">
@@ -152,15 +152,15 @@ export default function Assessment() {
                     <button
                       key={option}
                       onClick={() => handleAnswer(option)}
-                      className={`p-4 rounded-xl border-2 text-left transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                      className={`text-left bg-white border rounded-lg p-4 transition-all duration-200 ease-out focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] shadow-sm ${
                         answers[currentQuestion.id] === option
-                          ? "border-primary bg-primary/5 text-primary"
-                          : "border-border hover:border-primary/50"
+                          ? "border-[#1f60c2] bg-[#f0f6ff] text-[#1f60c2]"
+                          : "border-gray-200 hover:border-[#1f60c2] text-[#202020] hover:bg-gray-50"
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-medium">{option}</span>
-                        {answers[currentQuestion.id] === option && <Check className="w-5 h-5" />}
+                        <span className="text-[13px] leading-[18px] font-bold">{option}</span>
+                        {answers[currentQuestion.id] === option && <Check className="w-4 h-4" strokeWidth={3} />}
                       </div>
                     </button>
                   ))}
@@ -169,7 +169,7 @@ export default function Assessment() {
 
               {currentQuestion.type === "slider" && (
                 <div className="py-12 px-4">
-                  <div className="text-4xl font-bold text-center mb-8 text-primary">
+                  <div className="text-[26px] leading-[35px] font-bold text-center mb-8 text-[#1f60c2]">
                     {answers[currentQuestion.id] || currentQuestion.min} / {currentQuestion.max}
                   </div>
                   <Slider 
@@ -180,7 +180,7 @@ export default function Assessment() {
                     onValueChange={(vals) => handleAnswer(vals[0])}
                     className="w-full"
                   />
-                  <div className="flex justify-between mt-4 text-sm text-muted-foreground">
+                  <div className="flex justify-between mt-4 text-[13px] leading-[18px] text-[#808080] font-normal">
                     <span>Low</span>
                     <span>High</span>
                   </div>

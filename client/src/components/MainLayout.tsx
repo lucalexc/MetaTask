@@ -24,12 +24,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   }, []);
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50 text-slate-900 font-sans">
+    <div className="flex min-h-screen w-full bg-[#FCFAF8] text-[#202020]">
       {/* --- DESKTOP SIDEBAR --- */}
-      <aside className="hidden lg:flex flex-col w-64 fixed inset-y-0 left-0 bg-white border-r border-slate-100 z-50">
+      <aside className="hidden lg:flex flex-col w-64 fixed inset-y-0 left-0 bg-[#FCFAF8] z-50">
         <div className="p-8">
             {/* Logo area */}
-            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+            <h1 className="text-[26px] leading-[35px] font-bold text-[#202020]">
                 MetaTask
             </h1>
         </div>
@@ -40,14 +40,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             return (
               <Link key={item.href} href={item.href}>
                 <a className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-200 group",
+                  "flex items-center gap-3 px-4 py-2.5 rounded-lg text-[13px] leading-[18px] font-normal transition-all duration-200 ease-out group focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2]",
                   isActive 
-                    ? "bg-blue-50 text-blue-700 shadow-sm" 
-                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                    ? "bg-white shadow-sm text-[#202020]" 
+                    : "text-[#808080] hover:bg-gray-100/50 hover:text-[#202020]"
                 )}>
                   <item.icon className={cn(
-                    "w-5 h-5 transition-colors",
-                    isActive ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
+                    "w-5 h-5 transition-colors duration-200 ease-out",
+                    isActive ? "text-[#202020]" : "text-[#808080] group-hover:text-[#202020]"
                   )} />
                   {item.label}
                 </a>
@@ -56,15 +56,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           })}
         </nav>
 
-        <div className="p-4 border-t border-slate-50">
+        <div className="p-4">
            {/* User mini profile could go here */}
-           <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-2xl">
-               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-xs">
+           <div className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100/50 rounded-lg cursor-pointer transition-colors duration-200 ease-out">
+               <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-[#202020] font-bold text-[13px]">
                    U
                </div>
                <div className="flex-1 min-w-0">
-                   <p className="text-sm font-medium text-slate-900 truncate">Usuário</p>
-                   <p className="text-xs text-slate-500 truncate">Sair</p>
+                   <p className="text-[13px] leading-[18px] font-bold text-[#202020] truncate">Usuário</p>
+                   <p className="text-[12px] text-[#808080] truncate">Sair</p>
                </div>
            </div>
         </div>
@@ -78,16 +78,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       </main>
 
       {/* --- MOBILE BOTTOM NAVIGATION --- */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-4 z-50 pb-safe">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 z-50 pb-safe">
         <div className="flex items-center justify-around">
             {NAV_ITEMS.map((item) => {
                  const isActive = location === item.href;
                  return (
                     <Link key={item.href} href={item.href}>
-                        <a className="flex flex-col items-center gap-1 group">
+                        <a className="flex flex-col items-center gap-1 group focus:outline-none focus:ring-4 focus:ring-[#dceaff] rounded-lg">
                             <div className={cn(
-                                "p-2 rounded-xl transition-all duration-200",
-                                isActive ? "bg-blue-50 text-blue-600" : "text-slate-400 group-hover:text-slate-600"
+                                "p-2 rounded-lg transition-all duration-200 ease-out",
+                                isActive ? "bg-gray-100 text-[#202020]" : "text-[#808080] group-hover:text-[#202020]"
                             )}>
                                 <item.icon className="w-6 h-6" />
                             </div>

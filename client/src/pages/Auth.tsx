@@ -57,10 +57,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-950 dark:to-slate-900 overflow-hidden relative">
-      {/* Decorative background elements */}
-      <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-blue-400/20 blur-[100px]" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] rounded-full bg-purple-400/20 blur-[100px]" />
+    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-[#FCFAF8]">
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -69,26 +66,26 @@ export default function Auth() {
         className="w-full max-w-md z-10"
       >
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold tracking-tight mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          <h1 className="text-[26px] leading-[35px] font-bold text-[#202020] mb-2">
             Life Tracks
           </h1>
-          <p className="text-muted-foreground">Design your life, one day at a time.</p>
+          <p className="text-[#808080] text-[13px] leading-[18px]">Design your life, one day at a time.</p>
         </div>
 
         <GlassCard className="p-8">
-          <div className="flex w-full mb-8 bg-secondary/50 p-1 rounded-xl">
+          <div className="flex w-full mb-8 bg-gray-100 border border-gray-200 p-1 rounded-lg">
             <button
               onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
-                isLogin ? "bg-white shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+              className={`flex-1 py-1.5 text-[13px] leading-[18px] font-bold transition-all duration-200 ease-out focus:outline-none focus:ring-4 focus:ring-[#dceaff] rounded-md ${
+                isLogin ? "bg-white shadow-sm text-[#202020]" : "text-[#808080] hover:text-[#202020]"
               }`}
             >
               Log In
             </button>
             <button
               onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
-                !isLogin ? "bg-white shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+              className={`flex-1 py-1.5 text-[13px] leading-[18px] font-bold transition-all duration-200 ease-out focus:outline-none focus:ring-4 focus:ring-[#dceaff] rounded-md ${
+                !isLogin ? "bg-white shadow-sm text-[#202020]" : "text-[#808080] hover:text-[#202020]"
               }`}
             >
               Sign Up
