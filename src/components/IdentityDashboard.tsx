@@ -451,21 +451,21 @@ export default function IdentityDashboard() {
   const renderNecrologio = () => (
     <div className="flex h-full gap-8 relative">
       {/* Main Editor */}
-      <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-50 flex justify-between items-center">
+      <div className="flex-1 flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-gray-50 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gray-900 flex items-center justify-center">
               <History className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900">O Necrológio</h3>
-              <p className="text-xs text-slate-500">Memento Mori: Escreva o seu legado.</p>
+              <h3 className="font-bold text-gray-900">O Necrológio</h3>
+              <p className="text-xs text-gray-500">Memento Mori: Escreva o seu legado.</p>
             </div>
           </div>
           <button 
             onClick={handleSaveNecrologio}
             disabled={isSavingNecrologio || !necrologioText.trim() || !!selectedVersion}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="w-4 h-4" />
             {isSavingNecrologio ? 'Salvando...' : 'Salvar Versão'}
@@ -478,17 +478,17 @@ export default function IdentityDashboard() {
             readOnly={!!selectedVersion}
             placeholder="Como você quer ser lembrado no seu funeral? Qual o seu legado? Escreva aqui sem filtros, focando na essência de quem você busca se tornar..."
             className={cn(
-              "w-full h-full resize-none text-lg leading-relaxed text-slate-700 placeholder:text-slate-300 focus:outline-none font-serif",
+              "w-full h-full resize-none text-lg leading-relaxed text-gray-700 placeholder:text-gray-300 focus:outline-none font-serif",
               selectedVersion && "opacity-70"
             )}
           />
         </div>
         {selectedVersion && (
-          <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-            <span className="text-sm text-slate-700 font-medium">Visualizando: {selectedVersion.title} (Somente Leitura)</span>
+          <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+            <span className="text-sm text-gray-700 font-medium">Visualizando: {selectedVersion.title} (Somente Leitura)</span>
             <button 
               onClick={() => setSelectedVersion(null)}
-              className="text-xs font-bold text-slate-900 uppercase tracking-wider hover:underline"
+              className="text-xs font-bold text-gray-900 uppercase tracking-wider hover:underline"
             >
               Voltar ao Editor
             </button>
@@ -498,10 +498,10 @@ export default function IdentityDashboard() {
 
       {/* History Sidebar */}
       <div className="w-80 flex flex-col gap-4">
-        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2">Histórico de Versões</h4>
+        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-2">Histórico de Versões</h4>
         <div className="space-y-3 overflow-y-auto pr-2 pb-4">
           {isLoadingNecrologio ? (
-            <div className="text-center p-4 text-sm text-slate-500">Carregando histórico...</div>
+            <div className="text-center p-4 text-sm text-gray-500">Carregando histórico...</div>
           ) : necrologioVersions.length > 0 ? (
             necrologioVersions.map((v) => (
               <button
@@ -510,28 +510,28 @@ export default function IdentityDashboard() {
                 className={cn(
                   "w-full p-4 rounded-xl border text-left transition-all group",
                   selectedVersion?.id === v.id 
-                    ? "bg-slate-50 border-slate-300 shadow-sm" 
-                    : "bg-white border-slate-100 hover:border-slate-200 hover:shadow-md"
+                    ? "bg-gray-50 border-gray-300 shadow-sm" 
+                    : "bg-white border-gray-100 hover:border-gray-200 hover:shadow-md"
                 )}
               >
                 <div className="flex justify-between items-start mb-1">
                   <span className={cn(
                     "font-bold text-sm",
-                    selectedVersion?.id === v.id ? "text-slate-900" : "text-slate-700"
+                    selectedVersion?.id === v.id ? "text-gray-900" : "text-gray-700"
                   )}>{v.title}</span>
-                  <span className="text-[10px] text-slate-400 font-medium">{v.date}</span>
+                  <span className="text-[10px] text-gray-400 font-medium">{v.date}</span>
                 </div>
-                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
                   {v.text}
                 </p>
               </button>
             ))
           ) : (
-            <div className="p-6 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center text-center gap-2 opacity-50">
-              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
-                <Fingerprint className="w-4 h-4 text-slate-400" />
+            <div className="p-6 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center text-center gap-2 opacity-50">
+              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                <Fingerprint className="w-4 h-4 text-gray-400" />
               </div>
-              <p className="text-[10px] font-medium text-slate-500">Suas versões anteriores aparecerão aqui para você acompanhar sua evolução.</p>
+              <p className="text-[10px] font-medium text-gray-500">Suas versões anteriores aparecerão aqui para você acompanhar sua evolução.</p>
             </div>
           )}
         </div>
@@ -545,7 +545,7 @@ export default function IdentityDashboard() {
         <div className="h-full flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin" />
-            <p className="text-slate-500 font-medium">Carregando seu perfil...</p>
+            <p className="text-gray-500 font-medium">Carregando seu perfil...</p>
           </div>
         </div>
       );
@@ -558,8 +558,8 @@ export default function IdentityDashboard() {
             <Flame className="w-12 h-12 text-orange-500" />
           </div>
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-4">Descubra sua Natureza</h2>
-            <p className="text-slate-500 leading-relaxed">
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-4">Descubra sua Natureza</h2>
+            <p className="text-gray-500 leading-relaxed">
               Os 4 Temperamentos (Colérico, Sanguíneo, Fleumático e Melancólico) são a base biológica da sua personalidade. 
               Entender sua inclinação natural permite que você domine seus impulsos e potencialize suas virtudes.
             </p>
@@ -583,12 +583,12 @@ export default function IdentityDashboard() {
         <div className="max-w-2xl mx-auto mt-6">
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-semibold text-slate-400 tracking-wider uppercase">
+              <span className="text-xs font-semibold text-gray-400 tracking-wider uppercase">
                 Pergunta {currentQuestion + 1} de {temperamentQuestions.length}
               </span>
-              <span className="text-xs font-semibold text-slate-400">{Math.round(progress)}%</span>
+              <span className="text-xs font-semibold text-gray-400">{Math.round(progress)}%</span>
             </div>
-            <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
               <div 
                 style={{ width: `${progress}%` }}
                 className="h-full bg-blue-600 rounded-full transition-all duration-300"
@@ -596,7 +596,7 @@ export default function IdentityDashboard() {
             </div>
           </div>
 
-          <h3 className="text-lg font-semibold text-slate-800 mb-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-6">
             {q.question}
           </h3>
 
@@ -605,9 +605,9 @@ export default function IdentityDashboard() {
               <button
                 key={idx}
                 onClick={() => handleAnswer(opt.type)}
-                className="w-full text-left py-3 px-4 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer"
+                className="w-full text-left py-3 px-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer"
               >
-                <span className="text-sm text-slate-700">
+                <span className="text-sm text-gray-700">
                   {opt.text}
                 </span>
               </button>
@@ -625,17 +625,17 @@ export default function IdentityDashboard() {
           <span className="text-xs font-bold tracking-widest text-blue-600 mb-2 block uppercase">
             Anamnese Concluída
           </span>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 capitalize mb-4">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 capitalize mb-4">
             {resultData.title}
           </h2>
-          <p className="text-slate-600 text-base md:text-lg text-center max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-gray-600 text-base md:text-lg text-center max-w-2xl mx-auto mb-10 leading-relaxed">
             {resultData.desc}
           </p>
 
-          <div className="bg-slate-50 rounded-2xl p-6 md:p-8 border border-slate-100 text-left">
+          <div className="bg-gray-50 rounded-2xl p-6 md:p-8 border border-gray-100 text-left">
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h4 className="text-xs font-bold text-slate-500 tracking-wider mb-4 flex items-center gap-2 uppercase">
+                <h4 className="text-xs font-bold text-gray-500 tracking-wider mb-4 flex items-center gap-2 uppercase">
                   <Shield className="w-4 h-4 text-emerald-500" />
                   Forças e Virtudes
                 </h4>
@@ -648,7 +648,7 @@ export default function IdentityDashboard() {
                 </div>
               </div>
               <div>
-                <h4 className="text-xs font-bold text-slate-500 tracking-wider mb-4 flex items-center gap-2 uppercase">
+                <h4 className="text-xs font-bold text-gray-500 tracking-wider mb-4 flex items-center gap-2 uppercase">
                   <AlertCircle className="w-4 h-4 text-red-500" />
                   Pontos de Atenção
                 </h4>
@@ -666,7 +666,7 @@ export default function IdentityDashboard() {
           <div className="mt-8 flex justify-center">
             <button 
               onClick={resetTest}
-              className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors underline underline-offset-4"
+              className="text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors underline underline-offset-4"
             >
               Refazer teste de temperamento
             </button>
@@ -684,7 +684,7 @@ export default function IdentityDashboard() {
         <div className="h-full flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-            <p className="text-slate-500 font-medium">Carregando sua anamnese...</p>
+            <p className="text-gray-500 font-medium">Carregando sua anamnese...</p>
           </div>
         </div>
       );
@@ -697,8 +697,8 @@ export default function IdentityDashboard() {
             <Layers className="w-12 h-12 text-blue-500" />
           </div>
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-4">As 12 Camadas da Personalidade</h2>
-            <p className="text-slate-500 leading-relaxed">
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-4">As 12 Camadas da Personalidade</h2>
+            <p className="text-gray-500 leading-relaxed">
               A teoria das 12 camadas descreve o amadurecimento humano. Desde a infância até a vida espiritual, 
               cada camada representa um nível de consciência e responsabilidade. Descobrir sua camada atual é o primeiro passo para o amadurecimento real.
             </p>
@@ -722,12 +722,12 @@ export default function IdentityDashboard() {
         <div className="max-w-2xl mx-auto mt-6">
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-semibold text-slate-400 tracking-wider uppercase">
+              <span className="text-xs font-semibold text-gray-400 tracking-wider uppercase">
                 Pergunta {currentLayerQuestion + 1} de {layerQuestions.length}
               </span>
-              <span className="text-xs font-semibold text-slate-400">{Math.round(progress)}%</span>
+              <span className="text-xs font-semibold text-gray-400">{Math.round(progress)}%</span>
             </div>
-            <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
               <div 
                 style={{ width: `${progress}%` }}
                 className="h-full bg-blue-600 rounded-full transition-all duration-300"
@@ -735,7 +735,7 @@ export default function IdentityDashboard() {
             </div>
           </div>
 
-          <h3 className="text-lg font-semibold text-slate-800 mb-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-6">
             {q.question}
           </h3>
 
@@ -744,9 +744,9 @@ export default function IdentityDashboard() {
               <button
                 key={idx}
                 onClick={() => handleLayerAnswer(opt.type)}
-                className="w-full text-left py-3 px-4 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer"
+                className="w-full text-left py-3 px-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer"
               >
-                <span className="text-sm text-slate-700">
+                <span className="text-sm text-gray-700">
                   {opt.text}
                 </span>
               </button>
@@ -764,17 +764,17 @@ export default function IdentityDashboard() {
           <span className="text-xs font-bold tracking-widest text-blue-600 mb-2 block uppercase">
             Anamnese Concluída
           </span>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 capitalize mb-4">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 capitalize mb-4">
             {resultData.title}
           </h2>
-          <p className="text-slate-600 text-base md:text-lg text-center max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-gray-600 text-base md:text-lg text-center max-w-2xl mx-auto mb-10 leading-relaxed">
             {resultData.desc}
           </p>
 
-          <div className="bg-slate-50 rounded-2xl p-6 md:p-8 border border-slate-100 text-left">
+          <div className="bg-gray-50 rounded-2xl p-6 md:p-8 border border-gray-100 text-left">
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h4 className="text-xs font-bold text-slate-500 tracking-wider mb-4 flex items-center gap-2 uppercase">
+                <h4 className="text-xs font-bold text-gray-500 tracking-wider mb-4 flex items-center gap-2 uppercase">
                   <Shield className="w-4 h-4 text-emerald-500" />
                   Forças e Virtudes
                 </h4>
@@ -787,7 +787,7 @@ export default function IdentityDashboard() {
                 </div>
               </div>
               <div>
-                <h4 className="text-xs font-bold text-slate-500 tracking-wider mb-4 flex items-center gap-2 uppercase">
+                <h4 className="text-xs font-bold text-gray-500 tracking-wider mb-4 flex items-center gap-2 uppercase">
                   <AlertCircle className="w-4 h-4 text-red-500" />
                   Pontos de Atenção
                 </h4>
@@ -805,7 +805,7 @@ export default function IdentityDashboard() {
           <div className="mt-8 flex justify-center">
             <button 
               onClick={resetLayerTest}
-              className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors underline underline-offset-4"
+              className="text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors underline underline-offset-4"
             >
               Refazer anamnese de camadas
             </button>
@@ -818,11 +818,11 @@ export default function IdentityDashboard() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-slate-50/50 overflow-hidden relative">
+    <div className="flex-1 flex flex-col h-full bg-gray-50 overflow-hidden relative">
       {/* Toast */}
       {toastMsg && (
         <div
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-3 border border-white/10 animate-in slide-in-from-bottom-5 fade-in duration-300"
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] bg-gray-900 text-white px-6 py-3 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-3 border border-white/10 animate-in slide-in-from-bottom-5 fade-in duration-300"
         >
           <CheckCircle2 className="w-5 h-5 text-emerald-400" />
           {toastMsg}
@@ -830,14 +830,14 @@ export default function IdentityDashboard() {
       )}
 
       {/* Header */}
-      <div className="px-6 pt-5 bg-white border-b border-slate-200 shrink-0">
+      <div className="px-6 pt-5 bg-white border-b border-gray-200 shrink-0">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-gray-900 flex items-center justify-center shadow-sm">
             <Fingerprint className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-none">Minha Identidade</h1>
-            <p className="text-sm text-slate-500 mt-1">A base de toda a sua evolução.</p>
+            <h1 className="text-xl font-bold text-gray-900 tracking-tight leading-none">Minha Identidade</h1>
+            <p className="text-sm text-gray-500 mt-1">A base de toda a sua evolução.</p>
           </div>
         </div>
 
@@ -853,14 +853,14 @@ export default function IdentityDashboard() {
               onClick={() => setActiveTab(tab.id as IdentityTab)}
               className={cn(
                 "flex items-center gap-2 pb-3 text-sm font-bold transition-all relative",
-                activeTab === tab.id ? "text-slate-900" : "text-slate-400 hover:text-slate-600"
+                activeTab === tab.id ? "text-gray-900" : "text-gray-400 hover:text-gray-600"
               )}
             >
               <tab.icon className="w-4 h-4" />
               {tab.label}
               {activeTab === tab.id && (
                 <div 
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900"
                 />
               )}
             </button>

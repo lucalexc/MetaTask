@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { X, Target, Repeat, Clock, Calendar, Trophy } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { Button } from '@/src/components/ui/button';
@@ -60,18 +61,24 @@ export default function CreateActivityModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         onClick={onClose}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
       />
       
-      <div
-        className="relative w-full max-w-lg bg-[#0C1020] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="relative w-full max-w-lg bg-white border border-[#E8E8E8] rounded-2xl shadow-xl overflow-hidden"
       >
-        <div className="flex items-center justify-between p-6 border-b border-white/5">
-          <h2 className="text-xl font-bold text-white">Nova Atividade</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+        <div className="flex items-center justify-between p-6 border-b border-[#E8E8E8]">
+          <h2 className="text-xl font-bold text-[#1A1A1A]">Nova Atividade</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -85,8 +92,8 @@ export default function CreateActivityModal({
               className={cn(
                 "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all",
                 type === 'routine' 
-                  ? "border-blue-500 bg-blue-500/10 text-blue-400" 
-                  : "border-white/5 bg-white/5 text-slate-400 hover:border-white/10 hover:bg-white/10"
+                  ? "border-blue-600 bg-blue-50 text-blue-700" 
+                  : "border-gray-100 bg-gray-50 text-gray-400 hover:border-gray-200 hover:bg-gray-100"
               )}
             >
               <Repeat className="w-6 h-6 mb-2" />
@@ -99,8 +106,8 @@ export default function CreateActivityModal({
               className={cn(
                 "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all",
                 type === 'goal' 
-                  ? "border-purple-500 bg-purple-500/10 text-purple-400" 
-                  : "border-white/5 bg-white/5 text-slate-400 hover:border-white/10 hover:bg-white/10"
+                  ? "border-purple-600 bg-purple-50 text-purple-700" 
+                  : "border-gray-100 bg-gray-50 text-gray-400 hover:border-gray-200 hover:bg-gray-100"
               )}
             >
               <Target className="w-6 h-6 mb-2" />
@@ -111,13 +118,13 @@ export default function CreateActivityModal({
 
           {/* Name */}
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-300">Nome da Atividade</label>
+            <label className="text-sm font-bold text-gray-700">Nome da Atividade</label>
             <input
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder={type === 'routine' ? "Ex: Meditar 10 min" : "Ex: Correr 5km"}
-              className="w-full bg-[#111630] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+              className="w-full bg-white border border-[#E8E8E8] rounded-xl px-4 py-3 text-[#1A1A1A] placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all"
               required
             />
           </div>
@@ -125,11 +132,11 @@ export default function CreateActivityModal({
           {/* Period & Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-300">Período</label>
+              <label className="text-sm font-bold text-gray-700">Período</label>
               <select
                 value={period}
                 onChange={e => setPeriod(e.target.value as Period)}
-                className="w-full bg-[#111630] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none"
+                className="w-full bg-white border border-[#E8E8E8] rounded-xl px-4 py-3 text-[#1A1A1A] focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
               >
                 {periods.map(p => (
                   <option key={p.id} value={p.id}>{p.label}</option>
@@ -137,14 +144,14 @@ export default function CreateActivityModal({
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-300">Horário (Opcional)</label>
+              <label className="text-sm font-bold text-gray-700">Horário (Opcional)</label>
               <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="time"
                   value={scheduledTime}
                   onChange={e => setScheduledTime(e.target.value)}
-                  className="w-full bg-[#111630] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                  className="w-full bg-white border border-[#E8E8E8] rounded-xl pl-10 pr-4 py-3 text-[#1A1A1A] focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all"
                 />
               </div>
             </div>
@@ -152,7 +159,7 @@ export default function CreateActivityModal({
 
           {/* Active Days */}
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-300">Dias da Semana</label>
+            <label className="text-sm font-bold text-gray-700">Dias da Semana</label>
             <div className="flex justify-between gap-1">
               {daysOfWeek.map((day, index) => (
                 <button
@@ -166,8 +173,8 @@ export default function CreateActivityModal({
                   className={cn(
                     "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all",
                     activeDays[index]
-                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
-                      : "bg-[#111630] text-slate-500 hover:bg-white/10 hover:text-white"
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-600/10"
+                      : "bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                   )}
                 >
                   {day}
@@ -177,42 +184,48 @@ export default function CreateActivityModal({
           </div>
 
           {/* Goal Specific Fields */}
-          {type === 'goal' && (
-            <div
-              className="grid grid-cols-2 gap-4 overflow-hidden animate-in slide-in-from-top-4 fade-in duration-200"
-            >
+          <AnimatePresence>
+            {type === 'goal' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="grid grid-cols-2 gap-4 overflow-hidden"
+              >
                 <div className="space-y-2 pt-2">
-                  <label className="text-sm font-bold text-slate-300">Duração (Dias)</label>
+                  <label className="text-sm font-bold text-gray-700">Duração (Dias)</label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                       type="number"
                       min="1"
                       value={durationDays}
                       onChange={e => setDurationDays(parseInt(e.target.value) || 1)}
-                      className="w-full bg-[#111630] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+                      className="w-full bg-white border border-[#E8E8E8] rounded-xl pl-10 pr-4 py-3 text-[#1A1A1A] focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all"
                     />
                   </div>
                 </div>
                 <div className="space-y-2 pt-2">
-                  <label className="text-sm font-bold text-slate-300">Repetições/Dia</label>
+                  <label className="text-sm font-bold text-gray-700">Repetições/Dia</label>
                   <div className="relative">
-                    <Repeat className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                    <Repeat className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                       type="number"
                       min="1"
                       value={repsPerDay}
                       onChange={e => setRepsPerDay(parseInt(e.target.value) || 1)}
-                      className="w-full bg-[#111630] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+                      className="w-full bg-white border border-[#E8E8E8] rounded-xl pl-10 pr-4 py-3 text-[#1A1A1A] focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all"
                     />
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )}
+          </AnimatePresence>
+
           {/* Info Box */}
-          <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-start gap-3">
-            <Trophy className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-            <p className="text-sm text-blue-200/80 leading-relaxed">
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
+            <Trophy className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-blue-800 leading-relaxed">
               {type === 'routine' 
                 ? "Rotinas rendem 10 XP por conclusão. Mantenha o streak para multiplicar seus ganhos!" 
                 : "Metas rendem 25 XP por conclusão. Complete o ciclo para ganhar um bônus especial!"}
@@ -224,7 +237,8 @@ export default function CreateActivityModal({
             <Button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-transparent border border-white/10 text-white hover:bg-white/5 py-6 rounded-xl font-bold"
+              variant="outline"
+              className="flex-1 border-[#E8E8E8] text-gray-600 hover:bg-gray-50 py-6 rounded-xl font-bold"
             >
               Cancelar
             </Button>
@@ -232,17 +246,18 @@ export default function CreateActivityModal({
               type="submit"
               disabled={isSubmitting || !name.trim()}
               className={cn(
-                "flex-1 py-6 rounded-xl font-bold text-white shadow-lg transition-all",
+                "flex-1 py-6 rounded-xl font-bold text-white shadow-md transition-all",
                 type === 'routine' 
-                  ? "bg-blue-600 hover:bg-blue-700 shadow-blue-900/20" 
-                  : "bg-purple-600 hover:bg-purple-700 shadow-purple-900/20"
+                  ? "bg-blue-600 hover:bg-blue-700 shadow-blue-600/10" 
+                  : "bg-purple-600 hover:bg-purple-700 shadow-purple-600/10"
               )}
             >
               {isSubmitting ? 'Salvando...' : 'Criar Atividade'}
             </Button>
           </div>
         </form>
-      </div>
+      </motion.div>
+
     </div>
   );
 }
