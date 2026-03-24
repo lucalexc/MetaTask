@@ -27,21 +27,21 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-white font-sans text-slate-900 overflow-hidden relative">
+    <div className="flex h-screen bg-[#FCFAF8] font-sans text-[#202020] overflow-hidden relative">
       {/* Sidebar (Desktop) */}
-      <aside className="hidden md:flex w-64 bg-slate-50/50 border-r border-slate-100 flex-col shrink-0">
+      <aside className="hidden md:flex w-64 bg-[#FCFAF8] border-r border-gray-200 flex-col shrink-0">
         <div className="p-4 flex items-center gap-2">
-          <div className="w-5 h-5 rounded bg-blue-600 flex items-center justify-center">
+          <div className="w-5 h-5 rounded bg-[#1f60c2] flex items-center justify-center">
             <Target className="w-3 h-3 text-white" />
           </div>
-          <span className="font-bold text-sm tracking-tight text-slate-900">MetaTask</span>
+          <span className="font-bold text-[14px] tracking-tight text-[#202020]">MetaTask</span>
         </div>
 
         <div className="px-3 mb-4">
           {activeTab !== 'missions' && activeTab !== 'identity' && activeTab !== 'settings' && (
             <button 
               onClick={handleFabClick}
-              className="flex items-center gap-2 px-2 py-1.5 text-sm font-medium text-red-600 hover:bg-slate-100 rounded-md transition-colors w-full"
+              className="flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium text-[#d1453b] hover:bg-gray-100 rounded-md transition-colors ease-out duration-200 w-full"
             >
               <Plus className="w-4 h-4" />
               Adicionar {activeTab === 'tasks' ? 'tarefa' : 'atividade'}
@@ -53,74 +53,74 @@ export default function Dashboard() {
           <button 
             onClick={() => handleTabChange('tasks')}
             className={cn(
-              "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'tasks' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
+              "w-full flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium rounded-md transition-colors ease-out duration-200",
+              activeTab === 'tasks' ? "text-[#1f60c2] bg-[#dceaff]" : "text-[#202020] hover:bg-gray-100"
             )}
           >
-            <Inbox className={cn("w-4 h-4", activeTab === 'tasks' ? "text-blue-600" : "text-slate-500")} />
+            <Inbox className={cn("w-4 h-4", activeTab === 'tasks' ? "text-[#1f60c2]" : "text-[#808080]")} />
             Tarefas
           </button>
           <button 
             onClick={() => handleTabChange('projects')}
             className={cn(
-              "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'projects' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
+              "w-full flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium rounded-md transition-colors ease-out duration-200",
+              activeTab === 'projects' ? "text-[#1f60c2] bg-[#dceaff]" : "text-[#202020] hover:bg-gray-100"
             )}
           >
-            <Folder className={cn("w-4 h-4", activeTab === 'projects' ? "text-blue-600" : "text-slate-500")} />
+            <Folder className={cn("w-4 h-4", activeTab === 'projects' ? "text-[#1f60c2]" : "text-[#808080]")} />
             Projetos
           </button>
           <button 
             onClick={() => handleTabChange('my-routine')}
             className={cn(
-              "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'my-routine' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
+              "w-full flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium rounded-md transition-colors ease-out duration-200",
+              activeTab === 'my-routine' ? "text-[#1f60c2] bg-[#dceaff]" : "text-[#202020] hover:bg-gray-100"
             )}
           >
-            <RefreshCcw className={cn("w-4 h-4", activeTab === 'my-routine' ? "text-blue-600" : "text-slate-500")} />
+            <RefreshCcw className={cn("w-4 h-4", activeTab === 'my-routine' ? "text-[#1f60c2]" : "text-[#808080]")} />
             Minha Rotina
           </button>
           <button 
             onClick={() => handleTabChange('missions')}
             className={cn(
-              "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'missions' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
+              "w-full flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium rounded-md transition-colors ease-out duration-200",
+              activeTab === 'missions' ? "text-[#1f60c2] bg-[#dceaff]" : "text-[#202020] hover:bg-gray-100"
             )}
           >
-            <Sword className={cn("w-4 h-4", activeTab === 'missions' ? "text-blue-600" : "text-slate-500")} />
+            <Sword className={cn("w-4 h-4", activeTab === 'missions' ? "text-[#1f60c2]" : "text-[#808080]")} />
             Missões
           </button>
           <button 
             onClick={() => handleTabChange('identity')}
             className={cn(
-              "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'identity' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
+              "w-full flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium rounded-md transition-colors ease-out duration-200",
+              activeTab === 'identity' ? "text-[#1f60c2] bg-[#dceaff]" : "text-[#202020] hover:bg-gray-100"
             )}
           >
-            <Fingerprint className={cn("w-4 h-4", activeTab === 'identity' ? "text-blue-600" : "text-slate-500")} />
+            <Fingerprint className={cn("w-4 h-4", activeTab === 'identity' ? "text-[#1f60c2]" : "text-[#808080]")} />
             Identidade
           </button>
           <button 
             onClick={() => handleTabChange('insights')}
             className={cn(
-              "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'insights' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
+              "w-full flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium rounded-md transition-colors ease-out duration-200",
+              activeTab === 'insights' ? "text-[#1f60c2] bg-[#dceaff]" : "text-[#202020] hover:bg-gray-100"
             )}
           >
-            <BarChart2 className={cn("w-4 h-4", activeTab === 'insights' ? "text-blue-600" : "text-slate-500")} />
+            <BarChart2 className={cn("w-4 h-4", activeTab === 'insights' ? "text-[#1f60c2]" : "text-[#808080]")} />
             Estatísticas
           </button>
         </nav>
 
-        <div className="p-3 mt-auto border-t border-slate-100">
+        <div className="p-3 mt-auto border-t border-gray-200">
           <button 
             onClick={() => handleTabChange('settings')}
             className={cn(
-              "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'settings' ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
+              "w-full flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium rounded-md transition-colors ease-out duration-200",
+              activeTab === 'settings' ? "text-[#1f60c2] bg-[#dceaff]" : "text-[#202020] hover:bg-gray-100"
             )}
           >
-            <Settings className={cn("w-4 h-4", activeTab === 'settings' ? "text-blue-600" : "text-slate-500")} />
+            <Settings className={cn("w-4 h-4", activeTab === 'settings' ? "text-[#1f60c2]" : "text-[#808080]")} />
             Configurações
           </button>
         </div>
@@ -152,12 +152,12 @@ export default function Dashboard() {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex items-center justify-between px-2 pb-[env(safe-area-inset-bottom)] z-50 h-[calc(4rem+env(safe-area-inset-bottom))]">
-        <button onClick={() => handleTabChange('tasks')} className={cn("flex flex-col items-center justify-center w-16 h-16", activeTab === 'tasks' ? "text-blue-600" : "text-slate-500")}>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-between px-2 pb-[env(safe-area-inset-bottom)] z-50 h-[calc(4rem+env(safe-area-inset-bottom))]">
+        <button onClick={() => handleTabChange('tasks')} className={cn("flex flex-col items-center justify-center w-16 h-16 transition-colors ease-out duration-200", activeTab === 'tasks' ? "text-[#1f60c2]" : "text-[#808080]")}>
           <Inbox className="w-5 h-5" />
           <span className="text-[10px] mt-1 font-medium">Tarefas</span>
         </button>
-        <button onClick={() => handleTabChange('projects')} className={cn("flex flex-col items-center justify-center w-16 h-16", activeTab === 'projects' ? "text-blue-600" : "text-slate-500")}>
+        <button onClick={() => handleTabChange('projects')} className={cn("flex flex-col items-center justify-center w-16 h-16 transition-colors ease-out duration-200", activeTab === 'projects' ? "text-[#1f60c2]" : "text-[#808080]")}>
           <Folder className="w-5 h-5" />
           <span className="text-[10px] mt-1 font-medium">Projetos</span>
         </button>
@@ -166,17 +166,17 @@ export default function Dashboard() {
         <div className="relative -top-5 flex justify-center w-16 h-16">
           <button 
             onClick={handleFabClick}
-            className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-colors"
+            className="w-12 h-12 bg-[#1f60c2] rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-colors ease-out duration-200"
           >
             <Plus className="w-6 h-6" />
           </button>
         </div>
 
-        <button onClick={() => handleTabChange('my-routine')} className={cn("flex flex-col items-center justify-center w-16 h-16", activeTab === 'my-routine' ? "text-blue-600" : "text-slate-500")}>
+        <button onClick={() => handleTabChange('my-routine')} className={cn("flex flex-col items-center justify-center w-16 h-16 transition-colors ease-out duration-200", activeTab === 'my-routine' ? "text-[#1f60c2]" : "text-[#808080]")}>
           <RefreshCcw className="w-5 h-5" />
           <span className="text-[10px] mt-1 font-medium">Rotina</span>
         </button>
-        <button onClick={() => setIsMobileMenuOpen(true)} className={cn("flex flex-col items-center justify-center w-16 h-16", ['missions', 'identity', 'insights', 'settings'].includes(activeTab) ? "text-blue-600" : "text-slate-500")}>
+        <button onClick={() => setIsMobileMenuOpen(true)} className={cn("flex flex-col items-center justify-center w-16 h-16 transition-colors ease-out duration-200", ['missions', 'identity', 'insights', 'settings'].includes(activeTab) ? "text-[#1f60c2]" : "text-[#808080]")}>
           <Menu className="w-5 h-5" />
           <span className="text-[10px] mt-1 font-medium">Mais</span>
         </button>
@@ -191,7 +191,7 @@ export default function Dashboard() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="md:hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60]"
+              className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
             />
             <motion.div
               initial={{ y: '100%' }}
@@ -200,40 +200,40 @@ export default function Dashboard() {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="md:hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-[70] overflow-hidden pb-[env(safe-area-inset-bottom)]"
             >
-              <div className="p-4 border-b border-slate-100 flex justify-between items-center">
-                <h3 className="font-bold text-slate-800">Mais Opções</h3>
-                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full">
+              <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 className="font-bold text-[#202020]">Mais Opções</h3>
+                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-[#808080] hover:bg-gray-100 rounded-full transition-colors ease-out duration-200">
                   <X className="w-5 h-5" />
                 </button>
               </div>
               <div className="p-2 space-y-1">
                 <button 
                   onClick={() => handleTabChange('missions')}
-                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'missions' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
+                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors ease-out duration-200", activeTab === 'missions' ? "bg-[#dceaff] text-[#1f60c2]" : "text-[#202020] hover:bg-gray-50")}
                 >
-                  <Sword className={cn("w-5 h-5", activeTab === 'missions' ? "text-blue-600" : "text-slate-400")} />
+                  <Sword className={cn("w-5 h-5", activeTab === 'missions' ? "text-[#1f60c2]" : "text-[#808080]")} />
                   <span className="font-medium">Missões</span>
                 </button>
                 <button 
                   onClick={() => handleTabChange('identity')}
-                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'identity' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
+                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors ease-out duration-200", activeTab === 'identity' ? "bg-[#dceaff] text-[#1f60c2]" : "text-[#202020] hover:bg-gray-50")}
                 >
-                  <Fingerprint className={cn("w-5 h-5", activeTab === 'identity' ? "text-blue-600" : "text-slate-400")} />
+                  <Fingerprint className={cn("w-5 h-5", activeTab === 'identity' ? "text-[#1f60c2]" : "text-[#808080]")} />
                   <span className="font-medium">Identidade</span>
                 </button>
                 <button 
                   onClick={() => handleTabChange('insights')}
-                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'insights' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
+                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors ease-out duration-200", activeTab === 'insights' ? "bg-[#dceaff] text-[#1f60c2]" : "text-[#202020] hover:bg-gray-50")}
                 >
-                  <BarChart2 className={cn("w-5 h-5", activeTab === 'insights' ? "text-blue-600" : "text-slate-400")} />
+                  <BarChart2 className={cn("w-5 h-5", activeTab === 'insights' ? "text-[#1f60c2]" : "text-[#808080]")} />
                   <span className="font-medium">Estatísticas</span>
                 </button>
-                <div className="h-px bg-slate-100 my-2 mx-3" />
+                <div className="h-px bg-gray-100 my-2 mx-3" />
                 <button 
                   onClick={() => handleTabChange('settings')}
-                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors", activeTab === 'settings' ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-slate-50")}
+                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors ease-out duration-200", activeTab === 'settings' ? "bg-[#dceaff] text-[#1f60c2]" : "text-[#202020] hover:bg-gray-50")}
                 >
-                  <Settings className={cn("w-5 h-5", activeTab === 'settings' ? "text-blue-600" : "text-slate-400")} />
+                  <Settings className={cn("w-5 h-5", activeTab === 'settings' ? "text-[#1f60c2]" : "text-[#808080]")} />
                   <span className="font-medium">Configurações</span>
                 </button>
               </div>

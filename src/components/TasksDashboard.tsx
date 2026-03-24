@@ -129,7 +129,7 @@ const TaskCard: React.FC<{
         draggable={true}
         onDragStart={(e) => onDragStart && onDragStart(e, task)}
         className={cn(
-          "flex flex-col gap-3 p-4 bg-white border border-slate-200 rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:shadow-md hover:border-blue-200 transition-all group",
+          "flex flex-col gap-3 p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:shadow-md hover:border-gray-300 transition-all ease-out duration-200 group",
           isDragging && "opacity-50 border-dashed"
         )}
       >
@@ -141,7 +141,7 @@ const TaskCard: React.FC<{
               "mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0",
               task.status === 'completed' 
                 ? "bg-emerald-500 border-emerald-500 text-white" 
-                : "border-slate-300 hover:border-slate-400"
+                : "border-gray-300 hover:border-gray-400"
             )}
           >
             {task.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -149,8 +149,8 @@ const TaskCard: React.FC<{
           
           <div className="flex-1 min-w-0">
             <h4 className={cn(
-              "text-sm font-medium text-slate-700 line-clamp-2 transition-all",
-              task.status === 'completed' && "text-slate-400 line-through"
+              "text-[14px] leading-[22px] font-bold text-[#202020] line-clamp-2 transition-all ease-out duration-200",
+              task.status === 'completed' && "text-[#808080] line-through"
             )}>
               {task.title}
             </h4>
@@ -167,15 +167,15 @@ const TaskCard: React.FC<{
                 </span>
               )}
               {(task.time || (task.recurrence && task.recurrence !== 'none')) && (
-                <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                <div className="flex items-center gap-2 text-[13px] text-[#808080]">
                   {task.time && (
-                    <span className="flex items-center gap-1 hover:text-slate-700 transition-colors" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenTimeModal(task); }}>
+                    <span className="flex items-center gap-1 hover:text-[#202020] transition-colors ease-out duration-200" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenTimeModal(task); }}>
                       <Clock className="w-3 h-3" />
                       {task.time}
                     </span>
                   )}
                   {task.recurrence && task.recurrence !== 'none' && (
-                    <span className="flex items-center gap-1 hover:text-slate-700 transition-colors" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenRecurrenceModal(task); }}>
+                    <span className="flex items-center gap-1 hover:text-[#202020] transition-colors ease-out duration-200" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenRecurrenceModal(task); }}>
                       <Repeat className="w-3 h-3" />
                       {task.recurrence === 'daily' ? 'Diário' : 
                        task.recurrence === 'weekly' ? 'Semanal' : 
@@ -193,7 +193,7 @@ const TaskCard: React.FC<{
               e.preventDefault();
               onDelete(task.id);
             }}
-            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all shrink-0"
+            className="p-2 text-[#808080] hover:text-red-600 hover:bg-red-50 rounded-lg transition-all ease-out duration-200 shrink-0"
             title="Excluir tarefa"
           >
             <Trash2 className="w-4 h-4" />
@@ -201,37 +201,37 @@ const TaskCard: React.FC<{
         </div>
 
         {/* Bottom line: Timer pill + History icon */}
-        <div className="flex justify-between items-center mt-2 pt-3 border-t border-slate-100">
+        <div className="flex justify-between items-center mt-2 pt-3 border-t border-gray-100">
           <div className="flex items-center gap-2">
             {/* Priority Flag */}
             <div 
               onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
-              className="flex items-center justify-center p-1.5 rounded-md bg-slate-50 border border-slate-100" 
+              className="flex items-center justify-center p-1.5 rounded-lg bg-gray-50 border border-gray-100" 
               title={`Prioridade ${task.priority || 'P4'}`}
             >
               <Flag className={cn("w-3.5 h-3.5", 
                 task.priority === 'P1' ? "text-red-500" : 
                 task.priority === 'P2' ? "text-orange-500" : 
-                task.priority === 'P3' ? "text-blue-500" : 
-                "text-slate-400"
+                task.priority === 'P3' ? "text-[#1f60c2]" : 
+                "text-[#808080]"
               )} fill={task.priority && task.priority !== 'P4' ? "currentColor" : "none"} />
             </div>
             
             {(task.estimated_time || currentElapsed > 0 || task.is_running) && (
-              <div className="flex items-center gap-2 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+              <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100">
                 <button 
                   onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggleTimer(task); }}
-                  className="hover:bg-slate-200 p-1 rounded transition-colors"
+                  className="hover:bg-gray-200 p-1 rounded transition-colors ease-out duration-200"
                 >
                   {task.is_running ? (
                     <Pause className="w-3.5 h-3.5 text-amber-500" />
                   ) : (
-                    <Play className="w-3.5 h-3.5 text-slate-500 hover:text-blue-500" />
+                    <Play className="w-3.5 h-3.5 text-[#808080] hover:text-[#1f60c2]" />
                   )}
                 </button>
                 <span className={cn(
-                  "text-[10px] font-mono font-medium",
-                  isOvertime ? "text-red-500" : "text-slate-600"
+                  "text-[13px] font-mono font-medium",
+                  isOvertime ? "text-red-600" : "text-[#808080]"
                 )}>
                   {formatTime(currentElapsed)}
                   {task.estimated_time ? ` / ${task.estimated_time}:00` : ''}
@@ -243,7 +243,7 @@ const TaskCard: React.FC<{
           {(task.estimated_time || currentElapsed > 0 || task.is_running) && (
             <button 
               onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenHistory(task); }}
-              className="hover:bg-slate-100 p-1.5 rounded-md transition-colors text-slate-400 hover:text-slate-600"
+              className="hover:bg-gray-100 p-1.5 rounded-lg transition-colors ease-out duration-200 text-[#808080] hover:text-[#202020]"
               title="Ver Histórico"
             >
               <Clock className="w-3.5 h-3.5" />
@@ -260,9 +260,9 @@ const TaskCard: React.FC<{
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       onClick={() => onEdit(task)}
-      className="flex items-center gap-3 py-2 border-b border-slate-100 bg-white group hover:bg-slate-50/50 transition-colors cursor-pointer"
+      className="flex items-center gap-3 py-2 border-b border-gray-100 bg-white group hover:bg-gray-50 transition-colors ease-out duration-200 cursor-pointer"
     >
-      <div className="opacity-0 group-hover:opacity-100 cursor-grab text-slate-300 transition-opacity">
+      <div className="opacity-0 group-hover:opacity-100 cursor-grab text-gray-300 transition-opacity ease-out duration-200">
         <GripVertical className="w-4 h-4" />
       </div>
       
@@ -272,7 +272,7 @@ const TaskCard: React.FC<{
           "w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0",
           task.status === 'completed' 
             ? "bg-emerald-500 border-emerald-500 text-white" 
-            : "border-slate-300 hover:border-slate-400"
+            : "border-gray-300 hover:border-gray-400"
         )}
       >
         {task.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -281,8 +281,8 @@ const TaskCard: React.FC<{
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <h4 className={cn(
-            "text-sm text-slate-800 truncate transition-all",
-            task.status === 'completed' && "text-slate-400 line-through"
+            "text-[14px] leading-[22px] font-bold text-[#202020] truncate transition-all ease-out duration-200",
+            task.status === 'completed' && "text-[#808080] line-through"
           )}>
             {task.title}
           </h4>
@@ -298,15 +298,15 @@ const TaskCard: React.FC<{
         </div>
         
         {(task.time || (task.recurrence && task.recurrence !== 'none')) && (
-          <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
+          <div className="flex items-center gap-2 mt-0.5 text-[13px] text-[#808080]">
             {task.time && (
-              <span className="flex items-center gap-1 cursor-pointer hover:text-slate-700 transition-colors" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenTimeModal(task); }}>
+              <span className="flex items-center gap-1 cursor-pointer hover:text-[#202020] transition-colors ease-out duration-200" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenTimeModal(task); }}>
                 <Clock className="w-3 h-3" />
                 {task.time}
               </span>
             )}
             {task.recurrence && task.recurrence !== 'none' && (
-              <span className="flex items-center gap-1 cursor-pointer hover:text-slate-700 transition-colors" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenRecurrenceModal(task); }}>
+              <span className="flex items-center gap-1 cursor-pointer hover:text-[#202020] transition-colors ease-out duration-200" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenRecurrenceModal(task); }}>
                 <Repeat className="w-3 h-3" />
                 {task.recurrence === 'daily' ? 'Diário' : 
                  task.recurrence === 'weekly' ? 'Semanal' : 
@@ -322,42 +322,42 @@ const TaskCard: React.FC<{
         {/* Priority Flag */}
         <div 
           onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
-          className="flex items-center justify-center p-1.5 rounded-md bg-slate-50 border border-slate-100" 
+          className="flex items-center justify-center p-1.5 rounded-lg bg-gray-50 border border-gray-100" 
           title={`Prioridade ${task.priority || 'P4'}`}
         >
           <Flag className={cn("w-3.5 h-3.5", 
             task.priority === 'P1' ? "text-red-500" : 
             task.priority === 'P2' ? "text-orange-500" : 
-            task.priority === 'P3' ? "text-blue-500" : 
-            "text-slate-400"
+            task.priority === 'P3' ? "text-[#1f60c2]" : 
+            "text-[#808080]"
           )} fill={task.priority && task.priority !== 'P4' ? "currentColor" : "none"} />
         </div>
 
         {(task.estimated_time || currentElapsed > 0 || task.is_running) && (
-          <div className="flex items-center gap-2 bg-slate-100/50 px-2 py-1 rounded-md">
+          <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100">
             <button 
               onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggleTimer(task); }}
-              className="hover:bg-slate-200 p-1 rounded transition-colors"
+              className="hover:bg-gray-200 p-1 rounded transition-colors ease-out duration-200"
             >
               {task.is_running ? (
                 <Pause className="w-3.5 h-3.5 text-amber-500" />
               ) : (
-                <Play className="w-3.5 h-3.5 text-slate-500 hover:text-blue-500" />
+                <Play className="w-3.5 h-3.5 text-[#808080] hover:text-[#1f60c2]" />
               )}
             </button>
             <span className={cn(
-              "text-xs font-mono font-medium",
-              isOvertime ? "text-red-500" : "text-slate-600"
+              "text-[13px] font-mono font-medium",
+              isOvertime ? "text-red-600" : "text-[#808080]"
             )}>
               {formatTime(currentElapsed)}
               {task.estimated_time ? ` / ${task.estimated_time}:00` : ''}
             </span>
             <button 
               onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenHistory(task); }}
-              className="hover:bg-slate-200 p-1 rounded transition-colors"
+              className="hover:bg-gray-200 p-1 rounded transition-colors ease-out duration-200"
               title="Ver Histórico"
             >
-              <Clock className="w-3.5 h-3.5 text-slate-400 hover:text-slate-600" />
+              <Clock className="w-3.5 h-3.5 text-[#808080] hover:text-[#202020]" />
             </button>
           </div>
         )}
@@ -369,7 +369,7 @@ const TaskCard: React.FC<{
           e.preventDefault();
           onDelete(task.id);
         }}
-        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all"
+        className="p-2 text-[#808080] hover:text-red-600 hover:bg-red-50 rounded-lg transition-all ease-out duration-200"
         title="Excluir tarefa"
       >
         <Trash2 className="w-4 h-4" />
@@ -491,26 +491,26 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
   const isSaveDisabled = !title.trim();
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 backdrop-blur-sm">
       <div className="min-h-full flex items-center justify-center p-4">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-visible flex flex-col relative"
+          className="bg-white border border-gray-200 rounded-xl w-full max-w-lg shadow-xl overflow-visible flex flex-col relative"
         >
           <div className="p-6 flex flex-col gap-4">
             <input 
               type="text" 
               placeholder="Qual é a sua próxima tarefa?" 
-              className="w-full text-xl font-bold text-slate-900 placeholder-slate-400 focus:outline-none"
+              className="w-full text-[26px] leading-[35px] font-bold text-[#202020] placeholder-[#808080] focus:outline-none"
               value={title}
               onChange={e => setTitle(e.target.value)}
               autoFocus
             />
             <textarea 
               placeholder="Descrição da tarefa..." 
-              className="w-full text-sm text-slate-600 focus:outline-none resize-none min-h-[60px]"
+              className="w-full text-[13px] leading-[18px] text-[#202020] placeholder-[#808080] focus:outline-none resize-none min-h-[60px]"
               value={description}
               onChange={e => setDescription(e.target.value)}
             />
@@ -527,11 +527,11 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
                         setIsRecurrencePickerOpen(false);
                       }}
                       className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors",
-                        isDatePickerOpen ? "border-blue-500 text-blue-600 bg-blue-50" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-colors ease-out duration-200",
+                        isDatePickerOpen ? "border-[#1f60c2] text-[#1f60c2] bg-[#dceaff]" : "border-gray-200 text-[#808080] hover:bg-gray-50"
                       )}
                     >
-                      <CalendarIcon className={cn("w-4 h-4", isDatePickerOpen ? "text-blue-500" : "text-slate-400")} />
+                      <CalendarIcon className={cn("w-4 h-4", isDatePickerOpen ? "text-[#1f60c2]" : "text-[#808080]")} />
                       {isSameDay(taskDate, new Date()) ? 'Hoje' : format(taskDate, 'dd/MM')}
                     </button>
                   </PopoverTrigger>
@@ -540,33 +540,33 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
                     align="start" 
                     sideOffset={16} 
                     avoidCollisions={true}
-                    className="w-72 p-0 bg-white rounded-xl shadow-xl border border-slate-200 z-[100] overflow-hidden"
+                    className="w-72 p-0 bg-white rounded-xl shadow-xl border border-gray-200 z-[100] overflow-hidden"
                   >
-                    <div className="p-2 space-y-1 border-b border-slate-100">
-                      <button onClick={() => { setTaskDate(addDays(new Date(), 1)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg text-left"><Sun className="w-4 h-4 text-orange-500" /> Amanhã</button>
-                      <button onClick={() => { setTaskDate(addDays(new Date(), 7)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg text-left"><CalendarDays className="w-4 h-4 text-blue-500" /> Próxima semana</button>
-                      <button onClick={() => { setTaskDate(addDays(new Date(), 5)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg text-left"><Coffee className="w-4 h-4 text-purple-500" /> Próximo fim de semana</button>
-                      <button onClick={() => { setTaskDate(new Date()); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg text-left"><Ban className="w-4 h-4 text-slate-400" /> Sem vencimento</button>
+                    <div className="p-2 space-y-1 border-b border-gray-100">
+                      <button onClick={() => { setTaskDate(addDays(new Date(), 1)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Sun className="w-4 h-4 text-orange-500" /> Amanhã</button>
+                      <button onClick={() => { setTaskDate(addDays(new Date(), 7)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><CalendarDays className="w-4 h-4 text-[#1f60c2]" /> Próxima semana</button>
+                      <button onClick={() => { setTaskDate(addDays(new Date(), 5)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Coffee className="w-4 h-4 text-purple-500" /> Próximo fim de semana</button>
+                      <button onClick={() => { setTaskDate(new Date()); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Ban className="w-4 h-4 text-[#808080]" /> Sem vencimento</button>
                     </div>
                     <div className="p-4">
                       <div className="flex items-center justify-between mb-4">
-                        <span className="font-bold text-sm">Março 2026</span>
+                        <span className="font-bold text-[14px] text-[#202020]">Março 2026</span>
                         <div className="flex gap-1">
-                          <button className="p-1 hover:bg-slate-100 rounded"><ChevronLeft className="w-4 h-4" /></button>
-                          <button className="p-1 hover:bg-slate-100 rounded"><ChevronRight className="w-4 h-4" /></button>
+                          <button className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors"><ChevronLeft className="w-4 h-4" /></button>
+                          <button className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors"><ChevronRight className="w-4 h-4" /></button>
                         </div>
                       </div>
-                      <div className="grid grid-cols-7 gap-1 text-center text-xs mb-2 text-slate-400 font-medium">
+                      <div className="grid grid-cols-7 gap-1 text-center text-[11px] mb-2 text-[#808080] font-bold uppercase tracking-wider">
                         <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
                       </div>
-                      <div className="grid grid-cols-7 gap-1 text-center text-sm">
+                      <div className="grid grid-cols-7 gap-1 text-center text-[13px]">
                         {Array.from({length: 31}).map((_, i) => {
                           const newDate = new Date(2026, 2, i + 1);
                           return (
                             <button 
                               key={i} 
                               onClick={() => { setTaskDate(newDate); setIsDatePickerOpen(false); }}
-                              className={cn("w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-100", isSameDay(newDate, taskDate) && "bg-blue-600 text-white hover:bg-blue-700")}
+                              className={cn("w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors ease-out duration-200", isSameDay(newDate, taskDate) && "bg-[#1f60c2] text-white hover:bg-[#1a50a3]")}
                             >
                               {i + 1}
                             </button>
@@ -581,17 +581,17 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
               {/* Time Input */}
               <div className="relative flex items-center">
                 <div className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500",
-                  time ? "border-blue-500 text-blue-600 bg-blue-50" : "border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-all ease-out duration-200 focus-within:ring-4 focus-within:ring-[#dceaff] focus-within:border-[#1f60c2]",
+                  time ? "border-[#1f60c2] text-[#1f60c2] bg-[#dceaff]" : "border-gray-200 text-[#808080] bg-white hover:bg-gray-50"
                 )}>
-                  <Clock className={cn("w-4 h-4", time ? "text-blue-500" : "text-slate-400")} />
+                  <Clock className={cn("w-4 h-4", time ? "text-[#1f60c2]" : "text-[#808080]")} />
                   <input
                     type="text"
                     placeholder="00:00"
                     maxLength={5}
                     value={time}
                     onChange={handleTimeChange}
-                    className="w-10 bg-transparent focus:outline-none text-center placeholder-slate-400"
+                    className="w-10 bg-transparent focus:outline-none text-center placeholder-[#808080] text-[#202020]"
                   />
                 </div>
               </div>
@@ -605,48 +605,48 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
                     setIsTimePickerOpen(false);
                   }}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors",
-                    isRecurrencePickerOpen || recurrence !== 'none' ? "border-blue-500 text-blue-600 bg-blue-50" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-colors ease-out duration-200",
+                    isRecurrencePickerOpen || recurrence !== 'none' ? "border-[#1f60c2] text-[#1f60c2] bg-[#dceaff]" : "border-gray-200 text-[#808080] hover:bg-gray-50"
                   )}
                 >
-                  <Repeat className={cn("w-4 h-4", isRecurrencePickerOpen || recurrence !== 'none' ? "text-blue-500" : "text-slate-400")} />
+                  <Repeat className={cn("w-4 h-4", isRecurrencePickerOpen || recurrence !== 'none' ? "text-[#1f60c2]" : "text-[#808080]")} />
                   {recurrence === 'daily' ? 'Diário' : recurrence === 'weekly' ? 'Semanal' : recurrence === 'monthly' ? 'Mensal' : 'Repetir'}
                 </button>
                 <AnimatePresence>
                   {isRecurrencePickerOpen && (
                     <motion.div 
                       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                      className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-200 z-[100] p-2 space-y-1"
+                      className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 z-[100] p-2 space-y-1"
                     >
-                      <button onClick={() => { setRecurrence('none'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100", recurrence === 'none' && "bg-blue-50 text-blue-700")}>Não repete</button>
-                      <button onClick={() => { setRecurrence('daily'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100", recurrence === 'daily' && "bg-blue-50 text-blue-700")}>Diariamente</button>
-                      <button onClick={() => { setRecurrence('weekly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100", recurrence === 'weekly' && "bg-blue-50 text-blue-700")}>Semanalmente</button>
-                      <button onClick={() => { setRecurrence('monthly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100", recurrence === 'monthly' && "bg-blue-50 text-blue-700")}>Mensalmente</button>
+                      <button onClick={() => { setRecurrence('none'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-[13px] text-[#202020] rounded-lg hover:bg-gray-100 transition-colors ease-out duration-200", recurrence === 'none' && "bg-[#dceaff] text-[#1f60c2]")}>Não repete</button>
+                      <button onClick={() => { setRecurrence('daily'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-[13px] text-[#202020] rounded-lg hover:bg-gray-100 transition-colors ease-out duration-200", recurrence === 'daily' && "bg-[#dceaff] text-[#1f60c2]")}>Diariamente</button>
+                      <button onClick={() => { setRecurrence('weekly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-[13px] text-[#202020] rounded-lg hover:bg-gray-100 transition-colors ease-out duration-200", recurrence === 'weekly' && "bg-[#dceaff] text-[#1f60c2]")}>Semanalmente</button>
+                      <button onClick={() => { setRecurrence('monthly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-[13px] text-[#202020] rounded-lg hover:bg-gray-100 transition-colors ease-out duration-200", recurrence === 'monthly' && "bg-[#dceaff] text-[#1f60c2]")}>Mensalmente</button>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
               <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger className="w-auto h-9 border-slate-200 bg-transparent hover:bg-slate-50 focus:ring-0 focus:ring-offset-0 border rounded-lg px-3">
-                  <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600">
-                    <Flag className={cn("w-4 h-4", priority === 'P1' ? "text-red-500" : priority === 'P2' ? "text-orange-500" : priority === 'P3' ? "text-blue-500" : "text-slate-400")} fill={priority !== 'P4' ? "currentColor" : "none"} />
+                <SelectTrigger className="w-auto h-9 border-gray-200 bg-transparent hover:bg-gray-50 focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] border rounded-lg px-3 transition-all ease-out duration-200">
+                  <div className="flex items-center gap-1.5 text-[13px] font-medium text-[#808080]">
+                    <Flag className={cn("w-4 h-4", priority === 'P1' ? "text-red-500" : priority === 'P2' ? "text-orange-500" : priority === 'P3' ? "text-[#1f60c2]" : "text-[#808080]")} fill={priority !== 'P4' ? "currentColor" : "none"} />
                     {priority}
                   </div>
                 </SelectTrigger>
                 <SelectContent className="z-[110]">
                   <SelectItem value="P1"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-red-500" fill="currentColor"/> Urgente</div></SelectItem>
                   <SelectItem value="P2"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-orange-500" fill="currentColor"/> Alta</div></SelectItem>
-                  <SelectItem value="P3"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-blue-500" fill="currentColor"/> Média</div></SelectItem>
-                  <SelectItem value="P4"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-slate-400" fill="none"/> Baixa</div></SelectItem>
+                  <SelectItem value="P3"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#1f60c2]" fill="currentColor"/> Média</div></SelectItem>
+                  <SelectItem value="P4"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#808080]" fill="none"/> Baixa</div></SelectItem>
                 </SelectContent>
               </Select>
 
               {projects.length > 0 && (
                 <Select value={projectId} onValueChange={setProjectId}>
-                  <SelectTrigger className="w-auto h-9 border-slate-200 bg-transparent hover:bg-slate-50 focus:ring-0 focus:ring-offset-0 border rounded-lg px-3">
-                    <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600">
-                      <Target className="w-4 h-4 text-slate-400" />
+                  <SelectTrigger className="w-auto h-9 border-gray-200 bg-transparent hover:bg-gray-50 focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] border rounded-lg px-3 transition-all ease-out duration-200">
+                    <div className="flex items-center gap-1.5 text-[13px] font-medium text-[#808080]">
+                      <Target className="w-4 h-4 text-[#808080]" />
                       {projectId === 'none' ? 'Projeto' : projects.find(p => p.id === projectId)?.name}
                     </div>
                   </SelectTrigger>
@@ -666,9 +666,9 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
 
               <div className="flex items-center gap-1">
                 <Select value={tagId} onValueChange={setTagId}>
-                  <SelectTrigger className="w-auto h-9 border-slate-200 bg-transparent hover:bg-slate-50 focus:ring-0 focus:ring-offset-0 border rounded-lg px-3">
-                    <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600">
-                      <Tag className="w-4 h-4 text-slate-400" />
+                  <SelectTrigger className="w-auto h-9 border-gray-200 bg-transparent hover:bg-gray-50 focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] border rounded-lg px-3 transition-all ease-out duration-200">
+                    <div className="flex items-center gap-1.5 text-[13px] font-medium text-[#808080]">
+                      <Tag className="w-4 h-4 text-[#808080]" />
                       {tagId === 'none' ? 'Categoria' : tags.find((t: TaskTag) => t.id === tagId)?.name}
                     </div>
                   </SelectTrigger>
@@ -686,47 +686,47 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
                 </Select>
                 
                 {isCreatingTag ? (
-                  <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 h-9">
+                  <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-lg px-2 h-9 focus-within:ring-4 focus-within:ring-[#dceaff] focus-within:border-[#1f60c2] transition-all ease-out duration-200">
                     <input 
                       type="text" 
                       value={newTagName} 
                       onChange={e => setNewTagName(e.target.value)}
                       placeholder="Nome da tag"
-                      className="w-24 text-sm bg-transparent focus:outline-none"
+                      className="w-24 text-[13px] text-[#202020] bg-transparent focus:outline-none placeholder-[#808080]"
                       autoFocus
                       onKeyDown={e => {
                         if (e.key === 'Enter') handleCreateTag();
                         if (e.key === 'Escape') setIsCreatingTag(false);
                       }}
                     />
-                    <button onClick={handleCreateTag} className="text-blue-600 hover:text-blue-700 p-1">
+                    <button onClick={handleCreateTag} className="text-[#1f60c2] hover:text-[#1a50a3] p-1 transition-colors">
                       <CheckCircle2 className="w-4 h-4" />
                     </button>
-                    <button onClick={() => setIsCreatingTag(false)} className="text-slate-400 hover:text-slate-600 p-1">
+                    <button onClick={() => setIsCreatingTag(false)} className="text-[#808080] hover:text-[#202020] p-1 transition-colors">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
                   <button 
                     onClick={() => setIsCreatingTag(true)}
-                    className="h-9 w-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                    className="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-200 text-[#808080] hover:text-[#1f60c2] hover:bg-[#dceaff] transition-colors ease-out duration-200"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 )}
               </div>
 
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
-                <Timer className="w-4 h-4 text-slate-400" />
-                <input type="text" value={duration} onChange={e => setDuration(e.target.value)} className="w-12 bg-transparent focus:outline-none text-center" placeholder="30" />
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-[13px] font-medium text-[#808080] hover:bg-gray-50 transition-colors ease-out duration-200 focus-within:ring-4 focus-within:ring-[#dceaff] focus-within:border-[#1f60c2]">
+                <Timer className="w-4 h-4 text-[#808080]" />
+                <input type="text" value={duration} onChange={e => setDuration(e.target.value)} className="w-12 bg-transparent focus:outline-none text-center text-[#202020] placeholder-[#808080]" placeholder="30" />
                 min
               </div>
             </div>
-            <p className="text-xs text-slate-400 ml-1">Isso ativará o temporizador de foco da tarefa.</p>
+            <p className="text-[11px] text-[#808080] ml-1">Isso ativará o temporizador de foco da tarefa.</p>
           </div>
 
-          <div className="p-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50 rounded-b-2xl">
-            <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
+          <div className="p-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
+            <button onClick={onClose} className="px-4 py-2 text-[13px] font-medium text-[#808080] hover:text-[#202020] hover:bg-gray-200 rounded-lg transition-colors ease-out duration-200">Cancelar</button>
             <button 
               disabled={isSaveDisabled}
               onClick={() => {
@@ -736,7 +736,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
                 setIsDatePickerOpen(false); setIsTimePickerOpen(false); setIsRecurrencePickerOpen(false);
                 onClose();
               }}
-              className="px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm"
+              className="px-4 py-2 text-[13px] font-bold bg-[#1f60c2] text-white hover:bg-[#1a50a3] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all ease-out duration-200 shadow-sm"
             >
               Salvar Tarefa
             </button>
@@ -758,29 +758,29 @@ const TimeModal = ({ isOpen, onClose, task, onSave }: { isOpen: boolean; onClose
 
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
+        className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden border border-gray-200"
       >
-        <div className="p-4 border-b border-slate-100 flex justify-between items-center">
-          <h3 className="font-bold text-lg">Definir Horário</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
+        <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+          <h3 className="font-bold text-[16px] text-[#202020]">Definir Horário</h3>
+          <button onClick={onClose} className="text-[#808080] hover:text-[#202020] transition-colors ease-out duration-200"><X className="w-5 h-5" /></button>
         </div>
         <div className="p-6">
-          <label className="block text-sm font-medium text-slate-700 mb-2">Horário</label>
+          <label className="block text-[13px] font-medium text-[#808080] mb-2">Horário</label>
           <input 
             type="time" 
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+            className="w-full p-2 border border-gray-200 rounded-lg focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] outline-none transition-all ease-out duration-200 text-[#202020]"
           />
         </div>
-        <div className="p-4 bg-slate-50 flex justify-end gap-2">
-          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-          <Button onClick={() => {
+        <div className="p-4 bg-gray-50 flex justify-end gap-2 border-t border-gray-100">
+          <Button variant="ghost" className="text-[13px] font-medium text-[#808080] hover:text-[#202020] hover:bg-gray-200 transition-colors ease-out duration-200" onClick={onClose}>Cancelar</Button>
+          <Button className="text-[13px] font-bold bg-[#1f60c2] text-white hover:bg-[#1a50a3] transition-all ease-out duration-200 shadow-sm" onClick={() => {
             if (task) onSave(task.id, time);
             onClose();
           }}>Salvar</Button>
@@ -801,24 +801,24 @@ const RecurrenceModal = ({ isOpen, onClose, task, onSave }: { isOpen: boolean; o
 
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
+        className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden border border-gray-200"
       >
-        <div className="p-4 border-b border-slate-100 flex justify-between items-center">
-          <h3 className="font-bold text-lg">Repetir Tarefa</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
+        <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+          <h3 className="font-bold text-[16px] text-[#202020]">Repetir Tarefa</h3>
+          <button onClick={onClose} className="text-[#808080] hover:text-[#202020] transition-colors ease-out duration-200"><X className="w-5 h-5" /></button>
         </div>
         <div className="p-6">
-          <label className="block text-sm font-medium text-slate-700 mb-2">Frequência</label>
+          <label className="block text-[13px] font-medium text-[#808080] mb-2">Frequência</label>
           <Select value={recurrence} onValueChange={setRecurrence}>
-            <SelectTrigger>
+            <SelectTrigger className="border-gray-200 focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all ease-out duration-200 text-[#202020]">
               <SelectValue placeholder="Selecione a frequência" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="z-[110]">
               <SelectItem value="none">Não repetir</SelectItem>
               <SelectItem value="daily">Diariamente</SelectItem>
               <SelectItem value="weekly">Semanalmente</SelectItem>
@@ -826,9 +826,9 @@ const RecurrenceModal = ({ isOpen, onClose, task, onSave }: { isOpen: boolean; o
             </SelectContent>
           </Select>
         </div>
-        <div className="p-4 bg-slate-50 flex justify-end gap-2">
-          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-          <Button onClick={() => {
+        <div className="p-4 bg-gray-50 flex justify-end gap-2 border-t border-gray-100">
+          <Button variant="ghost" className="text-[13px] font-medium text-[#808080] hover:text-[#202020] hover:bg-gray-200 transition-colors ease-out duration-200" onClick={onClose}>Cancelar</Button>
+          <Button className="text-[13px] font-bold bg-[#1f60c2] text-white hover:bg-[#1a50a3] transition-all ease-out duration-200 shadow-sm" onClick={() => {
             if (task) onSave(task.id, recurrence);
             onClose();
           }}>Salvar</Button>
@@ -907,24 +907,24 @@ const TaskHistoryModal = ({ isOpen, onClose, task }: { isOpen: boolean; onClose:
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]"
+        className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh] border border-gray-200"
       >
-        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
           <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-slate-500" />
-            <h3 className="font-bold text-lg text-slate-800">Histórico de Tempo</h3>
+            <Clock className="w-5 h-5 text-[#808080]" />
+            <h3 className="font-bold text-[16px] text-[#202020]">Histórico de Tempo</h3>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-200 transition-colors"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="text-[#808080] hover:text-[#202020] p-1 rounded-md hover:bg-gray-200 transition-colors ease-out duration-200"><X className="w-5 h-5" /></button>
         </div>
         
-        <div className="p-4 border-b border-slate-100">
-          <h4 className="font-medium text-slate-900 truncate">{task?.title}</h4>
-          <p className="text-sm text-slate-500 mt-1">
+        <div className="p-4 border-b border-gray-100">
+          <h4 className="font-medium text-[#202020] truncate text-[14px]">{task?.title}</h4>
+          <p className="text-[13px] text-[#808080] mt-1">
             Tempo total: {formatDuration(currentElapsed)}
             {task?.estimated_time ? ` / ${task.estimated_time}m estimado` : ''}
           </p>
@@ -933,29 +933,29 @@ const TaskHistoryModal = ({ isOpen, onClose, task }: { isOpen: boolean; onClose:
         <div className="flex-1 overflow-y-auto p-4">
           {isLoading ? (
             <div className="flex justify-center items-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+              <Loader2 className="w-6 h-6 animate-spin text-[#1f60c2]" />
             </div>
           ) : logs.length === 0 ? (
-            <div className="text-center py-8 text-slate-500">
+            <div className="text-center py-8 text-[#808080] text-[13px]">
               <p>Nenhum registro de tempo encontrado.</p>
             </div>
           ) : (
             <div className="space-y-3">
               {logs.map((log) => (
-                <div key={log.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50">
+                <div key={log.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-gray-50">
                   <div>
-                    <p className="text-sm font-medium text-slate-800">
+                    <p className="text-[13px] font-medium text-[#202020]">
                       {format(new Date(log.started_at), "dd 'de' MMM", { locale: ptBR })}
                     </p>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-[11px] text-[#808080] mt-0.5">
                       {format(new Date(log.started_at), "HH:mm")} 
                       {log.ended_at ? ` - ${format(new Date(log.ended_at), "HH:mm")}` : ' - Agora'}
                     </p>
                   </div>
                   <div className="text-right">
                     <span className={cn(
-                      "text-sm font-mono font-medium",
-                      !log.ended_at ? "text-blue-600" : "text-slate-700"
+                      "text-[13px] font-mono font-medium",
+                      !log.ended_at ? "text-[#1f60c2]" : "text-[#202020]"
                     )}>
                       {formatDuration(!log.ended_at && task?.last_started_at ? Math.max(0, currentElapsed - (task?.elapsed_time || 0)) : log.duration)}
                     </span>
@@ -973,25 +973,25 @@ const TaskHistoryModal = ({ isOpen, onClose, task }: { isOpen: boolean; onClose:
 const ConfirmDeleteModal = ({ isOpen, onClose, onConfirm }: { isOpen: boolean; onClose: () => void; onConfirm: () => void }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
+        className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden border border-gray-200"
       >
         <div className="p-6 text-center">
-          <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4">
             <Trash2 className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 mb-2">Excluir Tarefa</h3>
-          <p className="text-sm text-slate-500">
+          <h3 className="text-[16px] font-bold text-[#202020] mb-2">Excluir Tarefa</h3>
+          <p className="text-[13px] leading-[18px] text-[#808080]">
             Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.
           </p>
         </div>
-        <div className="p-4 bg-slate-50 flex justify-end gap-2">
-          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-          <Button className="bg-red-600 hover:bg-red-700 text-white" onClick={onConfirm}>Excluir</Button>
+        <div className="p-4 bg-gray-50 flex justify-end gap-2 border-t border-gray-100">
+          <Button variant="ghost" className="text-[13px] font-medium text-[#808080] hover:text-[#202020] hover:bg-gray-200 transition-colors ease-out duration-200" onClick={onClose}>Cancelar</Button>
+          <Button className="text-[13px] font-bold bg-red-500 hover:bg-red-600 text-white transition-all ease-out duration-200 shadow-sm" onClick={onConfirm}>Excluir</Button>
         </div>
       </motion.div>
     </div>
@@ -1553,26 +1553,26 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
   const emptyDaysBefore = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
 
   return (
-    <main className="flex-1 flex flex-col overflow-hidden bg-slate-50">
+    <main className="flex-1 flex flex-col overflow-hidden bg-[#FCFAF8]">
       <div className="max-w-4xl mx-auto w-full pt-6 md:pt-10 px-4 md:px-8 flex-1 overflow-y-auto pb-12">
         
         {/* Header */}
           <header className="flex flex-col gap-4 mb-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h1 className="text-xl font-bold text-slate-900 capitalize">
+                <h1 className="text-[26px] leading-[35px] font-bold text-[#202020] capitalize">
                   {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
                 </h1>
               </div>
               
               <div className="flex items-center gap-4 overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
                 {/* Toggle Group */}
-                <div className="flex items-center bg-slate-100 p-1 rounded-lg shrink-0">
+                <div className="flex items-center bg-gray-100 p-1 rounded-lg shrink-0">
                   <button
                     onClick={() => setView('list')}
                     className={cn(
-                      "flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium transition-all",
-                      view === 'list' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      "flex items-center justify-center px-2.5 py-1 rounded-md text-[13px] font-medium transition-all ease-out duration-200",
+                      view === 'list' ? "bg-white text-[#202020] shadow-sm" : "text-[#808080] hover:text-[#202020]"
                     )}
                   >
                     <ListTodo className="w-3.5 h-3.5 mr-1.5" />
@@ -1581,8 +1581,8 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                   <button
                     onClick={() => setView('kanban')}
                     className={cn(
-                      "flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium transition-all",
-                      view === 'kanban' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      "flex items-center justify-center px-2.5 py-1 rounded-md text-[13px] font-medium transition-all ease-out duration-200",
+                      view === 'kanban' ? "bg-white text-[#202020] shadow-sm" : "text-[#808080] hover:text-[#202020]"
                     )}
                   >
                     <Kanban className="w-3.5 h-3.5 mr-1.5" />
@@ -1591,8 +1591,8 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                   <button
                     onClick={() => setView('calendar')}
                     className={cn(
-                      "flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium transition-all",
-                      view === 'calendar' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      "flex items-center justify-center px-2.5 py-1 rounded-md text-[13px] font-medium transition-all ease-out duration-200",
+                      view === 'calendar' ? "bg-white text-[#202020] shadow-sm" : "text-[#808080] hover:text-[#202020]"
                     )}
                   >
                     <CalendarIcon className="w-3.5 h-3.5 mr-1.5" />
@@ -1608,10 +1608,10 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                 <button
                   onClick={() => setSelectedProject(null)}
                   className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
+                    "px-3 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-colors ease-out duration-200 border",
                     selectedProject === null 
-                      ? "bg-slate-800 text-white border-slate-800" 
-                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                      ? "bg-[#202020] text-white border-[#202020]" 
+                      : "bg-white text-[#808080] border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                   )}
                 >
                   Todas
@@ -1621,10 +1621,10 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                     key={project.id}
                     onClick={() => setSelectedProject(project.id)}
                     className={cn(
-                      "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border flex items-center gap-1.5",
+                      "px-3 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-colors ease-out duration-200 border flex items-center gap-1.5",
                       selectedProject === project.id 
-                        ? "bg-slate-800 text-white border-slate-800" 
-                        : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                        ? "bg-[#202020] text-white border-[#202020]" 
+                        : "bg-white text-[#808080] border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                     )}
                   >
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: project.color }} />
@@ -1642,8 +1642,8 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               className="space-y-6"
             >
               {/* Horizontal Days Strip */}
-              <div className="flex items-center bg-white py-3 px-2 border-b border-slate-100">
-                <Button variant="ghost" size="icon" onClick={handlePrevWeek} className="text-slate-400 hover:text-slate-600 shrink-0">
+              <div className="flex items-center bg-white py-3 px-2 border-b border-gray-100">
+                <Button variant="ghost" size="icon" onClick={handlePrevWeek} className="text-[#808080] hover:text-[#202020] shrink-0 transition-colors ease-out duration-200">
                   <ChevronLeft className="w-5 h-5" />
                 </Button>
                 
@@ -1651,7 +1651,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                   {/* Static Labels */}
                   <div className="flex justify-around mb-2">
                     {['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'].map(day => (
-                      <div key={day} className="w-10 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      <div key={day} className="w-10 text-center text-[10px] font-semibold uppercase tracking-wider text-[#808080]">
                         {day}
                       </div>
                     ))}
@@ -1682,15 +1682,15 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                               key={day.toISOString()}
                               onClick={() => setSelectedDate(day)}
                               className={cn(
-                                "flex items-center justify-center w-10 h-10 rounded-lg transition-all",
+                                "flex items-center justify-center w-10 h-10 rounded-lg transition-all ease-out duration-200",
                                 isSelected 
-                                  ? "bg-blue-50 text-blue-600 font-bold shadow-sm" 
-                                  : "hover:bg-slate-50 text-slate-600"
+                                  ? "bg-[#dceaff] text-[#1f60c2] font-bold shadow-sm" 
+                                  : "hover:bg-gray-50 text-[#808080]"
                               )}
                             >
                               <span className={cn(
-                                "text-sm",
-                                isToday && !isSelected && "text-blue-600 font-bold"
+                                "text-[14px]",
+                                isToday && !isSelected && "text-[#1f60c2] font-bold"
                               )}>
                                 {format(day, 'd')}
                               </span>
@@ -1702,7 +1702,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                   </div>
                 </div>
 
-                <Button variant="ghost" size="icon" onClick={handleNextWeek} className="text-slate-400 hover:text-slate-600 shrink-0">
+                <Button variant="ghost" size="icon" onClick={handleNextWeek} className="text-[#808080] hover:text-[#202020] shrink-0 transition-colors ease-out duration-200">
                   <ChevronRight className="w-5 h-5" />
                 </Button>
               </div>
@@ -1711,9 +1711,9 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               <div>
                 <div className="space-y-0">
                   {isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-slate-400">
-                      <Loader2 className="w-6 h-6 animate-spin mb-2" />
-                      <p className="text-sm">Carregando tarefas...</p>
+                    <div className="flex flex-col items-center justify-center py-12 text-[#808080]">
+                      <Loader2 className="w-6 h-6 animate-spin mb-2 text-[#1f60c2]" />
+                      <p className="text-[13px]">Carregando tarefas...</p>
                     </div>
                   ) : (
                     <AnimatePresence mode="popLayout">
@@ -1722,7 +1722,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                           initial={{ opacity: 0 }} 
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
-                          className="text-center py-8 text-sm text-slate-500"
+                          className="text-center py-8 text-[13px] text-[#808080]"
                         >
                           Nenhuma tarefa pendente. Aproveite o descanso!
                         </motion.div>
@@ -1750,7 +1750,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               {/* Completed Missions Area */}
               {completedTasks.length > 0 && (
                 <div className="pt-4">
-                  <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <h3 className="text-[11px] font-semibold text-[#808080] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Concluídas
                   </h3>
                   <div className="space-y-0 opacity-60">
@@ -1783,16 +1783,16 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               {/* To Do Column */}
               <div 
                 className={cn(
-                  "flex flex-col gap-3 p-4 rounded-xl border transition-colors",
-                  dragOverColumn === 'pending' ? "bg-blue-50/50 border-blue-200 border-dashed" : "bg-slate-50/50 border-slate-100"
+                  "flex flex-col gap-3 p-4 rounded-xl border transition-colors ease-out duration-200",
+                  dragOverColumn === 'pending' ? "bg-[#dceaff] border-[#1f60c2] border-dashed" : "bg-gray-50/50 border-gray-200"
                 )}
                 onDragOver={(e) => handleDragOver(e, 'pending')}
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, 'pending')}
               >
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                  <span className="text-sm font-semibold text-slate-700">A Fazer</span>
-                  <span className="text-xs font-medium text-slate-500">{projectFilteredTasks.filter(t => t.status === 'pending' && !t.is_running).length}</span>
+                <div className="flex items-center justify-between pb-2 border-b border-gray-200">
+                  <span className="text-[14px] leading-[22px] font-semibold text-[#202020]">A Fazer</span>
+                  <span className="text-[11px] font-medium text-[#808080]">{projectFilteredTasks.filter(t => t.status === 'pending' && !t.is_running).length}</span>
                 </div>
                 <div className="space-y-3">
                   {projectFilteredTasks.filter(t => t.status === 'pending' && !t.is_running).map(task => (
@@ -1804,16 +1804,16 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               {/* In Progress Column */}
               <div 
                 className={cn(
-                  "flex flex-col gap-3 p-4 rounded-xl border transition-colors",
-                  dragOverColumn === 'in_progress' ? "bg-blue-50/50 border-blue-200 border-dashed" : "bg-slate-50/50 border-slate-100"
+                  "flex flex-col gap-3 p-4 rounded-xl border transition-colors ease-out duration-200",
+                  dragOverColumn === 'in_progress' ? "bg-[#dceaff] border-[#1f60c2] border-dashed" : "bg-gray-50/50 border-gray-200"
                 )}
                 onDragOver={(e) => handleDragOver(e, 'in_progress')}
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, 'in_progress')}
               >
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                  <span className="text-sm font-semibold text-slate-700">Em Progresso</span>
-                  <span className="text-xs font-medium text-slate-500">{projectFilteredTasks.filter(t => t.status === 'pending' && t.is_running).length}</span>
+                <div className="flex items-center justify-between pb-2 border-b border-gray-200">
+                  <span className="text-[14px] leading-[22px] font-semibold text-[#202020]">Em Progresso</span>
+                  <span className="text-[11px] font-medium text-[#808080]">{projectFilteredTasks.filter(t => t.status === 'pending' && t.is_running).length}</span>
                 </div>
                 <div className="space-y-3">
                   {projectFilteredTasks.filter(t => t.status === 'pending' && t.is_running).map(task => (
@@ -1825,16 +1825,16 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               {/* Done Column */}
               <div 
                 className={cn(
-                  "flex flex-col gap-3 p-4 rounded-xl border transition-colors",
-                  dragOverColumn === 'completed' ? "bg-blue-50/50 border-blue-200 border-dashed" : "bg-slate-50/50 border-slate-100"
+                  "flex flex-col gap-3 p-4 rounded-xl border transition-colors ease-out duration-200",
+                  dragOverColumn === 'completed' ? "bg-[#dceaff] border-[#1f60c2] border-dashed" : "bg-gray-50/50 border-gray-200"
                 )}
                 onDragOver={(e) => handleDragOver(e, 'completed')}
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, 'completed')}
               >
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                  <span className="text-sm font-semibold text-slate-700">Concluído</span>
-                  <span className="text-xs font-medium text-slate-500">{projectFilteredTasks.filter(t => t.status === 'completed').length}</span>
+                <div className="flex items-center justify-between pb-2 border-b border-gray-200">
+                  <span className="text-[14px] leading-[22px] font-semibold text-[#202020]">Concluído</span>
+                  <span className="text-[11px] font-medium text-[#808080]">{projectFilteredTasks.filter(t => t.status === 'completed').length}</span>
                 </div>
                 <div className="space-y-3 opacity-60">
                   {projectFilteredTasks.filter(t => t.status === 'completed').map(task => (
@@ -1849,27 +1849,27 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"
+              className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden"
             >
               {/* Calendar Navigation */}
-              <div className="flex items-center justify-between p-4 border-b border-slate-200">
-                <h2 className="text-lg font-bold text-slate-800 capitalize">
+              <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                <h2 className="text-[18px] leading-[24px] font-bold text-[#202020] capitalize">
                   {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
                 </h2>
                 <div className="flex gap-2">
-                  <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                    <ChevronLeft className="w-5 h-5 text-slate-600" />
+                  <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-2 hover:bg-gray-50 rounded-lg transition-colors ease-out duration-200">
+                    <ChevronLeft className="w-5 h-5 text-[#808080]" />
                   </button>
-                  <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                    <ChevronRight className="w-5 h-5 text-slate-600" />
+                  <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-2 hover:bg-gray-50 rounded-lg transition-colors ease-out duration-200">
+                    <ChevronRight className="w-5 h-5 text-[#808080]" />
                   </button>
                 </div>
               </div>
 
               {/* Calendar Header */}
-              <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50">
+              <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
                 {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map(day => (
-                  <div key={day} className="p-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 last:border-r-0">
+                  <div key={day} className="p-4 text-center text-[11px] font-bold text-[#808080] uppercase tracking-wider border-r border-gray-200 last:border-r-0">
                     {day}
                   </div>
                 ))}
@@ -1878,7 +1878,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               {/* Calendar Grid */}
               <div className="grid grid-cols-7 auto-rows-[120px]">
                 {Array.from({ length: emptyDaysBefore }).map((_, i) => (
-                  <div key={`empty-${i}`} className="border-r border-b border-slate-100 bg-slate-50/50" />
+                  <div key={`empty-${i}`} className="border-r border-b border-gray-100 bg-gray-50/50" />
                 ))}
                 
                 {monthDays.map((day, i) => {
@@ -1905,14 +1905,14 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                         setView('list');
                       }}
                       className={cn(
-                        "border-r border-b border-slate-100 p-2 cursor-pointer transition-colors hover:bg-slate-50 relative group",
-                        isSelected && "bg-blue-50/30"
+                        "border-r border-b border-gray-100 p-2 cursor-pointer transition-colors ease-out duration-200 hover:bg-gray-50 relative group",
+                        isSelected && "bg-[#dceaff]/30"
                       )}
                     >
                       <span className={cn(
-                        "text-xs font-medium w-7 h-7 flex items-center justify-center rounded-full mb-2",
-                        isToday ? "bg-blue-600 text-white shadow-sm" : "text-slate-700",
-                        isSelected && !isToday && "bg-slate-200"
+                        "text-[12px] font-medium w-7 h-7 flex items-center justify-center rounded-full mb-2",
+                        isToday ? "bg-[#1f60c2] text-white shadow-sm" : "text-[#202020]",
+                        isSelected && !isToday && "bg-gray-200"
                       )}>
                         {format(day, 'd')}
                       </span>
@@ -1920,12 +1920,12 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                       {dayTasks.length > 0 && (
                         <div className="flex flex-col gap-1 px-1">
                           {dayTasks.slice(0, 3).map(t => (
-                            <div key={t.id} className="text-[10px] truncate bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
+                            <div key={t.id} className="text-[10px] truncate bg-[#dceaff] text-[#1f60c2] px-1.5 py-0.5 rounded">
                               {t.title}
                             </div>
                           ))}
                           {dayTasks.length > 3 && (
-                            <div className="text-[10px] text-slate-500 font-medium px-1">
+                            <div className="text-[10px] text-[#808080] font-medium px-1">
                               +{dayTasks.length - 3} mais
                             </div>
                           )}

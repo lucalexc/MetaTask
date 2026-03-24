@@ -17,8 +17,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-sm text-slate-500">Carregando...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#FCFAF8]">
+        <div className="text-[13px] text-[#808080]">Carregando...</div>
       </div>
     );
   }
@@ -35,8 +35,8 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-sm text-slate-500">Carregando...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#FCFAF8]">
+        <div className="text-[13px] text-[#808080]">Carregando...</div>
       </div>
     );
   }

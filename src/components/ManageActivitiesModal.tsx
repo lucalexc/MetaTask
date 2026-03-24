@@ -27,31 +27,31 @@ export default function ManageActivitiesModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
       />
       
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-2xl max-h-[80vh] flex flex-col bg-[#0C1020] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-2xl max-h-[80vh] flex flex-col bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden"
       >
-        <div className="flex items-center justify-between p-6 border-b border-white/5 shrink-0">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 shrink-0">
           <div>
-            <h2 className="text-xl font-bold text-white">Gerenciar Atividades</h2>
-            <p className="text-sm text-slate-400 mt-1">Edite, pause ou exclua suas rotinas e metas</p>
+            <h2 className="text-[26px] leading-[35px] font-bold text-[#202020] tracking-tight">Gerenciar Atividades</h2>
+            <p className="text-[13px] text-[#808080] mt-1">Edite, pause ou exclua suas rotinas e metas</p>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-[#808080] hover:text-[#202020] transition-colors ease-out duration-200">
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="p-4 border-b border-white/5 flex gap-2 shrink-0">
+        <div className="p-4 border-b border-gray-200 flex gap-2 shrink-0">
           <button
             onClick={() => setFilter('all')}
             className={cn(
-              "px-4 py-2 rounded-lg text-sm font-bold transition-colors",
-              filter === 'all' ? "bg-white/10 text-white" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+              "px-4 py-2 rounded-lg text-[13px] font-bold transition-colors ease-out duration-200",
+              filter === 'all' ? "bg-gray-100 text-[#202020]" : "text-[#808080] hover:text-[#202020] hover:bg-gray-50"
             )}
           >
             Todas
@@ -59,8 +59,8 @@ export default function ManageActivitiesModal({
           <button
             onClick={() => setFilter('routine')}
             className={cn(
-              "px-4 py-2 rounded-lg text-sm font-bold transition-colors",
-              filter === 'routine' ? "bg-blue-500/20 text-blue-400" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+              "px-4 py-2 rounded-lg text-[13px] font-bold transition-colors ease-out duration-200",
+              filter === 'routine' ? "bg-blue-50 text-[#1f60c2]" : "text-[#808080] hover:text-[#202020] hover:bg-gray-50"
             )}
           >
             Rotinas
@@ -68,8 +68,8 @@ export default function ManageActivitiesModal({
           <button
             onClick={() => setFilter('goal')}
             className={cn(
-              "px-4 py-2 rounded-lg text-sm font-bold transition-colors",
-              filter === 'goal' ? "bg-purple-500/20 text-purple-400" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+              "px-4 py-2 rounded-lg text-[13px] font-bold transition-colors ease-out duration-200",
+              filter === 'goal' ? "bg-purple-50 text-purple-600" : "text-[#808080] hover:text-[#202020] hover:bg-gray-50"
             )}
           >
             Metas
@@ -86,24 +86,24 @@ export default function ManageActivitiesModal({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 className={cn(
-                  "flex items-center gap-4 p-4 rounded-xl border transition-colors",
+                  "flex items-center gap-4 p-4 rounded-xl border transition-colors ease-out duration-200",
                   activity.is_active 
-                    ? "bg-[#111630] border-white/10" 
-                    : "bg-[#111630]/50 border-white/5 opacity-60"
+                    ? "bg-white border-gray-200 hover:bg-gray-50" 
+                    : "bg-gray-50 border-gray-100 opacity-60"
                 )}
               >
-                <div className="cursor-grab active:cursor-grabbing text-slate-500 hover:text-slate-300">
+                <div className="cursor-grab active:cursor-grabbing text-[#808080] hover:text-[#202020]">
                   <GripVertical className="w-5 h-5" />
                 </div>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-bold text-white truncate">{activity.name}</h4>
+                    <h4 className="font-bold text-[#202020] truncate text-[13px] leading-[18px]">{activity.name}</h4>
                     {!activity.is_active && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-white/5 px-2 py-0.5 rounded">Pausada</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#808080] bg-gray-100 px-2 py-0.5 rounded">Pausada</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-slate-400">
+                  <div className="flex items-center gap-3 mt-1 text-[11px] text-[#808080]">
                     <span className="flex items-center gap-1">
                       {activity.type === 'goal' ? <Target className="w-3 h-3" /> : <Repeat className="w-3 h-3" />}
                       {activity.type === 'goal' ? 'Meta' : 'Rotina'}
@@ -123,10 +123,10 @@ export default function ManageActivitiesModal({
                   <button
                     onClick={() => updateActivity(activity.id, { is_active: !activity.is_active })}
                     className={cn(
-                      "p-2 rounded-lg transition-colors",
+                      "p-2 rounded-lg transition-colors ease-out duration-200",
                       activity.is_active 
-                        ? "text-slate-400 hover:text-orange-400 hover:bg-orange-500/10" 
-                        : "text-green-400 bg-green-500/10 hover:bg-green-500/20"
+                        ? "text-[#808080] hover:text-[#F97316] hover:bg-orange-50" 
+                        : "text-[#058527] bg-green-50 hover:bg-green-100"
                     )}
                     title={activity.is_active ? "Pausar atividade" : "Retomar atividade"}
                   >
@@ -134,7 +134,7 @@ export default function ManageActivitiesModal({
                   </button>
                   <button
                     onClick={() => onEdit?.(activity)}
-                    className="p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                    className="p-2 text-[#808080] hover:text-[#1f60c2] hover:bg-blue-50 rounded-lg transition-colors ease-out duration-200"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
@@ -144,7 +144,7 @@ export default function ManageActivitiesModal({
                         deleteActivity(activity.id);
                       }
                     }}
-                    className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                    className="p-2 text-[#808080] hover:text-[#EF4444] hover:bg-red-50 rounded-lg transition-colors ease-out duration-200"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -154,7 +154,7 @@ export default function ManageActivitiesModal({
           </AnimatePresence>
           
           {filteredActivities.length === 0 && (
-            <div className="text-center py-12 text-slate-500">
+            <div className="text-center py-12 text-[#808080] text-[13px]">
               Nenhuma atividade encontrada.
             </div>
           )}

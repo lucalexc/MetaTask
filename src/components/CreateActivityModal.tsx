@@ -80,17 +80,17 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="bg-[#0C1020] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col"
+          className="bg-white border border-gray-200 rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-            <h2 className="text-lg font-bold text-[#E8EAF0]">Nova Atividade</h2>
-            <button onClick={onClose} className="text-[#8B90A8] hover:text-white transition-colors">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <h2 className="text-[14px] leading-[22px] font-bold text-[#202020]">Nova Atividade</h2>
+            <button onClick={onClose} className="text-[#808080] hover:text-[#202020] transition-colors ease-out duration-200">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -102,10 +102,10 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
               <button
                 onClick={() => setType('routine')}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-semibold transition-all",
+                  "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border text-[13px] font-medium transition-all ease-out duration-200",
                   type === 'routine'
-                    ? "bg-blue-500/10 border-blue-500/50 text-blue-400"
-                    : "border-white/10 text-[#8B90A8] hover:bg-white/5"
+                    ? "bg-[#dceaff] border-[#1f60c2] text-[#1f60c2]"
+                    : "border-gray-200 text-[#808080] hover:bg-gray-50"
                 )}
               >
                 <RefreshCw className="w-4 h-4" /> Rotina
@@ -113,10 +113,10 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
               <button
                 onClick={() => setType('goal')}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-semibold transition-all",
+                  "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border text-[13px] font-medium transition-all ease-out duration-200",
                   type === 'goal'
-                    ? "bg-blue-500/10 border-blue-500/50 text-blue-400"
-                    : "border-white/10 text-[#8B90A8] hover:bg-white/5"
+                    ? "bg-[#dceaff] border-[#1f60c2] text-[#1f60c2]"
+                    : "border-gray-200 text-[#808080] hover:bg-gray-50"
                 )}
               >
                 <Target className="w-4 h-4" /> Meta
@@ -125,25 +125,25 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
 
             {/* Name */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-[#8B90A8] uppercase tracking-wider">Nome da Atividade</label>
+              <label className="text-[13px] font-bold text-[#202020]">Nome da Atividade</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ex: Ler 10 páginas, Meditar..."
-                className="w-full bg-[#111630] border border-white/10 rounded-xl px-4 py-3 text-[#E8EAF0] placeholder-[#8B90A8] focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
               />
             </div>
 
             {/* Description */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-[#8B90A8] uppercase tracking-wider">Descrição (Opcional)</label>
+              <label className="text-[13px] font-bold text-[#202020]">Descrição (Opcional)</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Detalhes sobre a atividade..."
                 rows={2}
-                className="w-full bg-[#111630] border border-white/10 rounded-xl px-4 py-3 text-[#E8EAF0] placeholder-[#8B90A8] focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all resize-none"
+                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200 resize-none"
               />
             </div>
 
@@ -151,11 +151,11 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
             {type === 'routine' ? (
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-[#8B90A8] uppercase tracking-wider">Período</label>
+                  <label className="text-[13px] font-bold text-[#202020]">Período</label>
                   <select
                     value={period}
                     onChange={(e) => setPeriod(e.target.value)}
-                    className="w-full bg-[#111630] border border-white/10 rounded-xl px-4 py-3 text-[#E8EAF0] focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all appearance-none"
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200 appearance-none"
                   >
                     <option value="morning">Manhã</option>
                     <option value="afternoon">Tarde</option>
@@ -164,37 +164,37 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-[#8B90A8] uppercase tracking-wider">Horário (Opcional)</label>
+                  <label className="text-[13px] font-bold text-[#202020]">Horário (Opcional)</label>
                   <input
                     type="time"
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
-                    className="w-full bg-[#111630] border border-white/10 rounded-xl px-4 py-3 text-[#E8EAF0] focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all [color-scheme:dark]"
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                   />
                 </div>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-[#8B90A8] uppercase tracking-wider">Duração (Dias)</label>
+                  <label className="text-[13px] font-bold text-[#202020]">Duração (Dias)</label>
                   <input
                     type="number"
                     min="1"
                     value={duration}
                     onChange={(e) => setDuration(e.target.value)}
                     placeholder="Ex: 30"
-                    className="w-full bg-[#111630] border border-white/10 rounded-xl px-4 py-3 text-[#E8EAF0] placeholder-[#8B90A8] focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-[#8B90A8] uppercase tracking-wider">Repetições/Dia</label>
+                  <label className="text-[13px] font-bold text-[#202020]">Repetições/Dia</label>
                   <input
                     type="number"
                     min="1"
                     value={repetitions}
                     onChange={(e) => setRepetitions(e.target.value)}
                     placeholder="Ex: 1"
-                    className="w-full bg-[#111630] border border-white/10 rounded-xl px-4 py-3 text-[#E8EAF0] placeholder-[#8B90A8] focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                   />
                 </div>
               </div>
@@ -202,18 +202,18 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-white/10 bg-[#0C1020] flex justify-end gap-3">
+          <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
             <button
               onClick={onClose}
               disabled={isLoading}
-              className="px-4 py-2 rounded-xl text-[#8B90A8] hover:text-white hover:bg-white/5 transition-colors font-medium disabled:opacity-50"
+              className="px-4 py-2 rounded-lg text-[13px] text-[#808080] hover:text-[#202020] hover:bg-gray-200 transition-colors ease-out duration-200 font-medium disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               onClick={handleSave}
               disabled={isLoading || !name.trim()}
-              className="px-6 py-2 rounded-xl text-white font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 transition-all shadow-lg shadow-blue-500/25 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-2 rounded-lg text-[13px] text-white font-bold bg-[#1f60c2] hover:bg-[#1a50a3] transition-all ease-out duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
               Salvar
