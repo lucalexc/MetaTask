@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Target, RefreshCw } from 'lucide-react';
-import { cn } from '@/src/lib/utils';
-import { Button } from '@/src/components/ui/button';
+import { cn } from '@/src/lib/utils'; // Ajuste o caminho do utils se necessário
+import { Button } from '@/src/components/ui/button'; // Ajuste o caminho do botão se necessário
 
 export default function CreateActivityModal({ isOpen, onClose, onSuccess }: any) {
   const [type, setType] = useState<'routine' | 'goal'>('routine');
@@ -22,7 +22,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: any)
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <h2 className="text-lg font-bold text-gray-900">Nova Atividade</h2>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -32,13 +32,19 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: any)
             <div className="flex gap-3">
               <button
                 onClick={() => setType('routine')}
-                className={cn("flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-semibold transition-all", type === 'routine' ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-600 hover:bg-gray-50")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-semibold transition-all", 
+                  type === 'routine' ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                )}
               >
                 <RefreshCw className="w-4 h-4" /> Rotina
               </button>
               <button
                 onClick={() => setType('goal')}
-                className={cn("flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-semibold transition-all", type === 'goal' ? "border-purple-600 bg-purple-50 text-purple-700" : "border-gray-200 text-gray-600 hover:bg-gray-50")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-semibold transition-all", 
+                  type === 'goal' ? "border-purple-600 bg-purple-50 text-purple-700" : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                )}
               >
                 <Target className="w-4 h-4" /> Meta
               </button>
@@ -58,7 +64,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: any)
             <div className="grid grid-cols-2 gap-4">
                <div className="space-y-1.5">
                  <label className="text-xs font-bold text-gray-500 uppercase">Período</label>
-                 <select className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                 <select className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
                    <option value="morning">Manhã</option>
                    <option value="afternoon">Tarde</option>
                    <option value="evening">Noite</option>
@@ -67,7 +73,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: any)
                </div>
                <div className="space-y-1.5">
                  <label className="text-xs font-bold text-gray-500 uppercase">Horário</label>
-                 <input type="time" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+                 <input type="time" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" />
                </div>
             </div>
           </div>
