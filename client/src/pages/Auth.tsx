@@ -11,8 +11,8 @@ import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const authSchema = z.object({
-  username: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  username: z.string().email("Por favor, insira um e-mail válido"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   name: z.string().optional(),
 });
 
@@ -38,7 +38,7 @@ export default function Auth() {
         await login.mutateAsync({ username: data.username, password: data.password });
       } else {
         if (!data.name) {
-          form.setError("name", { message: "Name is required" });
+          form.setError("name", { message: "O nome é obrigatório" });
           return;
         }
         await register.mutateAsync({ 
@@ -51,7 +51,7 @@ export default function Auth() {
     } catch (error: any) {
       console.error(error);
       form.setError("root", { 
-        message: error.message || "An error occurred. Please try again." 
+        message: error.message || "Ocorreu um erro. Tente novamente." 
       });
     }
   };
@@ -67,9 +67,9 @@ export default function Auth() {
       >
         <div className="text-center mb-8">
           <h1 className="text-[26px] leading-[35px] font-bold text-[#202020] mb-2">
-            Life Tracks
+            MetaTask
           </h1>
-          <p className="text-[#808080] text-[13px] leading-[18px]">Design your life, one day at a time.</p>
+          <p className="text-[#808080] text-[13px] leading-[18px]">Organize seu fluxo. Domine seu dia.</p>
         </div>
 
         <GlassCard className="p-8">
@@ -80,7 +80,7 @@ export default function Auth() {
                 isLogin ? "bg-white shadow-sm text-[#202020]" : "text-[#808080] hover:text-[#202020]"
               }`}
             >
-              Log In
+              Entrar
             </button>
             <button
               onClick={() => setIsLogin(false)}
@@ -88,7 +88,7 @@ export default function Auth() {
                 !isLogin ? "bg-white shadow-sm text-[#202020]" : "text-[#808080] hover:text-[#202020]"
               }`}
             >
-              Sign Up
+              Cadastrar
             </button>
           </div>
 
@@ -107,9 +107,9 @@ export default function Auth() {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Full Name</FormLabel>
+                          <FormLabel>Nome Completo</FormLabel>
                           <FormControl>
-                            <Input placeholder="John Doe" {...field} />
+                            <Input placeholder="Seu nome" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -124,9 +124,9 @@ export default function Auth() {
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>E-mail</FormLabel>
                     <FormControl>
-                      <Input placeholder="hello@example.com" type="email" {...field} />
+                      <Input placeholder="ola@exemplo.com" type="email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -138,7 +138,7 @@ export default function Auth() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Senha</FormLabel>
                     <FormControl>
                       <Input placeholder="••••••••" type="password" {...field} />
                     </FormControl>
@@ -159,7 +159,7 @@ export default function Auth() {
                 size="lg"
                 isLoading={login.isPending || register.isPending}
               >
-                {isLogin ? "Welcome Back" : "Start Your Journey"}
+                {isLogin ? "Entrar" : "Criar minha conta"}
               </Button>
             </form>
           </Form>
