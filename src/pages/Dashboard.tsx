@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Target, Plus, Inbox, Sword, RefreshCcw, Map, Fingerprint, Settings, Folder, Menu, X, BarChart2 } from 'lucide-react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import TasksDashboard from '@/src/components/TasksDashboard';
 import ProjectsDashboard from '@/src/components/ProjectsDashboard';
 import MyRoutinePage from '@/src/components/MyRoutinePage';
@@ -10,8 +11,16 @@ import InsightsDashboard from '@/src/components/InsightsDashboard';
 import { cn } from '@/src/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 
+type TabType = 'tasks' | 'projects' | 'my-routine' | 'missions' | 'identity' | 'insights' | 'settings';
+
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<'tasks' | 'projects' | 'my-routine' | 'missions' | 'identity' | 'insights' | 'settings'>('tasks');
+  const { tab, projectId } = useParams<{ tab?: string; projectId?: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Determine active tab from URL or default to 'tasks'
+  const activeTab = (tab as TabType) || (projectId ? 'projects' : 'tasks');
+  
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isRoutineModalOpen, setIsRoutineModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -21,8 +30,9 @@ export default function Dashboard() {
     else setIsTaskModalOpen(true); // Default to task
   };
 
-  const handleTabChange = (tab: typeof activeTab) => {
-    setActiveTab(tab);
+  // Sync state if needed, but mostly we use the URL
+  const handleTabChange = (newTab: TabType) => {
+    navigate(`/app/${newTab}`);
     setIsMobileMenuOpen(false);
   };
 
@@ -138,7 +148,7 @@ export default function Dashboard() {
           <TasksDashboard isCreateModalOpen={isTaskModalOpen} setIsCreateModalOpen={setIsTaskModalOpen} />
         </div>
         <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'projects' && "hidden")}>
-          <ProjectsDashboard />
+          <ProjectsDashboard projectId={projectId} />
         </div>
         <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'my-routine' && "hidden")}>
           <MyRoutinePage isCreateModalOpen={isRoutineModalOpen} setIsCreateModalOpen={setIsRoutineModalOpen} />

@@ -76,6 +76,9 @@ export default function App() {
           <Routes>
             <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
             <Route path="/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/app/:tab" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/app/projects/:projectId" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/projetos" element={<Navigate to="/app/projects" replace />} />
           </Routes>
         </Router>
         <Toaster position="top-right" richColors />
