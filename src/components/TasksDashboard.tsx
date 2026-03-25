@@ -59,15 +59,10 @@ export type TaskTag = {
 
 // --- Subcomponents ---
 
-export const DynamicIcon = ({ iconName, className }: { iconName: string, className?: string }) => {
-  const Icon = (LucideIcons as any)[iconName];
-  if (!Icon) return <LucideIcons.Circle className={className} />;
-  return <Icon className={className} />;
-};
-
 const TaskCard: React.FC<{ 
   task: Task; 
   project?: { id: string, name: string, color: string };
+  categories?: Category[];
   view?: 'list' | 'kanban' | 'calendar';
   onToggle: (id: string, status: string) => void;
   onDelete: (id: string) => void;
@@ -90,7 +85,8 @@ const TaskCard: React.FC<{
   onOpenHistory,
   onEdit,
   onDragStart,
-  isDragging
+  isDragging,
+  categories = []
 }) => {
   const [currentElapsed, setCurrentElapsed] = useState(task.elapsed_time || 0);
 
@@ -186,16 +182,9 @@ const TaskCard: React.FC<{
                   {project.name}
                 </span>
               )}
-              {task.category_id && LIFE_CATEGORIES.find(c => c.id === task.category_id) && (
-                <span className={cn(
-                  "text-[10px] px-1.5 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-gray-50",
-                  LIFE_CATEGORIES.find(c => c.id === task.category_id)?.color
-                )}>
-                  <DynamicIcon 
-                    iconName={LIFE_CATEGORIES.find(c => c.id === task.category_id)!.icon} 
-                    className="w-3 h-3" 
-                  />
-                  {LIFE_CATEGORIES.find(c => c.id === task.category_id)?.name}
+              {task.category_id && categories?.find(c => c.id === task.category_id) && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-slate-50 text-slate-700 border-slate-200">
+                  {categories?.find(c => c.id === task.category_id)?.name}
                 </span>
               )}
               {(task.time || (task.recurrence && task.recurrence !== 'none')) && (
@@ -327,16 +316,9 @@ const TaskCard: React.FC<{
               {project.name}
             </span>
           )}
-          {task.category_id && LIFE_CATEGORIES.find(c => c.id === task.category_id) && (
-            <span className={cn(
-              "text-[10px] px-1.5 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-gray-50",
-              LIFE_CATEGORIES.find(c => c.id === task.category_id)?.color
-            )}>
-              <DynamicIcon 
-                iconName={LIFE_CATEGORIES.find(c => c.id === task.category_id)!.icon} 
-                className="w-3 h-3" 
-              />
-              {LIFE_CATEGORIES.find(c => c.id === task.category_id)?.name}
+          {task.category_id && categories?.find(c => c.id === task.category_id) && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-slate-50 text-slate-700 border-slate-200">
+              {categories?.find(c => c.id === task.category_id)?.name}
             </span>
           )}
         </div>
@@ -422,22 +404,7 @@ const TaskCard: React.FC<{
   );
 };
 
-export const LIFE_CATEGORIES: Category[] = [
-  { id: 'health', name: 'Saúde e Disposição', icon: 'Heart', color: 'text-red-500' },
-  { id: 'intellect', name: 'Desenvolvimento Intelectual', icon: 'BookOpen', color: 'text-blue-500' },
-  { id: 'emotions', name: 'Equilíbrio Emocional', icon: 'Smile', color: 'text-yellow-500' },
-  { id: 'purpose', name: 'Realização e Propósito', icon: 'Target', color: 'text-purple-500' },
-  { id: 'finances', name: 'Recursos Financeiros', icon: 'DollarSign', color: 'text-green-500' },
-  { id: 'contribution', name: 'Contribuição Social', icon: 'Globe', color: 'text-teal-500' },
-  { id: 'family', name: 'Família', icon: 'Users', color: 'text-orange-500' },
-  { id: 'romance', name: 'Relacionamento Amoroso', icon: 'HeartPulse', color: 'text-pink-500' },
-  { id: 'social', name: 'Vida Social', icon: 'MessageCircle', color: 'text-indigo-500' },
-  { id: 'hobbies', name: 'Criatividade e Hobbies', icon: 'Palette', color: 'text-fuchsia-500' },
-  { id: 'happiness', name: 'Plenitude e Felicidade', icon: 'Sun', color: 'text-amber-500' },
-  { id: 'spirituality', name: 'Espiritualidade', icon: 'Feather', color: 'text-cyan-500' },
-];
-
-const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: boolean; onClose: () => void; onSave: (task: any) => void; projects: {id: string, name: string, color: string}[]; taskToEdit?: Task | null }) => {
+const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }: { isOpen: boolean; onClose: () => void; onSave: (task: any) => void; projects: {id: string, name: string, color: string}[]; categories: Category[]; taskToEdit?: Task | null }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [title, setTitle] = useState('');
@@ -458,8 +425,6 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
   const [taskDate, setTaskDate] = useState<Date>(new Date());
   const [projectId, setProjectId] = useState<string>('none');
   const [categoryId, setCategoryId] = useState<string>('none');
-
-  const categories = LIFE_CATEGORIES;
 
   useEffect(() => {
     if (isOpen) {
@@ -709,34 +674,22 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
               <div className="flex items-center gap-1">
                 <Select value={categoryId} onValueChange={setCategoryId}>
                   <SelectTrigger className="w-auto h-9 border-gray-200 bg-transparent hover:bg-gray-50 focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] border rounded-lg px-3 transition-all ease-out duration-200">
-                    <div className="flex items-center gap-1.5 text-[13px] font-medium text-[#808080]">
+                    <div className="flex items-center gap-1.5 text-[13px] font-medium text-slate-700">
                       {categoryId === 'none' ? (
-                        <>
-                          <Tag className="w-4 h-4 text-[#808080]" />
-                          Categoria
-                        </>
+                        'Categoria'
                       ) : (
-                        <>
-                          {categories.find((c: Category) => c.id === categoryId) && (
-                            <DynamicIcon 
-                              iconName={categories.find((c: Category) => c.id === categoryId)!.icon} 
-                              className={cn("w-4 h-4", categories.find((c: Category) => c.id === categoryId)!.color)} 
-                            />
-                          )}
-                          <span className={cn(categories.find((c: Category) => c.id === categoryId)?.color)}>
-                            {categories.find((c: Category) => c.id === categoryId)?.name}
-                          </span>
-                        </>
+                        <span>
+                          {categories?.find((c: Category) => c.id === categoryId)?.name}
+                        </span>
                       )}
                     </div>
                   </SelectTrigger>
                   <SelectContent className="z-[110]">
                     <SelectItem value="none">Nenhuma categoria</SelectItem>
-                    {categories.map((c: Category) => (
+                    {categories?.map((c: Category) => (
                       <SelectItem key={c.id} value={c.id}>
-                        <div className="flex items-center gap-2">
-                          <DynamicIcon iconName={c.icon} className={cn("w-4 h-4", c.color)} />
-                          <span className={cn(c.color)}>{c.name}</span>
+                        <div className="flex items-center gap-2 text-slate-700">
+                          <span>{c.name}</span>
                         </div>
                       </SelectItem>
                     ))}
@@ -1265,6 +1218,18 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
   // Drag and Drop State
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<'pending' | 'in_progress' | 'completed' | null>(null);
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      return data as Category[];
+    }
+  });
 
   useEffect(() => {
     if (user) {
@@ -1958,6 +1923,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                             key={task.id} 
                             task={task} 
                             project={projects.find(p => p.id === task.project_id)}
+                            categories={categories}
                             onToggle={handleToggleTask} 
                             onDelete={setTaskToDelete}
                             onOpenTimeModal={openTimeModal}
@@ -1985,6 +1951,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                         key={task.id} 
                         task={task} 
                         project={projects.find(p => p.id === task.project_id)}
+                        categories={categories}
                         onToggle={handleToggleTask} 
                         onDelete={setTaskToDelete}
                         onOpenTimeModal={openTimeModal}
@@ -2022,7 +1989,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                 </div>
                 <div className="space-y-3">
                   {projectFilteredTasks.filter(t => t.status === 'pending' && !t.is_running).map(task => (
-                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={setTaskToDelete} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
+                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} categories={categories} view="kanban" onToggle={handleToggleTask} onDelete={setTaskToDelete} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
                   ))}
                 </div>
               </div>
@@ -2043,7 +2010,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                 </div>
                 <div className="space-y-3">
                   {projectFilteredTasks.filter(t => t.status === 'pending' && t.is_running).map(task => (
-                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={setTaskToDelete} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
+                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} categories={categories} view="kanban" onToggle={handleToggleTask} onDelete={setTaskToDelete} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
                   ))}
                 </div>
               </div>
@@ -2064,7 +2031,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                 </div>
                 <div className="space-y-3 opacity-60">
                   {projectFilteredTasks.filter(t => t.status === 'completed').map(task => (
-                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} view="kanban" onToggle={handleToggleTask} onDelete={setTaskToDelete} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
+                    <TaskCard key={task.id} task={task} project={projects.find(p => p.id === task.project_id)} categories={categories} view="kanban" onToggle={handleToggleTask} onDelete={setTaskToDelete} onOpenTimeModal={openTimeModal} onOpenRecurrenceModal={openRecurrenceModal} onToggleTimer={handleToggleTimer} onOpenHistory={handleOpenHistory} onEdit={(task) => { setSelectedTaskForModal(task); setIsCreateModalOpen(true); }} onDragStart={handleDragStart} isDragging={draggedTask?.id === task.id} />
                   ))}
                 </div>
               </div>
@@ -2177,6 +2144,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               }}
               onSave={handleSaveNewTask}
               projects={projects}
+              categories={categories}
               taskToEdit={selectedTaskForModal}
             />
           )}
