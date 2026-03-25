@@ -186,6 +186,18 @@ const TaskCard: React.FC<{
                   {project.name}
                 </span>
               )}
+              {task.category_id && LIFE_CATEGORIES.find(c => c.id === task.category_id) && (
+                <span className={cn(
+                  "text-[10px] px-1.5 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-gray-50",
+                  LIFE_CATEGORIES.find(c => c.id === task.category_id)?.color
+                )}>
+                  <DynamicIcon 
+                    iconName={LIFE_CATEGORIES.find(c => c.id === task.category_id)!.icon} 
+                    className="w-3 h-3" 
+                  />
+                  {LIFE_CATEGORIES.find(c => c.id === task.category_id)?.name}
+                </span>
+              )}
               {(task.time || (task.recurrence && task.recurrence !== 'none')) && (
                 <div className="flex items-center gap-2 text-[13px] text-[#808080]">
                   {task.time && (
@@ -315,6 +327,18 @@ const TaskCard: React.FC<{
               {project.name}
             </span>
           )}
+          {task.category_id && LIFE_CATEGORIES.find(c => c.id === task.category_id) && (
+            <span className={cn(
+              "text-[10px] px-1.5 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-gray-50",
+              LIFE_CATEGORIES.find(c => c.id === task.category_id)?.color
+            )}>
+              <DynamicIcon 
+                iconName={LIFE_CATEGORIES.find(c => c.id === task.category_id)!.icon} 
+                className="w-3 h-3" 
+              />
+              {LIFE_CATEGORIES.find(c => c.id === task.category_id)?.name}
+            </span>
+          )}
         </div>
         
         {(task.time || (task.recurrence && task.recurrence !== 'none')) && (
@@ -398,6 +422,21 @@ const TaskCard: React.FC<{
   );
 };
 
+export const LIFE_CATEGORIES: Category[] = [
+  { id: 'health', name: 'Saúde e Disposição', icon: 'Heart', color: 'text-red-500' },
+  { id: 'intellect', name: 'Desenvolvimento Intelectual', icon: 'BookOpen', color: 'text-blue-500' },
+  { id: 'emotions', name: 'Equilíbrio Emocional', icon: 'Smile', color: 'text-yellow-500' },
+  { id: 'purpose', name: 'Realização e Propósito', icon: 'Target', color: 'text-purple-500' },
+  { id: 'finances', name: 'Recursos Financeiros', icon: 'DollarSign', color: 'text-green-500' },
+  { id: 'contribution', name: 'Contribuição Social', icon: 'Globe', color: 'text-teal-500' },
+  { id: 'family', name: 'Família', icon: 'Users', color: 'text-orange-500' },
+  { id: 'romance', name: 'Relacionamento Amoroso', icon: 'HeartPulse', color: 'text-pink-500' },
+  { id: 'social', name: 'Vida Social', icon: 'MessageCircle', color: 'text-indigo-500' },
+  { id: 'hobbies', name: 'Criatividade e Hobbies', icon: 'Palette', color: 'text-fuchsia-500' },
+  { id: 'happiness', name: 'Plenitude e Felicidade', icon: 'Sun', color: 'text-amber-500' },
+  { id: 'spirituality', name: 'Espiritualidade', icon: 'Feather', color: 'text-cyan-500' },
+];
+
 const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: boolean; onClose: () => void; onSave: (task: any) => void; projects: {id: string, name: string, color: string}[]; taskToEdit?: Task | null }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -420,17 +459,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
   const [projectId, setProjectId] = useState<string>('none');
   const [categoryId, setCategoryId] = useState<string>('none');
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-      if (error) throw error;
-      return data as Category[];
-    }
-  });
+  const categories = LIFE_CATEGORIES;
 
   useEffect(() => {
     if (isOpen) {
