@@ -244,16 +244,6 @@ export default function ProjectsDashboard({ projectId }: { projectId?: string })
                           )}
                         </div>
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteProject(project.id);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 text-[#808080] hover:text-[#d1453b] hover:bg-red-50 rounded-md transition-all ease-out duration-200"
-                        title="Excluir projeto"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
                     </div>
                     <div className="flex items-center justify-between mt-4">
                       <div className="flex items-center text-[11px] font-bold text-[#808080] uppercase tracking-wider">
