@@ -86,7 +86,29 @@ const RoutineManagerModal = ({
   };
 
   const updateActivity = (index: number, field: keyof RoutineActivity, value: string) => {
-    setActivities(prev => prev.map((a, i) => i === index ? { ...a, [field]: value } : a));
+    if (field === 'time') {
+      let val = value.replace(/\D/g, ''); // Remove non-digits
+      if (val.length > 4) val = val.slice(0, 4);
+      
+      let formattedTime = val;
+      if (val.length >= 3) {
+        formattedTime = `${val.slice(0, 2)}:${val.slice(2)}`;
+      }
+
+      // Validate hours and minutes
+      if (formattedTime.length >= 2) {
+        const hours = parseInt(formattedTime.slice(0, 2));
+        if (hours > 23) formattedTime = `23${formattedTime.slice(2)}`;
+      }
+      if (formattedTime.length === 5) {
+        const minutes = parseInt(formattedTime.slice(3, 5));
+        if (minutes > 59) formattedTime = `${formattedTime.slice(0, 3)}59`;
+      }
+      
+      setActivities(prev => prev.map((a, i) => i === index ? { ...a, [field]: formattedTime } : a));
+    } else {
+      setActivities(prev => prev.map((a, i) => i === index ? { ...a, [field]: value } : a));
+    }
   };
 
   const removeActivity = (index: number) => {
@@ -165,7 +187,9 @@ const RoutineManagerModal = ({
               {activities.map((activity, index) => (
                 <div key={index} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 group">
                   <input 
-                    type="time" 
+                    type="text" 
+                    placeholder="00:00"
+                    maxLength={5}
                     className="bg-transparent text-sm font-bold text-slate-700 w-20 focus:outline-none"
                     value={activity.time}
                     onChange={e => updateActivity(index, 'time', e.target.value)}

@@ -9,9 +9,10 @@ interface CreateActivityModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  activityToEdit?: any;
 }
 
-export default function CreateActivityModal({ isOpen, onClose, onSuccess }: CreateActivityModalProps) {
+export default function CreateActivityModal({ isOpen, onClose, onSuccess, activityToEdit }: CreateActivityModalProps) {
   const [type, setType] = useState<'routine' | 'goal'>('routine');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -22,21 +23,31 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
   const [isLoading, setIsLoading] = useState(false);
 
   const resetForm = () => {
-    setType('routine');
-    setName('');
-    setDescription('');
-    setPeriod('morning');
-    setTime('');
-    setDuration('');
-    setRepetitions('1');
+    if (activityToEdit) {
+      setType(activityToEdit.type);
+      setName(activityToEdit.name);
+      setDescription(activityToEdit.description || '');
+      setPeriod(activityToEdit.period || 'morning');
+      setTime(activityToEdit.time || '');
+      setDuration(activityToEdit.duration_days?.toString() || '');
+      setRepetitions(activityToEdit.reps_per_day?.toString() || '1');
+    } else {
+      setType('routine');
+      setName('');
+      setDescription('');
+      setPeriod('morning');
+      setTime('');
+      setDuration('');
+      setRepetitions('1');
+    }
     setIsLoading(false);
   };
 
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
       resetForm();
     }
-  }, [isOpen]);
+  }, [isOpen, activityToEdit]);
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
@@ -100,23 +111,29 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
         duration_days: type === 'goal' && duration ? parseInt(duration) : null,
         reps_per_day: type === 'goal' && repetitions ? parseInt(repetitions) : 1,
         xp_reward: type === 'routine' ? 10 : 50, // Recompensa base
-        is_completed: false,
-        streak: 0,
       };
 
-      const { error } = await supabase
-        .from('activities')
-        .insert([activityData]);
+      if (activityToEdit) {
+        const { error } = await supabase
+          .from('activities')
+          .update(activityData)
+          .eq('id', activityToEdit.id);
+        if (error) throw error;
+        toast.success('Atividade atualizada com sucesso!');
+      } else {
+        const { error } = await supabase
+          .from('activities')
+          .insert([{ ...activityData, is_completed: false, streak: 0 }]);
+        if (error) throw error;
+        toast.success('Atividade criada com sucesso!');
+      }
 
-      if (error) throw error;
-
-      toast.success('Atividade criada com sucesso!');
       resetForm();
       onSuccess?.();
       onClose();
     } catch (error: any) {
-      console.error('Erro ao criar atividade:', error);
-      toast.error(error.message || 'Erro ao criar atividade');
+      console.error('Erro ao salvar atividade:', error);
+      toast.error(error.message || 'Erro ao salvar atividade');
     } finally {
       setIsLoading(false);
     }
@@ -135,7 +152,9 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
         >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h2 className="text-[14px] leading-[22px] font-bold text-[#202020]">Nova Atividade</h2>
+            <h2 className="text-[14px] leading-[22px] font-bold text-[#202020]">
+              {activityToEdit ? 'Editar Atividade' : 'Nova Atividade'}
+            </h2>
             <button onClick={onClose} className="text-[#808080] hover:text-[#202020] transition-colors ease-out duration-200">
               <X className="w-5 h-5" />
             </button>
@@ -250,22 +269,53 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
-            <button
-              onClick={onClose}
-              disabled={isLoading}
-              className="px-4 py-2 rounded-lg text-[13px] text-[#808080] hover:text-[#202020] hover:bg-gray-200 transition-colors ease-out duration-200 font-medium disabled:opacity-50"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={isLoading || !name.trim()}
-              className="px-5 py-2 rounded-lg text-[13px] text-white font-bold bg-[#1f60c2] hover:bg-[#1a50a3] transition-all ease-out duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              {isLoading ? 'Salvando...' : 'Salvar'}
-            </button>
+          <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between rounded-b-xl">
+            <div>
+              {activityToEdit && (
+                <button
+                  onClick={async () => {
+                    if (window.confirm('Tem certeza que deseja excluir esta atividade?')) {
+                      setIsLoading(true);
+                      try {
+                        const { error } = await supabase
+                          .from('activities')
+                          .delete()
+                          .eq('id', activityToEdit.id);
+                        if (error) throw error;
+                        toast.success('Atividade excluída com sucesso!');
+                        onSuccess?.();
+                        onClose();
+                      } catch (error: any) {
+                        toast.error('Erro ao excluir atividade');
+                      } finally {
+                        setIsLoading(false);
+                      }
+                    }
+                  }}
+                  disabled={isLoading}
+                  className="text-[13px] text-red-500 hover:text-red-600 font-medium transition-colors ease-out duration-200 disabled:opacity-50"
+                >
+                  Excluir Atividade
+                </button>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                disabled={isLoading}
+                className="px-4 py-2 rounded-lg text-[13px] text-[#808080] hover:text-[#202020] hover:bg-gray-200 transition-colors ease-out duration-200 font-medium disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isLoading || !name.trim()}
+                className="px-5 py-2 rounded-lg text-[13px] text-white font-bold bg-[#1f60c2] hover:bg-[#1a50a3] transition-all ease-out duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                {isLoading ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
           </div>
         </motion.div>
       </div>

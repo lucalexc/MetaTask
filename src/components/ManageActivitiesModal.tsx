@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Edit2, Trash2, Power, Target, Repeat, GripVertical } from 'lucide-react';
+import { X, Edit2, Trash2, Target, Repeat, GripVertical } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { useActivities, Activity } from '@/src/hooks/useActivities';
 
@@ -39,7 +39,7 @@ export default function ManageActivitiesModal({
         <div className="flex items-center justify-between p-6 border-b border-gray-200 shrink-0">
           <div>
             <h2 className="text-[26px] leading-[35px] font-bold text-[#202020] tracking-tight">Gerenciar Atividades</h2>
-            <p className="text-[13px] text-[#808080] mt-1">Edite, pause ou exclua suas rotinas e metas</p>
+            <p className="text-[13px] text-[#808080] mt-1">Edite ou exclua suas rotinas e metas</p>
           </div>
           <button onClick={onClose} className="text-[#808080] hover:text-[#202020] transition-colors ease-out duration-200">
             <X className="w-6 h-6" />
@@ -85,12 +85,7 @@ export default function ManageActivitiesModal({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className={cn(
-                  "flex items-center gap-4 p-4 rounded-xl border transition-colors ease-out duration-200",
-                  activity.is_active 
-                    ? "bg-white border-gray-200 hover:bg-gray-50" 
-                    : "bg-gray-50 border-gray-100 opacity-60"
-                )}
+                className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors ease-out duration-200"
               >
                 <div className="cursor-grab active:cursor-grabbing text-[#808080] hover:text-[#202020]">
                   <GripVertical className="w-5 h-5" />
@@ -99,9 +94,6 @@ export default function ManageActivitiesModal({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h4 className="font-bold text-[#202020] truncate text-[13px] leading-[18px]">{activity.name}</h4>
-                    {!activity.is_active && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#808080] bg-gray-100 px-2 py-0.5 rounded">Pausada</span>
-                    )}
                   </div>
                   <div className="flex items-center gap-3 mt-1 text-[11px] text-[#808080]">
                     <span className="flex items-center gap-1">
@@ -120,18 +112,6 @@ export default function ManageActivitiesModal({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => updateActivity(activity.id, { is_active: !activity.is_active })}
-                    className={cn(
-                      "p-2 rounded-lg transition-colors ease-out duration-200",
-                      activity.is_active 
-                        ? "text-[#808080] hover:text-[#F97316] hover:bg-orange-50" 
-                        : "text-[#058527] bg-green-50 hover:bg-green-100"
-                    )}
-                    title={activity.is_active ? "Pausar atividade" : "Retomar atividade"}
-                  >
-                    <Power className="w-4 h-4" />
-                  </button>
                   <button
                     onClick={() => onEdit?.(activity)}
                     className="p-2 text-[#808080] hover:text-[#1f60c2] hover:bg-blue-50 rounded-lg transition-colors ease-out duration-200"

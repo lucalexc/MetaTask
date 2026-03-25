@@ -463,27 +463,32 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
   }, [isOpen, taskToEdit]);
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '');
+    let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
     
-    if (value.length > 2) {
-      let hours = parseInt(value.substring(0, 2), 10);
-      if (hours > 23) hours = 23;
-      
-      let minutesStr = value.substring(2, 4);
-      if (minutesStr.length === 2) {
-        let minutes = parseInt(minutesStr, 10);
-        if (minutes > 59) minutes = 59;
-        minutesStr = minutes.toString().padStart(2, '0');
-      }
-      
-      value = hours.toString().padStart(2, '0') + ':' + minutesStr;
-    } else if (value.length === 2) {
-      let hours = parseInt(value, 10);
-      if (hours > 23) hours = 23;
-      value = hours.toString().padStart(2, '0');
+    if (value.length > 4) {
+      value = value.slice(0, 4);
     }
-    
-    setTime(value);
+
+    let formattedTime = value;
+    if (value.length >= 3) {
+      formattedTime = `${value.slice(0, 2)}:${value.slice(2)}`;
+    }
+
+    // Validate hours and minutes
+    if (formattedTime.length >= 2) {
+      const hours = parseInt(formattedTime.slice(0, 2));
+      if (hours > 23) {
+        formattedTime = `23${formattedTime.slice(2)}`;
+      }
+    }
+    if (formattedTime.length === 5) {
+      const minutes = parseInt(formattedTime.slice(3, 5));
+      if (minutes > 59) {
+        formattedTime = `${formattedTime.slice(0, 3)}59`;
+      }
+    }
+
+    setTime(formattedTime);
   };
 
   if (!isOpen) return null;
@@ -756,6 +761,35 @@ const TimeModal = ({ isOpen, onClose, task, onSave }: { isOpen: boolean; onClose
     }
   }, [isOpen, task]);
 
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    
+    if (value.length > 4) {
+      value = value.slice(0, 4);
+    }
+
+    let formattedTime = value;
+    if (value.length >= 3) {
+      formattedTime = `${value.slice(0, 2)}:${value.slice(2)}`;
+    }
+
+    // Validate hours and minutes
+    if (formattedTime.length >= 2) {
+      const hours = parseInt(formattedTime.slice(0, 2));
+      if (hours > 23) {
+        formattedTime = `23${formattedTime.slice(2)}`;
+      }
+    }
+    if (formattedTime.length === 5) {
+      const minutes = parseInt(formattedTime.slice(3, 5));
+      if (minutes > 59) {
+        formattedTime = `${formattedTime.slice(0, 3)}59`;
+      }
+    }
+
+    setTime(formattedTime);
+  };
+
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -772,9 +806,11 @@ const TimeModal = ({ isOpen, onClose, task, onSave }: { isOpen: boolean; onClose
         <div className="p-6">
           <label className="block text-[13px] font-medium text-[#808080] mb-2">Horário</label>
           <input 
-            type="time" 
+            type="text" 
+            placeholder="00:00"
+            maxLength={5}
             value={time}
-            onChange={(e) => setTime(e.target.value)}
+            onChange={handleTimeChange}
             className="w-full p-2 border border-gray-200 rounded-lg focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] outline-none transition-all ease-out duration-200 text-[#202020]"
           />
         </div>

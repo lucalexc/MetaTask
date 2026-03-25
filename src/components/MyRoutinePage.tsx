@@ -5,7 +5,6 @@ import { cn } from '@/src/lib/utils';
 import { Button } from '@/src/components/ui/button';
 import { useActivities, DailyActivity } from '@/src/hooks/useActivities';
 import CreateActivityModal from './CreateActivityModal';
-import ManageActivitiesModal from './ManageActivitiesModal';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -18,7 +17,7 @@ export default function MyRoutinePage({
 }) {
   const [currentDate] = useState(new Date());
   const { activities, isLoading, error, toggleActivity, refresh } = useActivities(currentDate);
-  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [activityToEdit, setActivityToEdit] = useState<DailyActivity | null>(null);
 
   const totalActivities = activities?.length || 0;
   const completedActivities = activities?.filter(a => a.is_completed).length || 0;
@@ -45,12 +44,6 @@ export default function MyRoutinePage({
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <h1 className="text-[26px] leading-[35px] font-bold text-[#202020] tracking-tight">Minha Rotina</h1>
-              <button 
-                onClick={() => setIsManageModalOpen(true)}
-                className="p-1 text-[#808080] hover:text-[#202020] transition-colors ease-out duration-200"
-              >
-                <Settings className="w-5 h-5" />
-              </button>
             </div>
             <p className="text-[13px] text-[#808080] mt-1 capitalize">
               {format(currentDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
@@ -101,7 +94,11 @@ export default function MyRoutinePage({
                           <ActivityRow 
                             key={activity.id} 
                             activity={activity} 
-                            onToggle={() => toggleActivity(activity)} 
+                            onToggle={() => toggleActivity(activity)}
+                            onEdit={() => {
+                              setActivityToEdit(activity);
+                              setIsCreateModalOpen(true);
+                            }}
                           />
                         ))}
                       </AnimatePresence>
@@ -114,13 +111,24 @@ export default function MyRoutinePage({
         </div>
       </div>
 
-      <CreateActivityModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSuccess={refresh} />
-      <ManageActivitiesModal isOpen={isManageModalOpen} onClose={() => setIsManageModalOpen(false)} />
+      <CreateActivityModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setActivityToEdit(null);
+        }} 
+        onSuccess={refresh}
+        activityToEdit={activityToEdit}
+      />
     </div>
   );
 }
 
-const ActivityRow: React.FC<{ activity: DailyActivity, onToggle: () => void }> = ({ activity, onToggle }) => {
+const ActivityRow: React.FC<{ 
+  activity: DailyActivity, 
+  onToggle: () => void,
+  onEdit: () => void 
+}> = ({ activity, onToggle, onEdit }) => {
   const isGoal = activity.type === 'goal';
   const isCompleted = activity.is_completed;
 
@@ -131,9 +139,15 @@ const ActivityRow: React.FC<{ activity: DailyActivity, onToggle: () => void }> =
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       className="flex flex-row items-center py-3 border-b border-gray-200 hover:bg-gray-100 transition-colors ease-out duration-200 group cursor-pointer"
-      onClick={onToggle}
+      onClick={onEdit}
     >
-      <div className="flex-shrink-0 mr-4">
+      <div 
+        className="flex-shrink-0 mr-4"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle();
+        }}
+      >
         <div className={cn(
             "w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-200 ease-out",
             isCompleted ? "bg-[#058527] border-[#058527] text-white" : "border-gray-300 group-hover:border-[#1f60c2] bg-white"
