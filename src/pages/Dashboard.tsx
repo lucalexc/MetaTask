@@ -48,13 +48,13 @@ export default function Dashboard() {
         </div>
 
         <div className="px-3 mb-4">
-          {activeTab !== 'missions' && activeTab !== 'identity' && activeTab !== 'settings' && (
+          {(activeTab === 'tasks' || activeTab === 'my-routine') && (
             <button 
               onClick={handleFabClick}
               className="flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium text-[#d1453b] hover:bg-gray-100 rounded-md transition-colors ease-out duration-200 w-full"
             >
               <Plus className="w-4 h-4" />
-              Adicionar {activeTab === 'tasks' ? 'tarefa' : 'atividade'}
+              Adicionar {activeTab === 'tasks' ? 'Tarefa' : 'Rotina'}
             </button>
           )}
         </div>
