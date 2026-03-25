@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Target, RefreshCw, Loader2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { supabase } from '@/src/lib/supabase';
+import { toast } from 'sonner';
 
 interface CreateActivityModalProps {
   isOpen: boolean;
@@ -37,8 +38,52 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
     }
   }, [isOpen]);
 
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    
+    if (value.length > 4) {
+      value = value.slice(0, 4);
+    }
+
+    let formattedTime = value;
+    if (value.length >= 3) {
+      formattedTime = `${value.slice(0, 2)}:${value.slice(2)}`;
+    }
+
+    // Validate hours and minutes
+    if (formattedTime.length >= 2) {
+      const hours = parseInt(formattedTime.slice(0, 2));
+      if (hours > 23) {
+        formattedTime = `23${formattedTime.slice(2)}`;
+      }
+    }
+    if (formattedTime.length === 5) {
+      const minutes = parseInt(formattedTime.slice(3, 5));
+      if (minutes > 59) {
+        formattedTime = `${formattedTime.slice(0, 3)}59`;
+      }
+    }
+
+    setTime(formattedTime);
+
+    // Auto-select period
+    if (formattedTime.length >= 2) {
+      const hours = parseInt(formattedTime.slice(0, 2));
+      if (hours >= 0 && hours < 12) {
+        setPeriod('morning');
+      } else if (hours >= 12 && hours < 18) {
+        setPeriod('afternoon');
+      } else if (hours >= 18 && hours <= 23) {
+        setPeriod('evening');
+      }
+    }
+  };
+
   const handleSave = async () => {
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      toast.error('O nome da atividade é obrigatório');
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -51,7 +96,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
         description: description.trim() || null,
         type,
         period: type === 'routine' ? period : null,
-        time: type === 'routine' && time ? time : null,
+        time: type === 'routine' && time.length === 5 ? time : null,
         duration_days: type === 'goal' && duration ? parseInt(duration) : null,
         reps_per_day: type === 'goal' && repetitions ? parseInt(repetitions) : 1,
         xp_reward: type === 'routine' ? 10 : 50, // Recompensa base
@@ -65,12 +110,13 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
 
       if (error) throw error;
 
+      toast.success('Atividade criada com sucesso!');
       resetForm();
       onSuccess?.();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao criar atividade:', error);
-      // Aqui você pode adicionar um toast de erro no futuro
+      toast.error(error.message || 'Erro ao criar atividade');
     } finally {
       setIsLoading(false);
     }
@@ -166,10 +212,12 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
                 <div className="space-y-2">
                   <label className="text-[13px] font-bold text-[#202020]">Horário (Opcional)</label>
                   <input
-                    type="time"
+                    type="text"
                     value={time}
-                    onChange={(e) => setTime(e.target.value)}
-                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                    onChange={handleTimeChange}
+                    placeholder="00:00"
+                    maxLength={5}
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                   />
                 </div>
               </div>
@@ -216,7 +264,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess }: Crea
               className="px-5 py-2 rounded-lg text-[13px] text-white font-bold bg-[#1f60c2] hover:bg-[#1a50a3] transition-all ease-out duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              Salvar
+              {isLoading ? 'Salvando...' : 'Salvar'}
             </button>
           </div>
         </motion.div>

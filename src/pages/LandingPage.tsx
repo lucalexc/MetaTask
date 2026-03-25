@@ -351,7 +351,6 @@ export default function LandingPage() {
       <footer className="py-12 text-center text-slate-500 text-sm border-t border-white/10 relative z-10 bg-[#06080F]">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-blue-500" />
             <span className="font-display font-bold text-lg text-white">MetaTask</span>
           </div>
           <p>© 2026 MetaTask. Todos os direitos reservados.</p>
