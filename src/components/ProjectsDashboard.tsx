@@ -164,14 +164,8 @@ export default function ProjectsDashboard() {
         .eq('id', id);
 
       if (error) throw error;
-
-      // Optimistic local update — no full re-fetch to prevent loops
-      setProjects(prev => prev.map(p =>
-        p.id === id ? { ...p, name: name.trim(), description: description.trim() || undefined, color } : p
-      ));
-      setSelectedProject(prev =>
-        prev ? { ...prev, name: name.trim(), description: description.trim() || undefined, color } : prev
-      );
+      
+      fetchProjects();
       toast.success('Projeto atualizado com sucesso!');
     } catch (error) {
       console.error('Error updating project:', error);
@@ -180,14 +174,10 @@ export default function ProjectsDashboard() {
   };
 
   const handleDeleteProject = async (id: string) => {
-    const confirmed = window.confirm('Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.');
-    if (!confirmed) return;
     try {
       const { error } = await supabase.from('projects').delete().eq('id', id);
       if (error) throw error;
-      // Optimistic local update — remove from list and navigate back
-      setProjects(prev => prev.filter(p => p.id !== id));
-      setSelectedProject(null);
+      fetchProjects();
       toast.success('Projeto excluído com sucesso!');
     } catch (error) {
       console.error('Error deleting project:', error);
@@ -473,17 +463,25 @@ function ProjectDetailView({
 
   return (
     <div className="flex-1 flex flex-col bg-[#FCFAF8] h-full overflow-hidden">
-      <header className="px-4 md:px-8 py-4 md:py-6 border-b border-gray-200 flex items-center gap-4 shrink-0">
-        <button
-          onClick={onClose}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors ease-out duration-200 text-[#808080] text-[13px] font-bold"
-        >
-          ← Voltar para Projetos
-        </button>
-        <div className="flex items-center gap-3">
-          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: project.color }} />
-          <h1 className="text-[26px] leading-[35px] font-bold text-[#202020] tracking-tight">{project.name}</h1>
+      <header className="px-4 md:px-8 py-4 md:py-6 border-b border-gray-200 flex justify-between items-center shrink-0">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors ease-out duration-200 text-[#808080]"
+          >
+            ← Voltar para Projetos
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: project.color }} />
+            <h1 className="text-[26px] leading-[35px] font-bold text-[#202020] tracking-tight">{project.name}</h1>
+          </div>
         </div>
+        <button
+          onClick={() => onDelete(project.id)}
+          className="px-3 py-1.5 text-[13px] font-bold text-[#d1453b] hover:bg-red-50 rounded-md transition-colors ease-out duration-200"
+        >
+          Excluir Projeto
+        </button>
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 md:p-8">
@@ -557,16 +555,7 @@ function ProjectDetailView({
               </div>
             </div>
 
-            <div className="pt-4 border-t border-gray-100 flex justify-between items-center gap-3">
-              {/* Destructive action — left side */}
-              <button
-                onClick={() => onDelete(project.id)}
-                disabled={isSaving}
-                className="px-4 py-2 text-[13px] font-bold text-[#d1453b] border border-red-200 rounded-lg hover:bg-red-50 transition-colors ease-out duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Excluir Projeto
-              </button>
-              {/* Primary action — right side */}
+            <div className="pt-4 border-t border-gray-100 flex justify-end">
               <button
                 onClick={handleSave}
                 disabled={!name.trim() || isSaving}
