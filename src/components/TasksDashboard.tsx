@@ -34,6 +34,11 @@ export type Task = {
   priority?: string;
   time?: string;
   recurrence?: string;
+  custom_recurrence_base?: string;
+  custom_recurrence_interval?: string | number;
+  custom_recurrence_unit?: string;
+  custom_recurrence_end_type?: string;
+  custom_recurrence_end_date?: string | null;
 };
 
 export type TaskTag = {
@@ -389,7 +394,13 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
   const [priority, setPriority] = useState('P4');
   const [duration, setDuration] = useState('30');
   const [time, setTime] = useState('');
-  const [recurrence, setRecurrence] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
+  const [recurrenceType, setRecurrenceType] = useState<'none' | 'daily' | 'weekly' | 'weekdays' | 'monthly' | 'yearly' | 'custom'>('none');
+  const [isCustomRecurrenceModalOpen, setIsCustomRecurrenceModalOpen] = useState(false);
+  const [customRecurrenceBase, setCustomRecurrenceBase] = useState<'scheduled' | 'completion'>('scheduled');
+  const [customRecurrenceInterval, setCustomRecurrenceInterval] = useState('1');
+  const [customRecurrenceUnit, setCustomRecurrenceUnit] = useState<'day' | 'week' | 'month' | 'year'>('week');
+  const [customRecurrenceEndType, setCustomRecurrenceEndType] = useState<'never' | 'date'>('never');
+  const [customRecurrenceEndDate, setCustomRecurrenceEndDate] = useState<Date | null>(null);
   const [taskDate, setTaskDate] = useState<Date>(new Date());
   const [projectId, setProjectId] = useState<string>('none');
   const [tagId, setTagId] = useState<string>('none');
@@ -444,7 +455,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
         setPriority(taskToEdit.priority || 'P4');
         setDuration(taskToEdit.estimated_time ? taskToEdit.estimated_time.toString() : '30');
         setTime(taskToEdit.time || '');
-        setRecurrence((taskToEdit.recurrence as any) || 'none');
+        setRecurrenceType((taskToEdit.recurrence as any) || 'none');
         setTaskDate(taskToEdit.due_date ? new Date(taskToEdit.due_date) : new Date());
         setProjectId(taskToEdit.project_id || 'none');
         setTagId(taskToEdit.tag_id || 'none');
@@ -454,7 +465,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
         setPriority('P4');
         setDuration('30');
         setTime('');
-        setRecurrence('none');
+        setRecurrenceType('none');
         setTaskDate(new Date());
         setProjectId('none');
         setTagId('none');
@@ -586,7 +597,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
               {/* Time Input */}
               <div className="relative flex items-center">
                 <div className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-all ease-out duration-200 focus-within:ring-4 focus-within:ring-[#dceaff] focus-within:border-[#1f60c2]",
+                  "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-all ease-out duration-200 focus-within:ring-4 focus-within:ring-[#dceaff] focus-within:border-[#1f60c2]",
                   time ? "border-[#1f60c2] text-[#1f60c2] bg-[#dceaff]" : "border-gray-200 text-[#808080] bg-white hover:bg-gray-50"
                 )}>
                   <Clock className={cn("w-4 h-4", time ? "text-[#1f60c2]" : "text-[#808080]")} />
@@ -596,40 +607,52 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
                     maxLength={5}
                     value={time}
                     onChange={handleTimeChange}
-                    className="w-10 bg-transparent focus:outline-none text-center placeholder-[#808080] text-[#202020]"
+                    className="w-11 bg-transparent focus:outline-none text-left justify-start placeholder-[#808080] text-[#202020]"
                   />
                 </div>
               </div>
 
               {/* Recurrence Button & Popover */}
               <div className="relative">
-                <button 
-                  onClick={() => {
-                    setIsRecurrencePickerOpen(!isRecurrencePickerOpen);
-                    setIsDatePickerOpen(false);
-                    setIsTimePickerOpen(false);
-                  }}
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-colors ease-out duration-200",
-                    isRecurrencePickerOpen || recurrence !== 'none' ? "border-[#1f60c2] text-[#1f60c2] bg-[#dceaff]" : "border-gray-200 text-[#808080] hover:bg-gray-50"
-                  )}
-                >
-                  <Repeat className={cn("w-4 h-4", isRecurrencePickerOpen || recurrence !== 'none' ? "text-[#1f60c2]" : "text-[#808080]")} />
-                  {recurrence === 'daily' ? 'Diário' : recurrence === 'weekly' ? 'Semanal' : recurrence === 'monthly' ? 'Mensal' : 'Repetir'}
-                </button>
-                <AnimatePresence>
-                  {isRecurrencePickerOpen && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                      className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 z-[100] p-2 space-y-1"
+                <Popover open={isRecurrencePickerOpen} onOpenChange={setIsRecurrencePickerOpen}>
+                  <PopoverTrigger asChild>
+                    <button 
+                      onClick={() => {
+                        setIsDatePickerOpen(false);
+                        setIsTimePickerOpen(false);
+                      }}
+                      className={cn(
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-colors ease-out duration-200",
+                        isRecurrencePickerOpen || recurrenceType !== 'none' ? "border-[#1f60c2] text-[#1f60c2] bg-[#dceaff]" : "border-gray-200 text-[#808080] hover:bg-gray-50"
+                      )}
                     >
-                      <button onClick={() => { setRecurrence('none'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-[13px] text-[#202020] rounded-lg hover:bg-gray-100 transition-colors ease-out duration-200", recurrence === 'none' && "bg-[#dceaff] text-[#1f60c2]")}>Não repete</button>
-                      <button onClick={() => { setRecurrence('daily'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-[13px] text-[#202020] rounded-lg hover:bg-gray-100 transition-colors ease-out duration-200", recurrence === 'daily' && "bg-[#dceaff] text-[#1f60c2]")}>Diariamente</button>
-                      <button onClick={() => { setRecurrence('weekly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-[13px] text-[#202020] rounded-lg hover:bg-gray-100 transition-colors ease-out duration-200", recurrence === 'weekly' && "bg-[#dceaff] text-[#1f60c2]")}>Semanalmente</button>
-                      <button onClick={() => { setRecurrence('monthly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-[13px] text-[#202020] rounded-lg hover:bg-gray-100 transition-colors ease-out duration-200", recurrence === 'monthly' && "bg-[#dceaff] text-[#1f60c2]")}>Mensalmente</button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      <Repeat className={cn("w-4 h-4", isRecurrencePickerOpen || recurrenceType !== 'none' ? "text-[#1f60c2]" : "text-[#808080]")} />
+                      {recurrenceType === 'daily' ? 'Todo dia' : 
+                       recurrenceType === 'weekly' ? `Toda semana (${format(taskDate, 'EEEE', { locale: ptBR })})` : 
+                       recurrenceType === 'weekdays' ? 'Todo dia útil' :
+                       recurrenceType === 'monthly' ? `Todo mês (dia ${format(taskDate, 'd')})` :
+                       recurrenceType === 'yearly' ? `Todo ano (${format(taskDate, 'd \'de\' MMMM', { locale: ptBR })})` :
+                       recurrenceType === 'custom' ? 'Personalizado' :
+                       'Repetir'}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    side="bottom" 
+                    align="start" 
+                    sideOffset={8} 
+                    avoidCollisions={true}
+                    className="w-56 p-2 bg-white rounded-xl shadow-xl border border-gray-200 z-[100] flex flex-col gap-1"
+                  >
+                    <button onClick={() => { setRecurrenceType('daily'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-[13px] text-[#202020] rounded-lg hover:bg-gray-100 transition-colors ease-out duration-200 capitalize", recurrenceType === 'daily' && "bg-[#dceaff] text-[#1f60c2]")}>Todo dia</button>
+                    <button onClick={() => { setRecurrenceType('weekly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-[13px] text-[#202020] rounded-lg hover:bg-gray-100 transition-colors ease-out duration-200 capitalize", recurrenceType === 'weekly' && "bg-[#dceaff] text-[#1f60c2]")}>Toda semana ({format(taskDate, 'EEEE', { locale: ptBR })})</button>
+                    <button onClick={() => { setRecurrenceType('weekdays'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-[13px] text-[#202020] rounded-lg hover:bg-gray-100 transition-colors ease-out duration-200 capitalize", recurrenceType === 'weekdays' && "bg-[#dceaff] text-[#1f60c2]")}>Todo dia útil (Seg - Sex)</button>
+                    <button onClick={() => { setRecurrenceType('monthly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-[13px] text-[#202020] rounded-lg hover:bg-gray-100 transition-colors ease-out duration-200 capitalize", recurrenceType === 'monthly' && "bg-[#dceaff] text-[#1f60c2]")}>Todo mês (dia {format(taskDate, 'd')})</button>
+                    <button onClick={() => { setRecurrenceType('yearly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-3 py-2 text-[13px] text-[#202020] rounded-lg hover:bg-gray-100 transition-colors ease-out duration-200 capitalize", recurrenceType === 'yearly' && "bg-[#dceaff] text-[#1f60c2]")}>Todo ano ({format(taskDate, 'd \'de\' MMMM', { locale: ptBR })})</button>
+                    <button onClick={() => { setIsRecurrencePickerOpen(false); setIsCustomRecurrenceModalOpen(true); }} className={cn("w-full text-left px-3 py-2 text-[13px] text-[#202020] rounded-lg hover:bg-gray-100 transition-colors ease-out duration-200 capitalize", recurrenceType === 'custom' && "bg-[#dceaff] text-[#1f60c2]")}>Personalizar...</button>
+                    <div className="h-px bg-gray-100 my-1" />
+                    <button onClick={() => { setRecurrenceType('none'); setIsRecurrencePickerOpen(false); }} className="w-full text-left px-3 py-2 text-[13px] text-red-500 rounded-lg hover:bg-red-50 transition-colors ease-out duration-200 font-medium">Limpar</button>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <Select value={priority} onValueChange={setPriority}>
@@ -736,8 +759,25 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
               disabled={isSaveDisabled}
               onClick={() => {
                 if (isSaveDisabled) return;
-                onSave({ id: taskToEdit?.id, title, description, priority, estimated_time: parseInt(duration) || 30, time: time || undefined, recurrence, date: taskDate, project_id: projectId === 'none' ? null : projectId, tag_id: tagId === 'none' ? null : tagId });
-                setTitle(''); setDescription(''); setTime(''); setRecurrence('none'); setPriority('P4'); setDuration('30'); setProjectId('none'); setTagId('none');
+                onSave({ 
+                  id: taskToEdit?.id, 
+                  title, 
+                  description, 
+                  priority, 
+                  estimated_time: parseInt(duration) || 30, 
+                  time: time || undefined, 
+                  recurrence: recurrenceType, 
+                  date: taskDate, 
+                  project_id: projectId === 'none' ? null : projectId, 
+                  tag_id: tagId === 'none' ? null : tagId,
+                  recurrenceType,
+                  customRecurrenceBase,
+                  customRecurrenceInterval,
+                  customRecurrenceUnit,
+                  customRecurrenceEndType,
+                  customRecurrenceEndDate
+                });
+                setTitle(''); setDescription(''); setTime(''); setRecurrenceType('none'); setPriority('P4'); setDuration('30'); setProjectId('none'); setTagId('none');
                 setIsDatePickerOpen(false); setIsTimePickerOpen(false); setIsRecurrencePickerOpen(false);
                 onClose();
               }}
@@ -748,6 +788,151 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
           </div>
         </motion.div>
       </div>
+
+      {/* Custom Recurrence Modal */}
+      <AnimatePresence>
+        {isCustomRecurrenceModalOpen && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white border border-gray-200 rounded-xl shadow-xl w-full max-w-sm overflow-hidden flex flex-col"
+            >
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <h2 className="text-[14px] leading-[22px] font-bold text-[#202020]">Repetição personalizada</h2>
+                <button onClick={() => setIsCustomRecurrenceModalOpen(false)} className="text-[#808080] hover:text-[#202020] transition-colors ease-out duration-200">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* Com base na */}
+                <div className="space-y-3">
+                  <label className="text-[13px] font-bold text-[#202020]">Com base na:</label>
+                  <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="customRecurrenceBase" 
+                        value="scheduled" 
+                        checked={customRecurrenceBase === 'scheduled'} 
+                        onChange={() => setCustomRecurrenceBase('scheduled')}
+                        className="w-4 h-4 text-[#1f60c2] border-gray-300 focus:ring-[#1f60c2]"
+                      />
+                      <span className="text-[13px] text-[#202020]">Data agendada</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="customRecurrenceBase" 
+                        value="completion" 
+                        checked={customRecurrenceBase === 'completion'} 
+                        onChange={() => setCustomRecurrenceBase('completion')}
+                        className="w-4 h-4 text-[#1f60c2] border-gray-300 focus:ring-[#1f60c2]"
+                      />
+                      <span className="text-[13px] text-[#202020]">Data de conclusão</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Cada */}
+                <div className="space-y-3">
+                  <label className="text-[13px] font-bold text-[#202020]">Cada:</label>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="number" 
+                      min="1" 
+                      value={customRecurrenceInterval} 
+                      onChange={(e) => setCustomRecurrenceInterval(e.target.value)}
+                      className="w-20 bg-white border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                    />
+                    <select 
+                      value={customRecurrenceUnit}
+                      onChange={(e) => setCustomRecurrenceUnit(e.target.value as any)}
+                      className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                    >
+                      <option value="day">Dia(s)</option>
+                      <option value="week">Semana(s)</option>
+                      <option value="month">Mês(es)</option>
+                      <option value="year">Ano(s)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Termina em */}
+                <div className="space-y-3">
+                  <label className="text-[13px] font-bold text-[#202020]">Termina em:</label>
+                  <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="customRecurrenceEndType" 
+                        value="never" 
+                        checked={customRecurrenceEndType === 'never'} 
+                        onChange={() => setCustomRecurrenceEndType('never')}
+                        className="w-4 h-4 text-[#1f60c2] border-gray-300 focus:ring-[#1f60c2]"
+                      />
+                      <span className="text-[13px] text-[#202020]">Nunca</span>
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                          type="radio" 
+                          name="customRecurrenceEndType" 
+                          value="date" 
+                          checked={customRecurrenceEndType === 'date'} 
+                          onChange={() => setCustomRecurrenceEndType('date')}
+                          className="w-4 h-4 text-[#1f60c2] border-gray-300 focus:ring-[#1f60c2]"
+                        />
+                        <span className="text-[13px] text-[#202020]">No vencimento (incluído)</span>
+                      </label>
+                      {customRecurrenceEndType === 'date' && (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-[13px] font-medium text-[#808080] hover:bg-gray-50 transition-colors ease-out duration-200">
+                              <CalendarIcon className="w-4 h-4" />
+                              {customRecurrenceEndDate ? format(customRecurrenceEndDate, 'dd/MM/yyyy') : 'Selecionar'}
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0 z-[120]" align="start">
+                            <div className="p-4 bg-white rounded-xl shadow-xl border border-gray-200">
+                              <input 
+                                type="date" 
+                                value={customRecurrenceEndDate ? format(customRecurrenceEndDate, 'yyyy-MM-dd') : ''}
+                                onChange={(e) => setCustomRecurrenceEndDate(e.target.value ? new Date(e.target.value) : null)}
+                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                              />
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
+                <button
+                  onClick={() => setIsCustomRecurrenceModalOpen(false)}
+                  className="px-4 py-2 rounded-lg text-[13px] text-[#808080] hover:text-[#202020] hover:bg-gray-200 transition-colors ease-out duration-200 font-medium"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => {
+                    setRecurrenceType('custom');
+                    setIsCustomRecurrenceModalOpen(false);
+                  }}
+                  className="px-5 py-2 rounded-lg text-[13px] text-white font-bold bg-[#1f60c2] hover:bg-[#1a50a3] transition-all ease-out duration-200 flex items-center gap-2"
+                >
+                  Salvar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -1375,6 +1560,11 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
       estimated_time: taskData.estimated_time,
       time: taskData.time,
       recurrence: taskData.recurrence,
+      // custom_recurrence_base: taskData.customRecurrenceBase,
+      // custom_recurrence_interval: taskData.customRecurrenceInterval,
+      // custom_recurrence_unit: taskData.customRecurrenceUnit,
+      // custom_recurrence_end_type: taskData.customRecurrenceEndType,
+      // custom_recurrence_end_date: taskData.customRecurrenceEndDate ? taskData.customRecurrenceEndDate.toISOString() : null,
       project_id: taskData.project_id || null,
       tag_id: taskData.tag_id || null,
       priority: taskData.priority || 'P4'
