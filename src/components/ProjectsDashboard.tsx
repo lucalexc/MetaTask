@@ -128,11 +128,17 @@ export default function ProjectsDashboard() {
 
   const handleCreateProject = async (name: string, description: string, color: string) => {
     if (!user) return;
+    
+    if (projects.length >= 7) {
+      toast.error('Limite máximo de 7 projetos atingido.');
+      return;
+    }
+
     try {
       const { error } = await supabase.from('projects').insert([{
         user_id: user.id,
-        name,
-        description,
+        name: name.trim(),
+        description: description.trim() || null,
         color
       }]);
       if (error) throw error;
@@ -151,8 +157,8 @@ export default function ProjectsDashboard() {
       const { error } = await supabase
         .from('projects')
         .update({
-          name,
-          description,
+          name: name.trim(),
+          description: description.trim() || null,
           color
         })
         .eq('id', id);
@@ -326,10 +332,17 @@ export default function ProjectsDashboard() {
   );
 }
 
-function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (name: string, description: string, color: string) => void }) {
+function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (name: string, description: string, color: string) => Promise<void> }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState(PRESET_COLORS[4]); // Default blue
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    await onSave(name, description, color);
+    setIsSaving(false);
+  };
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -397,10 +410,11 @@ function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (na
             Cancelar
           </button>
           <button
-            onClick={() => onSave(name, description, color)}
-            disabled={!name.trim()}
-            className="px-4 py-1.5 bg-[#202020] text-white text-[13px] font-bold rounded-md hover:bg-black transition-colors ease-out duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            onClick={handleSave}
+            disabled={!name.trim() || isSaving}
+            className="px-4 py-1.5 bg-[#202020] text-white text-[13px] font-bold rounded-md hover:bg-black transition-colors ease-out duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex items-center gap-2"
           >
+            {isSaving && <Loader2 className="w-3 h-3 animate-spin" />}
             Criar Projeto
           </button>
         </div>
