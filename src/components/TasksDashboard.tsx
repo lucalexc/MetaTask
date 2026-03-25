@@ -1219,14 +1219,45 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<'pending' | 'in_progress' | 'completed' | null>(null);
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], refetch: refetchCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
+      console.log('Fetching categories...');
       const { data, error } = await supabase
         .from('categories')
         .select('*')
         .order('name');
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Error fetching categories:', error);
+        throw error;
+      }
+
+      // If no categories exist, seed default ones
+      if (!data || data.length === 0) {
+        console.log('No categories found, seeding defaults...');
+        const defaultCategories = [
+          { name: 'Saúde', icon: 'Heart', color: '#ff4d4f' },
+          { name: 'Trabalho', icon: 'Briefcase', color: '#1890ff' },
+          { name: 'Aprendizado', icon: 'Book', color: '#722ed1' },
+          { name: 'Pessoal', icon: 'User', color: '#52c41a' },
+          { name: 'Finanças', icon: 'DollarSign', color: '#faad14' }
+        ];
+
+        const { data: seededData, error: seedError } = await supabase
+          .from('categories')
+          .insert(defaultCategories)
+          .select();
+
+        if (seedError) {
+          console.error('Error seeding categories:', seedError);
+          return [];
+        }
+        console.log('Categories seeded successfully:', seededData);
+        return seededData as Category[];
+      }
+
+      console.log('Categories fetched:', data);
       return data as Category[];
     }
   });
