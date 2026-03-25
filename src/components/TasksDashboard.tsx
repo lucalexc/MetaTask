@@ -4,6 +4,7 @@ import {
   CheckCircle2, Circle, Plus, Calendar as CalendarIcon, 
   ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause, Trash2, Tag
 } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, addDays, startOfMonth, endOfMonth, getDay, addMonths, subMonths, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/src/components/ui/button';
@@ -15,6 +16,13 @@ import { useAuth } from '@/src/lib/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // --- Types ---
+export type Category = {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+};
+
 export type Task = {
   id: string;
   user_id: string;
@@ -30,6 +38,7 @@ export type Task = {
   estimated_time?: number;
   project_id?: string;
   tag_id?: string;
+  category_id?: string;
   // UI only fields for now (not in DB schema)
   priority?: string;
   time?: string;
@@ -49,6 +58,12 @@ export type TaskTag = {
 };
 
 // --- Subcomponents ---
+
+export const DynamicIcon = ({ iconName, className }: { iconName: string, className?: string }) => {
+  const Icon = (LucideIcons as any)[iconName];
+  if (!Icon) return <LucideIcons.Circle className={className} />;
+  return <Icon className={className} />;
+};
 
 const TaskCard: React.FC<{ 
   task: Task; 
@@ -403,49 +418,19 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
   const [customRecurrenceEndDate, setCustomRecurrenceEndDate] = useState<Date | null>(null);
   const [taskDate, setTaskDate] = useState<Date>(new Date());
   const [projectId, setProjectId] = useState<string>('none');
-  const [tagId, setTagId] = useState<string>('none');
-  const [isCreatingTag, setIsCreatingTag] = useState(false);
-  const [newTagName, setNewTagName] = useState('');
+  const [categoryId, setCategoryId] = useState<string>('none');
 
-  const { data: tags = [] } = useQuery({
-    queryKey: ['task_tags', user?.id],
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
     queryFn: async () => {
-      if (!user) return [];
       const { data, error } = await supabase
-        .from('task_tags')
+        .from('categories')
         .select('*')
-        .eq('user_id', user.id)
         .order('name');
       if (error) throw error;
-      return data as TaskTag[];
-    },
-    enabled: !!user,
-  });
-
-  const createTagMutation = useMutation({
-    mutationFn: async (name: string) => {
-      if (!user) throw new Error('User not logged in');
-      const { data, error } = await supabase
-        .from('task_tags')
-        .insert([{ user_id: user.id, name, color: '#3b82f6' }])
-        .select()
-        .single();
-      if (error) throw error;
-      return data as TaskTag;
-    },
-    onSuccess: (newTag) => {
-      queryClient.invalidateQueries({ queryKey: ['task_tags'] });
-      setTagId(newTag.id);
-      setIsCreatingTag(false);
-      setNewTagName('');
+      return data as Category[];
     }
   });
-
-  const handleCreateTag = () => {
-    if (newTagName.trim()) {
-      createTagMutation.mutate(newTagName.trim());
-    }
-  };
 
   useEffect(() => {
     if (isOpen) {
@@ -458,7 +443,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
         setRecurrenceType((taskToEdit.recurrence as any) || 'none');
         setTaskDate(taskToEdit.due_date ? new Date(taskToEdit.due_date) : new Date());
         setProjectId(taskToEdit.project_id || 'none');
-        setTagId(taskToEdit.tag_id || 'none');
+        setCategoryId(taskToEdit.category_id || 'none');
       } else {
         setTitle('');
         setDescription('');
@@ -468,7 +453,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
         setRecurrenceType('none');
         setTaskDate(new Date());
         setProjectId('none');
-        setTagId('none');
+        setCategoryId('none');
       }
     }
   }, [isOpen, taskToEdit]);
@@ -693,55 +678,41 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
               )}
 
               <div className="flex items-center gap-1">
-                <Select value={tagId} onValueChange={setTagId}>
+                <Select value={categoryId} onValueChange={setCategoryId}>
                   <SelectTrigger className="w-auto h-9 border-gray-200 bg-transparent hover:bg-gray-50 focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] border rounded-lg px-3 transition-all ease-out duration-200">
                     <div className="flex items-center gap-1.5 text-[13px] font-medium text-[#808080]">
-                      <Tag className="w-4 h-4 text-[#808080]" />
-                      {tagId === 'none' ? 'Categoria' : tags.find((t: TaskTag) => t.id === tagId)?.name}
+                      {categoryId === 'none' ? (
+                        <>
+                          <Tag className="w-4 h-4 text-[#808080]" />
+                          Categoria
+                        </>
+                      ) : (
+                        <>
+                          {categories.find((c: Category) => c.id === categoryId) && (
+                            <DynamicIcon 
+                              iconName={categories.find((c: Category) => c.id === categoryId)!.icon} 
+                              className={cn("w-4 h-4", categories.find((c: Category) => c.id === categoryId)!.color)} 
+                            />
+                          )}
+                          <span className={cn(categories.find((c: Category) => c.id === categoryId)?.color)}>
+                            {categories.find((c: Category) => c.id === categoryId)?.name}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </SelectTrigger>
                   <SelectContent className="z-[110]">
                     <SelectItem value="none">Nenhuma categoria</SelectItem>
-                    {tags.map((t: TaskTag) => (
-                      <SelectItem key={t.id} value={t.id}>
+                    {categories.map((c: Category) => (
+                      <SelectItem key={c.id} value={c.id}>
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: t.color || '#3b82f6' }} />
-                          {t.name}
+                          <DynamicIcon iconName={c.icon} className={cn("w-4 h-4", c.color)} />
+                          <span className={cn(c.color)}>{c.name}</span>
                         </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                
-                {isCreatingTag ? (
-                  <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-lg px-2 h-9 focus-within:ring-4 focus-within:ring-[#dceaff] focus-within:border-[#1f60c2] transition-all ease-out duration-200">
-                    <input 
-                      type="text" 
-                      value={newTagName} 
-                      onChange={e => setNewTagName(e.target.value)}
-                      placeholder="Nome da tag"
-                      className="w-24 text-[13px] text-[#202020] bg-transparent focus:outline-none placeholder-[#808080]"
-                      autoFocus
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') handleCreateTag();
-                        if (e.key === 'Escape') setIsCreatingTag(false);
-                      }}
-                    />
-                    <button onClick={handleCreateTag} className="text-[#1f60c2] hover:text-[#1a50a3] p-1 transition-colors">
-                      <CheckCircle2 className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => setIsCreatingTag(false)} className="text-[#808080] hover:text-[#202020] p-1 transition-colors">
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <button 
-                    onClick={() => setIsCreatingTag(true)}
-                    className="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-200 text-[#808080] hover:text-[#1f60c2] hover:bg-[#dceaff] transition-colors ease-out duration-200"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                )}
               </div>
 
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-[13px] font-medium text-[#808080] hover:bg-gray-50 transition-colors ease-out duration-200 focus-within:ring-4 focus-within:ring-[#dceaff] focus-within:border-[#1f60c2]">
@@ -769,7 +740,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
                   recurrence: recurrenceType, 
                   date: taskDate, 
                   project_id: projectId === 'none' ? null : projectId, 
-                  tag_id: tagId === 'none' ? null : tagId,
+                  category_id: categoryId === 'none' ? null : categoryId,
                   recurrenceType,
                   customRecurrenceBase,
                   customRecurrenceInterval,
@@ -777,7 +748,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, taskToEdit }: { isOpen: 
                   customRecurrenceEndType,
                   customRecurrenceEndDate
                 });
-                setTitle(''); setDescription(''); setTime(''); setRecurrenceType('none'); setPriority('P4'); setDuration('30'); setProjectId('none'); setTagId('none');
+                setTitle(''); setDescription(''); setTime(''); setRecurrenceType('none'); setPriority('P4'); setDuration('30'); setProjectId('none'); setCategoryId('none');
                 setIsDatePickerOpen(false); setIsTimePickerOpen(false); setIsRecurrencePickerOpen(false);
                 onClose();
               }}
@@ -1566,7 +1537,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
       // custom_recurrence_end_type: taskData.customRecurrenceEndType,
       // custom_recurrence_end_date: taskData.customRecurrenceEndDate ? taskData.customRecurrenceEndDate.toISOString() : null,
       project_id: taskData.project_id || null,
-      tag_id: taskData.tag_id || null,
+      category_id: taskData.category_id || null,
       priority: taskData.priority || 'P4'
     };
 
