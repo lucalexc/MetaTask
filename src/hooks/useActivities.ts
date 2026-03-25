@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
 import { startOfDay, endOfDay, format } from 'date-fns';
@@ -45,7 +45,7 @@ export function useActivities(date: Date = new Date()) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchActivities = useCallback(async () => {
+  const fetchActivities = async () => {
     if (!user) return;
     setIsLoading(true);
     setError(null);
@@ -123,11 +123,11 @@ export function useActivities(date: Date = new Date()) {
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id, date.toISOString().split('T')[0]]);
+  };
 
   useEffect(() => {
     fetchActivities();
-  }, [fetchActivities]);
+  }, [user, date]);
 
   const toggleActivity = async (activity: DailyActivity) => {
     if (!user) return;
