@@ -211,7 +211,7 @@ export default function InsightsDashboard() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8">
+    <div className="w-full bg-gray-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Energy Banner */}

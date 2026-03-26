@@ -821,7 +821,7 @@ export default function IdentityDashboard() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-slate-50/50 overflow-hidden relative">
+    <div className="w-full flex flex-col bg-slate-50/50 relative">
       {/* Toast */}
       <AnimatePresence>
         {toastMsg && (
@@ -878,7 +878,7 @@ export default function IdentityDashboard() {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 p-6">
         <motion.div
           key={activeTab}
           initial={{ opacity: 0, y: 10 }}

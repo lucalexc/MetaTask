@@ -61,7 +61,7 @@ export default function MyRoutinePage({
   ];
 
   return (
-    <div className="min-h-screen w-full bg-[#FCFAF8] text-[#202020] p-8">
+    <div className="w-full bg-[#FCFAF8] text-[#202020] p-8">
       <div className="max-w-3xl mx-auto mb-8">
         <div className="flex items-center justify-between border-b border-gray-200 pb-6 mb-8">
           <div className="flex flex-col">

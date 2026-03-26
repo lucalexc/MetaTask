@@ -1892,8 +1892,8 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
   const emptyDaysBefore = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
 
   return (
-    <main className="flex-1 flex flex-col overflow-hidden bg-[#FCFAF8]">
-      <div className="max-w-4xl mx-auto w-full pt-6 md:pt-10 px-4 md:px-8 flex-1 overflow-y-auto pb-12">
+    <div className="w-full flex flex-col bg-[#FCFAF8]">
+      <div className="max-w-4xl mx-auto w-full pt-6 md:pt-10 px-4 md:px-8 pb-12">
         
         {/* Header */}
           <header className="flex flex-col gap-4 mb-6">
@@ -2271,6 +2271,6 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
             />
           )}
         </AnimatePresence>
-    </main>
+    </div>
   );
 }

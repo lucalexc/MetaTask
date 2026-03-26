@@ -134,26 +134,26 @@ export default function Dashboard() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden relative pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
-        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'identity' && "hidden")}>
+      <main className="flex-1 flex flex-col overflow-y-auto relative pb-32 md:pb-32">
+        <div className={cn("flex flex-col", activeTab !== 'identity' && "hidden")}>
           <IdentityDashboard />
         </div>
-        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'missions' && "hidden")}>
+        <div className={cn("flex flex-col", activeTab !== 'missions' && "hidden")}>
           <MissionsMapDashboard />
         </div>
-        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'tasks' && "hidden")}>
+        <div className={cn("flex flex-col", activeTab !== 'tasks' && "hidden")}>
           <TasksDashboard isCreateModalOpen={isTaskModalOpen} setIsCreateModalOpen={setIsTaskModalOpen} />
         </div>
-        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'projects' && "hidden")}>
+        <div className={cn("flex flex-col", activeTab !== 'projects' && "hidden")}>
           <ProjectsDashboard projectId={projectId} />
         </div>
-        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'my-routine' && "hidden")}>
+        <div className={cn("flex flex-col", activeTab !== 'my-routine' && "hidden")}>
           <MyRoutinePage isCreateModalOpen={isRoutineModalOpen} setIsCreateModalOpen={setIsRoutineModalOpen} />
         </div>
-        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'insights' && "hidden")}>
+        <div className={cn("flex flex-col", activeTab !== 'insights' && "hidden")}>
           <InsightsDashboard />
         </div>
-        <div className={cn("h-full flex flex-col overflow-hidden", activeTab !== 'settings' && "hidden")}>
+        <div className={cn("flex flex-col", activeTab !== 'settings' && "hidden")}>
           <SettingsDashboard />
         </div>
       </main>

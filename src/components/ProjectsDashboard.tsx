@@ -175,7 +175,7 @@ export default function ProjectsDashboard({ projectId }: { projectId?: string })
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-[#FCFAF8] h-screen overflow-hidden">
+    <div className="w-full flex flex-col bg-[#FCFAF8]">
       <header className="px-4 md:px-8 py-4 md:py-6 border-b border-gray-200 flex justify-between items-center shrink-0">
         <div className="flex items-center gap-3">
           <h1 className="text-[26px] leading-[35px] font-bold text-[#202020] tracking-tight">Meus Projetos</h1>
@@ -193,7 +193,7 @@ export default function ProjectsDashboard({ projectId }: { projectId?: string })
         </button>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
+      <div className="flex-1 p-4 md:p-8 pb-24 md:pb-8">
         <div className="max-w-5xl mx-auto">
           {projects.length === 0 ? (
             <div className="text-center py-20">
@@ -276,7 +276,7 @@ export default function ProjectsDashboard({ projectId }: { projectId?: string })
             </div>
           )}
         </div>
-      </main>
+      </div>
 
       <AnimatePresence>
         {isModalOpen && (

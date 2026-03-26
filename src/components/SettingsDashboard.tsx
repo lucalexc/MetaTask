@@ -104,7 +104,7 @@ export default function SettingsDashboard() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-white">
+    <div className="w-full bg-white">
       <div className="max-w-2xl mx-auto mt-6 md:mt-10 px-4 md:px-6 pb-20">
         {/* Header */}
         <div className="mb-8">
