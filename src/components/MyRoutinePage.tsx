@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Plus, Loader2, Trophy, Calendar, Settings, X } from 'lucide-react';
+import { Check, Plus, Loader2, Trophy, Calendar, Settings, X, Lock } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { Button } from '@/src/components/ui/button';
 import { useActivities, DailyActivity } from '@/src/hooks/useActivities';
 import CreateActivityModal from './CreateActivityModal';
-import { format } from 'date-fns';
+import { format, isBefore, startOfDay, startOfWeek, addDays, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { WeeklyCalendar } from './WeeklyCalendar';
+import { useWeeklyRoutineStatus } from '@/src/hooks/useWeeklyRoutineStatus';
 
 export default function MyRoutinePage({ 
   isCreateModalOpen, 
@@ -15,9 +17,30 @@ export default function MyRoutinePage({
   isCreateModalOpen: boolean; 
   setIsCreateModalOpen: (v: boolean) => void; 
 }) {
-  const [currentDate] = useState(new Date());
-  const { activities, isLoading, error, toggleActivity, refresh } = useActivities(currentDate);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [weekDirection, setWeekDirection] = useState(0);
+
+  const { activities, isLoading, error, toggleActivity, refresh } = useActivities(selectedDate);
   const [activityToEdit, setActivityToEdit] = useState<DailyActivity | null>(null);
+  
+  const { failedDays } = useWeeklyRoutineStatus(currentWeekStart);
+
+  const handlePrevWeek = () => {
+    setWeekDirection(-1);
+    setCurrentWeekStart(prev => subDays(prev, 7));
+  };
+
+  const handleNextWeek = () => {
+    setWeekDirection(1);
+    setCurrentWeekStart(prev => addDays(prev, 7));
+  };
+
+  const isPastDate = isBefore(startOfDay(selectedDate), startOfDay(new Date()));
+
+  const isDayFailed = (date: Date) => {
+    return failedDays.has(startOfDay(date).toISOString());
+  };
 
   const totalActivities = activities?.length || 0;
   const completedActivities = activities?.filter(a => a.is_completed).length || 0;
@@ -46,7 +69,7 @@ export default function MyRoutinePage({
               <h1 className="text-[26px] leading-[35px] font-bold text-[#202020] tracking-tight">Minha Rotina</h1>
             </div>
             <p className="text-[13px] text-[#808080] mt-1 capitalize">
-              {format(currentDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
+              {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
             </p>
           </div>
           
@@ -68,7 +91,31 @@ export default function MyRoutinePage({
           </div>
         </div>
 
+        <div className="max-w-3xl mx-auto mb-8">
+          <WeeklyCalendar 
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            currentWeekStart={currentWeekStart}
+            weekDirection={weekDirection}
+            handlePrevWeek={handlePrevWeek}
+            handleNextWeek={handleNextWeek}
+            isDayFailed={isDayFailed}
+          />
+        </div>
+
         <div className="max-w-3xl mx-auto">
+          {isPastDate && (
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-amber-800">
+              <Lock className="w-5 h-5 mt-0.5 shrink-0" />
+              <div>
+                <h4 className="text-[14px] font-bold">Modo Leitura (Data Passada)</h4>
+                <p className="text-[13px] mt-1 opacity-90">
+                  Você está visualizando uma data no passado. As rotinas estão bloqueadas e não podem ser marcadas como concluídas hoje.
+                </p>
+              </div>
+            </div>
+          )}
+
           {activities?.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <p className="text-[13px] text-[#808080] mb-4">Sua rotina está vazia.</p>
@@ -94,11 +141,16 @@ export default function MyRoutinePage({
                           <ActivityRow 
                             key={activity.id} 
                             activity={activity} 
-                            onToggle={() => toggleActivity(activity)}
-                            onEdit={() => {
-                              setActivityToEdit(activity);
-                              setIsCreateModalOpen(true);
+                            onToggle={() => {
+                              if (!isPastDate) toggleActivity(activity);
                             }}
+                            onEdit={() => {
+                              if (!isPastDate) {
+                                setActivityToEdit(activity);
+                                setIsCreateModalOpen(true);
+                              }
+                            }}
+                            isLocked={isPastDate}
                           />
                         ))}
                       </AnimatePresence>
@@ -127,8 +179,9 @@ export default function MyRoutinePage({
 const ActivityRow: React.FC<{ 
   activity: DailyActivity, 
   onToggle: () => void,
-  onEdit: () => void 
-}> = ({ activity, onToggle, onEdit }) => {
+  onEdit: () => void,
+  isLocked?: boolean
+}> = ({ activity, onToggle, onEdit, isLocked }) => {
   const isGoal = activity.type === 'goal';
   const isCompleted = activity.is_completed;
 
@@ -138,19 +191,25 @@ const ActivityRow: React.FC<{
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="flex flex-row items-center py-3 border-b border-gray-200 hover:bg-gray-100 transition-colors ease-out duration-200 group cursor-pointer"
-      onClick={onEdit}
+      className={cn(
+        "flex flex-row items-center py-3 border-b border-gray-200 transition-colors ease-out duration-200 group",
+        isLocked ? "opacity-60 cursor-not-allowed" : "hover:bg-gray-100 cursor-pointer"
+      )}
+      onClick={() => {
+        if (!isLocked) onEdit();
+      }}
     >
       <div 
-        className="flex-shrink-0 mr-4"
+        className={cn("flex-shrink-0 mr-4", isLocked ? "cursor-not-allowed" : "cursor-pointer")}
         onClick={(e) => {
           e.stopPropagation();
-          onToggle();
+          if (!isLocked) onToggle();
         }}
       >
         <div className={cn(
             "w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-200 ease-out",
-            isCompleted ? "bg-[#058527] border-[#058527] text-white" : "border-gray-300 group-hover:border-[#1f60c2] bg-white"
+            isCompleted ? "bg-[#058527] border-[#058527] text-white" : "border-gray-300 bg-white",
+            !isLocked && !isCompleted && "group-hover:border-[#1f60c2]"
           )}
         >
           {isCompleted && <Check className="w-3.5 h-3.5 stroke-[3]" />}

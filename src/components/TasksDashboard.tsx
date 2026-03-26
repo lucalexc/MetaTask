@@ -5,9 +5,10 @@ import {
   ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause, Trash2, Tag, Minus
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
-import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, addDays, startOfMonth, endOfMonth, getDay, addMonths, subMonths, parseISO } from 'date-fns';
+import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, addDays, startOfMonth, endOfMonth, getDay, addMonths, subMonths, parseISO, isBefore, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/src/components/ui/button';
+import { WeeklyCalendar } from './WeeklyCalendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/src/components/ui/popover';
 import { cn } from '@/src/lib/utils';
@@ -134,6 +135,7 @@ const TaskCard: React.FC<{
   };
 
   const isOvertime = task.estimated_time ? currentElapsed > task.estimated_time * 60 : false;
+  const isOverdue = task.status === 'pending' && task.due_date && isBefore(startOfDay(parseISO(task.due_date)), startOfDay(new Date()));
 
   if (view === 'kanban') {
     return (
@@ -187,8 +189,18 @@ const TaskCard: React.FC<{
                   {categories?.find(c => c.id === task.category_id)?.name}
                 </span>
               )}
-              {(task.time || (task.recurrence && task.recurrence !== 'none')) && (
-                <div className="flex items-center gap-2 text-[13px] text-[#808080]">
+              {isOverdue && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-md border font-bold flex items-center gap-1 bg-red-50 text-red-600 border-red-200 uppercase tracking-wider">
+                  Atrasada
+                </span>
+              )}
+              {(task.time || (task.recurrence && task.recurrence !== 'none') || isOverdue) && (
+                <div className={cn("flex items-center gap-2 text-[13px]", isOverdue ? "text-red-500 font-medium" : "text-[#808080]")}>
+                  {task.due_date && isOverdue && (
+                    <span className="flex items-center gap-1">
+                      {format(parseISO(task.due_date), "dd/MM")}
+                    </span>
+                  )}
                   {task.time && (
                     <span className="flex items-center gap-1 hover:text-[#202020] transition-colors ease-out duration-200" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenTimeModal(task); }}>
                       <Clock className="w-3 h-3" />
@@ -321,10 +333,20 @@ const TaskCard: React.FC<{
               {categories?.find(c => c.id === task.category_id)?.name}
             </span>
           )}
+          {isOverdue && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-md border font-bold flex items-center gap-1 bg-red-50 text-red-600 border-red-200 uppercase tracking-wider">
+              Atrasada
+            </span>
+          )}
         </div>
         
-        {(task.time || (task.recurrence && task.recurrence !== 'none')) && (
-          <div className="flex items-center gap-2 mt-0.5 text-[13px] text-[#808080]">
+        {(task.time || (task.recurrence && task.recurrence !== 'none') || isOverdue) && (
+          <div className={cn("flex items-center gap-2 mt-0.5 text-[13px]", isOverdue ? "text-red-500 font-medium" : "text-[#808080]")}>
+            {task.due_date && isOverdue && (
+              <span className="flex items-center gap-1">
+                {format(parseISO(task.due_date), "dd/MM")}
+              </span>
+            )}
             {task.time && (
               <span className="flex items-center gap-1 cursor-pointer hover:text-[#202020] transition-colors ease-out duration-200" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenTimeModal(task); }}>
                 <Clock className="w-3 h-3" />
@@ -1824,15 +1846,24 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
     return true;
   });
 
+  const isTodaySelected = isSameDay(selectedDate, new Date());
+
   const filteredTasks = projectFilteredTasks.filter(t => {
     if (!t.due_date) {
-      return isSameDay(new Date(), selectedDate); // Show tasks without due date on today
+      return isTodaySelected; // Show tasks without due date on today
     }
     
     const dueDate = parseISO(t.due_date);
     
     if (isSameDay(dueDate, selectedDate)) {
       return true;
+    }
+
+    // Overdue tasks logic: if today is selected, include pending tasks from the past
+    if (isTodaySelected && t.status === 'pending' && isBefore(startOfDay(dueDate), startOfDay(new Date()))) {
+      if (!t.recurrence || t.recurrence === 'none') {
+        return true;
+      }
     }
 
     if (t.recurrence && t.recurrence !== 'none' && selectedDate > dueDate) {
@@ -1950,70 +1981,14 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               className="space-y-6"
             >
               {/* Horizontal Days Strip */}
-              <div className="flex items-center bg-white py-3 px-2 border-b border-gray-100">
-                <Button variant="ghost" size="icon" onClick={handlePrevWeek} className="text-[#808080] hover:text-[#202020] shrink-0 transition-colors ease-out duration-200">
-                  <ChevronLeft className="w-5 h-5" />
-                </Button>
-                
-                <div className="flex-1 flex flex-col overflow-hidden px-2">
-                  {/* Static Labels */}
-                  <div className="flex justify-around mb-2">
-                    {['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'].map(day => (
-                      <div key={day} className="w-10 text-center text-[10px] font-semibold uppercase tracking-wider text-[#808080]">
-                        {day}
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Animated Numbers */}
-                  <div className="relative h-10">
-                    <AnimatePresence mode="popLayout" custom={weekDirection}>
-                      <motion.div
-                        key={currentWeekStart.toISOString()}
-                        custom={weekDirection}
-                        variants={{
-                          initial: (dir: number) => ({ x: dir > 0 ? 50 : -50, opacity: 0 }),
-                          animate: { x: 0, opacity: 1 },
-                          exit: (dir: number) => ({ x: dir > 0 ? -50 : 50, opacity: 0 })
-                        }}
-                        initial="initial"
-                        animate="animate"
-                        exit="exit"
-                        transition={{ duration: 0.3, ease: 'easeInOut' }}
-                        className="absolute inset-0 flex justify-around"
-                      >
-                        {eachDayOfInterval({ start: currentWeekStart, end: addDays(currentWeekStart, 6) }).map(day => {
-                          const isSelected = isSameDay(day, selectedDate);
-                          const isToday = isSameDay(day, new Date());
-                          return (
-                            <button
-                              key={day.toISOString()}
-                              onClick={() => setSelectedDate(day)}
-                              className={cn(
-                                "flex items-center justify-center w-10 h-10 rounded-lg transition-all ease-out duration-200",
-                                isSelected 
-                                  ? "bg-[#dceaff] text-[#1f60c2] font-bold shadow-sm" 
-                                  : "hover:bg-gray-50 text-[#808080]"
-                              )}
-                            >
-                              <span className={cn(
-                                "text-[14px]",
-                                isToday && !isSelected && "text-[#1f60c2] font-bold"
-                              )}>
-                                {format(day, 'd')}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
-                </div>
-
-                <Button variant="ghost" size="icon" onClick={handleNextWeek} className="text-[#808080] hover:text-[#202020] shrink-0 transition-colors ease-out duration-200">
-                  <ChevronRight className="w-5 h-5" />
-                </Button>
-              </div>
+              <WeeklyCalendar 
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+                currentWeekStart={currentWeekStart}
+                weekDirection={weekDirection}
+                handlePrevWeek={handlePrevWeek}
+                handleNextWeek={handleNextWeek}
+              />
 
               {/* Active Missions Area */}
               <div>

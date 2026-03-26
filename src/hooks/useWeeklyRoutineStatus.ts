@@ -1,0 +1,103 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../lib/AuthContext';
+import { startOfDay, endOfDay, addDays, isBefore, formatISO } from 'date-fns';
+import { Activity, ActivityLog } from './useActivities';
+
+export function useWeeklyRoutineStatus(weekStart: Date) {
+  const { user } = useAuth();
+  const [failedDays, setFailedDays] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchStatus = async () => {
+      const today = startOfDay(new Date());
+      const weekEnd = addDays(weekStart, 6);
+      
+      // Only check days up to yesterday
+      const checkEnd = isBefore(weekEnd, today) ? weekEnd : addDays(today, -1);
+      
+      if (isBefore(checkEnd, weekStart)) {
+        setFailedDays(new Set());
+        return; // No past days in this week
+      }
+
+      const startStr = startOfDay(weekStart).toISOString();
+      const endStr = endOfDay(checkEnd).toISOString();
+
+      try {
+        // Fetch all active routines
+        const { data: routines, error: routinesError } = await supabase
+          .from('activities')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('type', 'routine')
+          .eq('is_active', true);
+
+        if (routinesError) throw routinesError;
+
+        // Fetch all logs for the period
+        const { data: logs, error: logsError } = await supabase
+          .from('activity_logs')
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('completed_at', startStr)
+          .lte('completed_at', endStr);
+
+        if (logsError) throw logsError;
+
+        const newFailedDays = new Set<string>();
+
+        // Check each day from weekStart to checkEnd
+        let currentDay = startOfDay(weekStart);
+        while (!isBefore(checkEnd, currentDay)) {
+          const dayOfWeek = currentDay.getDay();
+          const dayStartStr = startOfDay(currentDay).toISOString();
+          const dayEndStr = endOfDay(currentDay).toISOString();
+
+          // Find routines active on this day
+          const activeRoutinesOnDay = (routines || []).filter(routine => {
+            // Check if routine was created before or on this day
+            const createdDate = new Date(routine.created_at);
+            if (isBefore(endOfDay(currentDay), startOfDay(createdDate))) return false;
+            
+            // Check if active on this day of week
+            return routine.active_days && routine.active_days[dayOfWeek];
+          });
+
+          if (activeRoutinesOnDay.length > 0) {
+            // Check if all active routines were completed
+            let allCompleted = true;
+            for (const routine of activeRoutinesOnDay) {
+              const routineLogs = (logs || []).filter(log => 
+                log.activity_id === routine.id && 
+                log.completed_at >= dayStartStr && 
+                log.completed_at <= dayEndStr
+              );
+              
+              if (routineLogs.length < (routine.reps_per_day || 1)) {
+                allCompleted = false;
+                break;
+              }
+            }
+
+            if (!allCompleted) {
+              newFailedDays.add(currentDay.toISOString());
+            }
+          }
+
+          currentDay = addDays(currentDay, 1);
+        }
+
+        setFailedDays(newFailedDays);
+      } catch (error) {
+        console.error('Error fetching weekly routine status:', error);
+      }
+    };
+
+    fetchStatus();
+  }, [user, weekStart.toISOString()]);
+
+  return { failedDays };
+}
