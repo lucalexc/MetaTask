@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, Circle, Plus, Calendar as CalendarIcon, 
-  ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause, Trash2, Tag
+  ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause, Trash2, Tag, Minus
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, addDays, startOfMonth, endOfMonth, getDay, addMonths, subMonths, parseISO } from 'date-fns';
@@ -404,6 +404,56 @@ const TaskCard: React.FC<{
   );
 };
 
+const formatDurationInput = (mins: number): string => {
+  if (!mins || mins < 0) return '0m';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h > 0 && m > 0) return `${h}h ${m}m`;
+  if (h > 0) return `${h}h`;
+  return `${m}m`;
+};
+
+const parseDurationInput = (text: string): number => {
+  const trimmed = text.trim().toLowerCase();
+  if (!trimmed) return 0;
+  
+  if (/^\d+$/.test(trimmed)) {
+    return parseInt(trimmed, 10);
+  }
+
+  let totalMinutes = 0;
+  let hasHoursOrMinutes = false;
+  
+  const hoursMatch = trimmed.match(/(\d+)\s*h/);
+  if (hoursMatch) {
+    totalMinutes += parseInt(hoursMatch[1], 10) * 60;
+    hasHoursOrMinutes = true;
+  }
+
+  const minutesMatch = trimmed.match(/(\d+)\s*m/);
+  if (minutesMatch) {
+    totalMinutes += parseInt(minutesMatch[1], 10);
+    hasHoursOrMinutes = true;
+  }
+
+  if (hoursMatch && !minutesMatch) {
+    const remaining = trimmed.replace(hoursMatch[0], '').trim();
+    if (/^\d+$/.test(remaining)) {
+      totalMinutes += parseInt(remaining, 10);
+      hasHoursOrMinutes = true;
+    }
+  }
+
+  if (!hasHoursOrMinutes) {
+    const numbersOnly = trimmed.replace(/\D/g, '');
+    if (numbersOnly) {
+      return parseInt(numbersOnly, 10);
+    }
+  }
+
+  return totalMinutes;
+};
+
 const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }: { isOpen: boolean; onClose: () => void; onSave: (task: any) => void; projects: {id: string, name: string, color: string}[]; categories: Category[]; taskToEdit?: Task | null }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -413,7 +463,8 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
   const [isRecurrencePickerOpen, setIsRecurrencePickerOpen] = useState(false);
   const [priority, setPriority] = useState('P4');
-  const [duration, setDuration] = useState('30');
+  const [duration, setDuration] = useState<number>(30);
+  const [durationInput, setDurationInput] = useState<string>('30m');
   const [time, setTime] = useState('');
   const [recurrenceType, setRecurrenceType] = useState<'none' | 'daily' | 'weekly' | 'weekdays' | 'monthly' | 'yearly' | 'custom'>('none');
   const [isCustomRecurrenceModalOpen, setIsCustomRecurrenceModalOpen] = useState(false);
@@ -432,7 +483,9 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
         setTitle(taskToEdit.title);
         setDescription(taskToEdit.description || '');
         setPriority(taskToEdit.priority || 'P4');
-        setDuration(taskToEdit.estimated_time ? taskToEdit.estimated_time.toString() : '30');
+        const initialDuration = taskToEdit.estimated_time || 30;
+        setDuration(initialDuration);
+        setDurationInput(formatDurationInput(initialDuration));
         setTime(taskToEdit.time || '');
         setRecurrenceType((taskToEdit.recurrence as any) || 'none');
         setTaskDate(taskToEdit.due_date ? new Date(taskToEdit.due_date) : new Date());
@@ -442,7 +495,8 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
         setTitle('');
         setDescription('');
         setPriority('P4');
-        setDuration('30');
+        setDuration(30);
+        setDurationInput('30m');
         setTime('');
         setRecurrenceType('none');
         setTaskDate(new Date());
@@ -697,10 +751,42 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                 </Select>
               </div>
 
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-[13px] font-medium text-[#808080] hover:bg-gray-50 transition-colors ease-out duration-200 focus-within:ring-4 focus-within:ring-[#dceaff] focus-within:border-[#1f60c2]">
-                <Timer className="w-4 h-4 text-[#808080]" />
-                <input type="text" value={duration} onChange={e => setDuration(e.target.value)} className="w-12 bg-transparent focus:outline-none text-center text-[#202020] placeholder-[#808080]" placeholder="30" />
-                min
+              <div className="flex items-center h-9 rounded-md border border-slate-200 bg-white text-[13px] font-medium text-slate-700 transition-colors ease-out duration-200 focus-within:ring-4 focus-within:ring-[#dceaff] focus-within:border-[#1f60c2] overflow-hidden">
+                <div className="pl-2.5 pr-1 flex items-center justify-center text-slate-400">
+                  <Timer className="w-4 h-4" />
+                </div>
+                <button 
+                  onClick={() => {
+                    const newDuration = Math.max(0, duration - 5);
+                    setDuration(newDuration);
+                    setDurationInput(formatDurationInput(newDuration));
+                  }}
+                  className="h-full px-2 hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors flex items-center justify-center"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <input 
+                  type="text" 
+                  value={durationInput} 
+                  onChange={e => setDurationInput(e.target.value)} 
+                  onBlur={() => {
+                    const parsed = parseDurationInput(durationInput);
+                    setDuration(parsed);
+                    setDurationInput(formatDurationInput(parsed));
+                  }}
+                  className="w-14 bg-transparent focus:outline-none text-center text-slate-700 placeholder-slate-400" 
+                  placeholder="30m" 
+                />
+                <button 
+                  onClick={() => {
+                    const newDuration = duration + 5;
+                    setDuration(newDuration);
+                    setDurationInput(formatDurationInput(newDuration));
+                  }}
+                  className="h-full px-2 hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors flex items-center justify-center"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
             <p className="text-[11px] text-[#808080] ml-1">Isso ativará o temporizador de foco da tarefa.</p>
@@ -717,7 +803,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                   title, 
                   description, 
                   priority, 
-                  estimated_time: parseInt(duration) || 30, 
+                  estimated_time: duration || 30, 
                   time: time || undefined, 
                   recurrence: recurrenceType, 
                   date: taskDate, 
@@ -730,7 +816,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                   customRecurrenceEndType,
                   customRecurrenceEndDate
                 });
-                setTitle(''); setDescription(''); setTime(''); setRecurrenceType('none'); setPriority('P4'); setDuration('30'); setProjectId('none'); setCategoryId('none');
+                setTitle(''); setDescription(''); setTime(''); setRecurrenceType('none'); setPriority('P4'); setDuration(30); setDurationInput('30m'); setProjectId('none'); setCategoryId('none');
                 setIsDatePickerOpen(false); setIsTimePickerOpen(false); setIsRecurrencePickerOpen(false);
                 onClose();
               }}
