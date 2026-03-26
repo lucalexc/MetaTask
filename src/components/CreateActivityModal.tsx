@@ -16,7 +16,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
   const [type, setType] = useState<'routine' | 'goal'>('routine');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [period, setPeriod] = useState('morning');
+  const [period, setPeriod] = useState('Manhã');
   const [time, setTime] = useState('');
   const [duration, setDuration] = useState('');
   const [repetitions, setRepetitions] = useState('1');
@@ -27,15 +27,25 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
       setType(activityToEdit.type);
       setName(activityToEdit.name);
       setDescription(activityToEdit.description || '');
-      setPeriod(activityToEdit.period || 'morning');
-      setTime(activityToEdit.time || '');
+      const activityTime = activityToEdit.time || '';
+      setTime(activityTime);
       setDuration(activityToEdit.duration_days?.toString() || '');
       setRepetitions(activityToEdit.reps_per_day?.toString() || '1');
+      
+      // Auto-calculate period from time if it's a routine
+      if (activityToEdit.type === 'routine' && activityTime.length >= 2) {
+        const hours = parseInt(activityTime.slice(0, 2));
+        if (hours >= 0 && hours < 12) setPeriod('Manhã');
+        else if (hours >= 12 && hours < 18) setPeriod('Tarde');
+        else if (hours >= 18 && hours <= 23) setPeriod('Noite');
+      } else {
+        setPeriod(activityToEdit.period || 'Manhã');
+      }
     } else {
       setType('routine');
       setName('');
       setDescription('');
-      setPeriod('morning');
+      setPeriod('Manhã');
       setTime('');
       setDuration('');
       setRepetitions('1');
@@ -81,11 +91,11 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
     if (formattedTime.length >= 2) {
       const hours = parseInt(formattedTime.slice(0, 2));
       if (hours >= 0 && hours < 12) {
-        setPeriod('morning');
+        setPeriod('Manhã');
       } else if (hours >= 12 && hours < 18) {
-        setPeriod('afternoon');
+        setPeriod('Tarde');
       } else if (hours >= 18 && hours <= 23) {
-        setPeriod('evening');
+        setPeriod('Noite');
       }
     }
   };
@@ -93,6 +103,11 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
   const handleSave = async () => {
     if (!name.trim()) {
       toast.error('O nome da atividade é obrigatório');
+      return;
+    }
+
+    if (type === 'routine' && (!time || time.length !== 5)) {
+      toast.error('O horário é obrigatório para rotinas');
       return;
     }
 
@@ -153,7 +168,9 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <h2 className="text-[14px] leading-[22px] font-bold text-[#202020]">
-              {activityToEdit ? 'Editar Atividade' : 'Nova Atividade'}
+              {activityToEdit 
+                ? (type === 'routine' ? 'Editar Rotina' : 'Editar Meta') 
+                : (type === 'routine' ? 'Nova Rotina' : 'Nova Meta')}
             </h2>
             <button onClick={onClose} className="text-[#808080] hover:text-[#202020] transition-colors ease-out duration-200">
               <X className="w-5 h-5" />
@@ -214,31 +231,16 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
 
             {/* Conditional Fields */}
             {type === 'routine' ? (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[13px] font-bold text-[#202020]">Período</label>
-                  <select
-                    value={period}
-                    onChange={(e) => setPeriod(e.target.value)}
-                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200 appearance-none"
-                  >
-                    <option value="morning">Manhã</option>
-                    <option value="afternoon">Tarde</option>
-                    <option value="evening">Noite</option>
-                    <option value="anytime">Qualquer Horário</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[13px] font-bold text-[#202020]">Horário (Opcional)</label>
-                  <input
-                    type="text"
-                    value={time}
-                    onChange={handleTimeChange}
-                    placeholder="00:00"
-                    maxLength={5}
-                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
-                  />
-                </div>
+              <div className="space-y-2">
+                <label className="text-[13px] font-bold text-[#202020]">Horário</label>
+                <input
+                  type="text"
+                  value={time}
+                  onChange={handleTimeChange}
+                  placeholder="00:00"
+                  maxLength={5}
+                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                />
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4">
@@ -295,7 +297,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                   disabled={isLoading}
                   className="text-[13px] text-red-500 hover:text-red-600 font-medium transition-colors ease-out duration-200 disabled:opacity-50"
                 >
-                  Excluir Atividade
+                  {type === 'routine' ? 'Excluir Rotina' : 'Excluir Meta'}
                 </button>
               )}
             </div>
