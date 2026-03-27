@@ -58,7 +58,11 @@ function AuthListener() {
   React.useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        navigate('/app');
+        // Prevent redirecting if the user is already inside the app
+        // This fixes the issue where resuming a suspended tab resets the view to /app
+        if (window.location.pathname === '/' || window.location.pathname === '/login') {
+          navigate('/app');
+        }
       }
     });
     return () => subscription.unsubscribe();
