@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/src/lib/utils';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import ConfirmDialog from './ConfirmDialog';
 
 interface Project {
   id: string;
@@ -28,7 +29,7 @@ interface ProjectDetailsProps {
   project: Project;
   onClose: () => void;
   onUpdate: (id: string, name: string, description: string, color: string) => Promise<void>;
-  onDelete: (id: string, skipConfirm?: boolean) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
 }
 
 export default function ProjectDetails({
@@ -43,6 +44,7 @@ export default function ProjectDetails({
   const [color, setColor] = useState(project.color);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: ['projectTasks', project.id],
@@ -77,22 +79,15 @@ export default function ProjectDetails({
   };
 
   const handleDelete = async () => {
-    const confirmed = window.confirm('Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.');
-    
-    if (confirmed) {
-      setIsDeleting(true);
-      try {
-        await onDelete(project.id, true); // Skip confirmation in parent
-        // After success, navigate back to projects list
-        // Since the app uses a tabbed dashboard, we'll navigate to /app
-        // and let the parent handle the view. 
-        // If the user specifically wants /projetos, we might need to adjust routing.
-        onClose(); 
-      } catch (error) {
-        console.error('Error deleting project:', error);
-      } finally {
-        setIsDeleting(false);
-      }
+    setIsDeleting(true);
+    try {
+      await onDelete(project.id); // Confirmation already handled by ConfirmDialog
+      onClose(); 
+    } catch (error) {
+      console.error('Error deleting project:', error);
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteModalOpen(false);
     }
   };
 
@@ -209,7 +204,7 @@ export default function ProjectDetails({
               {/* Footer with buttons as requested */}
               <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
                 <button
-                  onClick={handleDelete}
+                  onClick={() => setIsDeleteModalOpen(true)}
                   disabled={isDeleting || isSaving}
                   className="w-full sm:w-auto px-4 py-2 text-[13px] font-bold text-[#d1453b] hover:bg-red-50 border border-transparent hover:border-red-100 rounded-lg transition-all ease-out duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
                 >
@@ -245,6 +240,15 @@ export default function ProjectDetails({
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        title="Excluir Projeto"
+        description="Tem certeza que deseja excluir este projeto? Esta ação não poderá ser desfeita."
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

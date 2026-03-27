@@ -134,12 +134,7 @@ export default function ProjectsDashboard({ projectId }: { projectId?: string })
     }
   };
 
-  const handleDeleteProject = async (id: string, skipConfirm = false) => {
-    if (!skipConfirm) {
-      const confirmed = window.confirm('Tem certeza que deseja excluir este projeto?');
-      if (!confirmed) return;
-    }
-
+  const handleDeleteProject = async (id: string) => {
     try {
       const { error } = await supabase.from('projects').delete().eq('id', id);
       if (error) throw error;
@@ -169,7 +164,7 @@ export default function ProjectsDashboard({ projectId }: { projectId?: string })
         project={selectedProject}
         onClose={() => navigate('/app/projects')}
         onUpdate={handleUpdateProject}
-        onDelete={(id, skipConfirm) => handleDeleteProject(id, skipConfirm)}
+        onDelete={(id) => handleDeleteProject(id)}
       />
     );
   }

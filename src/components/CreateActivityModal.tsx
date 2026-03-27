@@ -4,6 +4,7 @@ import { X, Target, RefreshCw, Loader2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { supabase } from '@/src/lib/supabase';
 import { toast } from 'sonner';
+import ConfirmDialog from './ConfirmDialog';
 
 interface CreateActivityModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
   const [duration, setDuration] = useState('');
   const [repetitions, setRepetitions] = useState('1');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const resetForm = () => {
     if (activityToEdit) {
@@ -154,6 +156,27 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
     }
   };
 
+  const handleDelete = async () => {
+    if (!activityToEdit) return;
+    
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('activities')
+        .delete()
+        .eq('id', activityToEdit.id);
+      if (error) throw error;
+      toast.success('Atividade excluída com sucesso!');
+      onSuccess?.();
+      onClose();
+    } catch (error: any) {
+      toast.error('Erro ao excluir atividade');
+    } finally {
+      setIsLoading(false);
+      setIsDeleteModalOpen(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -275,25 +298,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
             <div>
               {activityToEdit && (
                 <button
-                  onClick={async () => {
-                    if (window.confirm('Tem certeza que deseja excluir esta atividade?')) {
-                      setIsLoading(true);
-                      try {
-                        const { error } = await supabase
-                          .from('activities')
-                          .delete()
-                          .eq('id', activityToEdit.id);
-                        if (error) throw error;
-                        toast.success('Atividade excluída com sucesso!');
-                        onSuccess?.();
-                        onClose();
-                      } catch (error: any) {
-                        toast.error('Erro ao excluir atividade');
-                      } finally {
-                        setIsLoading(false);
-                      }
-                    }
-                  }}
+                  onClick={() => setIsDeleteModalOpen(true)}
                   disabled={isLoading}
                   className="text-[13px] text-red-500 hover:text-red-600 font-medium transition-colors ease-out duration-200 disabled:opacity-50"
                 >
@@ -321,6 +326,15 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
           </div>
         </motion.div>
       </div>
+
+      <ConfirmDialog
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        title="Excluir Rotina"
+        description="Tem certeza que deseja excluir esta rotina? Esta ação não poderá ser desfeita."
+        isLoading={isLoading}
+      />
     </AnimatePresence>
   );
 }

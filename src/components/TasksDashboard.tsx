@@ -9,6 +9,7 @@ import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, addDays, 
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/src/components/ui/button';
 import { WeeklyCalendar } from './WeeklyCalendar';
+import ConfirmDialog from './ConfirmDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/src/components/ui/popover';
 import { cn } from '@/src/lib/utils';
@@ -1252,34 +1253,6 @@ const TaskHistoryModal = ({ isOpen, onClose, task }: { isOpen: boolean; onClose:
   );
 };
 
-const ConfirmDeleteModal = ({ isOpen, onClose, onConfirm }: { isOpen: boolean; onClose: () => void; onConfirm: () => void }) => {
-  if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden border border-gray-200"
-      >
-        <div className="p-6 text-center">
-          <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4">
-            <Trash2 className="w-6 h-6" />
-          </div>
-          <h3 className="text-[16px] font-bold text-[#202020] mb-2">Excluir Tarefa</h3>
-          <p className="text-[13px] leading-[18px] text-[#808080]">
-            Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.
-          </p>
-        </div>
-        <div className="p-4 bg-gray-50 flex justify-end gap-2 border-t border-gray-100">
-          <Button variant="ghost" className="text-[13px] font-medium text-[#808080] hover:text-[#202020] hover:bg-gray-200 transition-colors ease-out duration-200" onClick={onClose}>Cancelar</Button>
-          <Button className="text-[13px] font-bold bg-red-500 hover:bg-red-600 text-white transition-all ease-out duration-200 shadow-sm" onClick={onConfirm}>Excluir</Button>
-        </div>
-      </motion.div>
-    </div>
-  );
-};
-
 // --- Main Component ---
 
 export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen }: { isCreateModalOpen: boolean, setIsCreateModalOpen: (v: boolean) => void }) {
@@ -2264,10 +2237,13 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
             />
           )}
           {taskToDelete && (
-            <ConfirmDeleteModal
+            <ConfirmDialog
               isOpen={!!taskToDelete}
               onClose={() => setTaskToDelete(null)}
               onConfirm={() => handleDeleteTask(taskToDelete)}
+              title="Excluir Tarefa"
+              description="Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita."
+              confirmText="Excluir"
             />
           )}
         </AnimatePresence>
