@@ -293,7 +293,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
 
             {/* Conditional Fields */}
             {type === 'routine' ? (
-              <div className="space-y-4">
+              <div className="flex flex-row items-end gap-4">
                 <div className="space-y-2">
                   <label className="text-[13px] font-bold text-[#202020]">Horário</label>
                   <input
@@ -302,13 +302,13 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                     onChange={handleTimeChange}
                     placeholder="00:00"
                     maxLength={5}
-                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                    className="w-32 bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                   />
                 </div>
                 
-                <div className="space-y-2">
+                <div className="space-y-2 flex-1">
                   <label className="text-[13px] font-bold text-[#202020]">Dias da Semana</label>
-                  <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center gap-1.5">
                     {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, index) => {
                       const isActive = selectedDays.includes(index);
                       return (
@@ -322,10 +322,10 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                             }
                           }}
                           className={cn(
-                            "w-10 h-10 rounded-xl text-[13px] font-bold transition-all duration-200 flex items-center justify-center",
+                            "w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-colors",
                             isActive 
-                              ? "bg-blue-600 text-white shadow-sm" 
-                              : "bg-slate-100 text-slate-400 hover:bg-slate-200"
+                              ? "bg-blue-600 text-white" 
+                              : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                           )}
                         >
                           {day}
