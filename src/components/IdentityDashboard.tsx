@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Fingerprint, 
@@ -26,7 +26,7 @@ import { toast } from 'sonner';
 type IdentityTab = 'necrologio' | 'temperamento' | 'camadas';
 type TestStatus = 'idle' | 'running' | 'finished';
 type TemperamentType = 'colerico' | 'sanguineo' | 'melancolico' | 'fleumatico';
-type LayerType = 'camada4' | 'camada5' | 'camada6' | 'camada7';
+type LayerType = 'camada3' | 'camada4' | 'camada5' | 'camada6';
 
 interface NecrologioVersion {
   id: string;
@@ -121,82 +121,98 @@ const temperamentData: Record<TemperamentType, { title: string, desc: string, fo
 
 const layerQuestions = [
   {
-    question: "Quando você sofre um fracasso humilhante, qual é a sua dor mais profunda?",
+    id: 1,
+    question: "Você está em uma reunião e alguém critica duramente uma ideia que você deu. Qual é a sua primeira reação interna?",
     options: [
-      { text: "Sentir que as pessoas ao meu redor vão deixar de gostar de mim ou me abandonar.", type: "camada4" },
-      { text: "A ferida no meu ego. A raiva de ter perdido e a sensação de que zombaram da minha força.", type: "camada5" },
-      { text: "A frustração técnica de não ter dominado o processo ou não ter sido competente o suficiente.", type: "camada6" },
-      { text: "O peso na consciência por ter falhado com as pessoas que dependiam de mim e do meu papel.", type: "camada7" }
+      { text: "Sinto vergonha. Fico imaginando o que as outras pessoas na sala estão pensando de mim agora.", type: "camada3" },
+      { text: "Sinto raiva e ofensa pessoal. Minha vontade imediata é rebater, me defender ou atacar a pessoa de volta.", type: "camada4" },
+      { text: "Fico frustrado porque a pessoa não entendeu a parte técnica. Minha vontade é provar logicamente que funciona.", type: "camada5" },
+      { text: "Avalio friamente se a crítica tem utilidade prática. Se a ideia da pessoa for melhor para o objetivo final, eu descarto a minha.", type: "camada6" }
     ]
   },
   {
-    question: "Seja brutalmente honesto: por que você trabalha ou busca sucesso financeiro?",
+    id: 2,
+    question: "Pense em um final de semana onde você está exausto, mas prometeu ajudar um parente com uma mudança. O que te faz ir?",
     options: [
-      { text: "Para ser acolhido, admirado e sentir que pertenço a um grupo que me valoriza.", type: "camada4" },
-      { text: "Para não depender de ninguém, não receber ordens e provar que sou maior que meus obstáculos.", type: "camada5" },
-      { text: "Porque quero ser excelente no que faço e dominar as ferramentas do meu ofício.", type: "camada6" },
-      { text: "Porque é a minha obrigação objetiva sustentar a minha família e cumprir meu papel na sociedade.", type: "camada7" }
+      { text: "O medo de ficar com fama de 'fura-olho' ou de que eles fiquem chateados e parem de me convidar para as coisas.", type: "camada3" },
+      { text: "O meu orgulho. Eu odeio dar o braço a torcer ou admitir fraqueza. Vou lá para provar que dou conta.", type: "camada4" },
+      { text: "A vontade de organizar as coisas. Chegando lá, vou otimizar o caminhão porque odeio ver serviço mal feito.", type: "camada5" },
+      { text: "A simples constatação de que uma promessa foi feita e a pessoa precisa de ajuda. Minha vontade não entra na equação.", type: "camada6" }
     ]
   },
   {
-    question: "Como você age no meio de um conflito injusto contra você?",
+    id: 3,
+    question: "Imagine que você perdeu todo o seu dinheiro e o seu emprego de uma vez só. No primeiro dia após o choque, qual é o seu pensamento dominante?",
     options: [
-      { text: "Muitas vezes cedo, peço desculpas mesmo sem culpa, só para não perder o afeto e a paz.", type: "camada4" },
-      { text: "Bato de frente com agressividade. Eu prefiro quebrar tudo a abaixar a cabeça e parecer fraco.", type: "camada5" },
-      { text: "Tento ignorar a ofensa emocional e focar apenas em resolver o problema prático de forma utilitária.", type: "camada6" },
-      { text: "Analiso quais são os meus deveres reais na situação. Cumpro minha parte, doa a quem doer.", type: "camada7" }
+      { text: "'Como eu vou contar isso para os meus amigos/familiares? Vão me ver como um fracassado.'", type: "camada3" },
+      { text: "'Isso é humilhante. Não aceito voltar para a estaca zero ou ter que receber ordens de pessoas menores que eu.'", type: "camada4" },
+      { text: "'Quais são as minhas habilidades? Se eu consertar X ou vender Y, eu consigo gerar fluxo de caixa em uma semana.'", type: "camada5" },
+      { text: "'Quem depende de mim não pode passar fome. O que eu tenho que fazer hoje para colocar pão na mesa?'", type: "camada6" }
     ]
   },
   {
-    question: "O que significa 'Liberdade' para você hoje?",
+    id: 4,
+    question: "Quando você observa uma pessoa extremamente bem-sucedida, o que você mais inveja ou admira nela?",
     options: [
-      { text: "Estar cercado de pessoas que me amam incondicionalmente, sem me julgar.", type: "camada4" },
-      { text: "Ter poder e dinheiro suficientes para fazer o que eu quiser, na hora que eu quiser.", type: "camada5" },
-      { text: "Ter a capacidade e o domínio técnico para materializar minhas ideias no mundo real.", type: "camada6" },
-      { text: "A capacidade de escolher livremente as minhas responsabilidades e carregar o peso delas.", type: "camada7" }
+      { text: "O carisma dela. O fato de que todos a adoram, a escutam e querem estar perto dela.", type: "camada3" },
+      { text: "A liberdade e o poder inquestionável. O fato de que ela não precisa baixar a cabeça para ninguém.", type: "camada4" },
+      { text: "A competência absurda dela. O domínio que ela tem sobre as ferramentas, o trabalho e o mercado.", type: "camada5" },
+      { text: "O peso que ela consegue carregar. A capacidade de ser o pilar que sustenta uma família ou uma empresa inteira.", type: "camada6" }
     ]
   },
   {
-    question: "Ao assumir um compromisso chato, longo e exaustivo, o que te impede de desistir?",
+    id: 5,
+    question: "Como você lida com regras burocráticas (no trabalho ou sociedade) que você considera estúpidas?",
     options: [
-      { text: "O medo de que os outros fiquem chateados comigo se eu pular fora.", type: "camada4" },
-      { text: "O meu orgulho. Eu disse que faria, e não vou dar o braço a torcer para ninguém.", type: "camada5" },
-      { text: "O desejo de ver a obra pronta e bem executada, pelo simples amor ao trabalho bem feito.", type: "camada6" },
-      { text: "O fato de que eu fiz um juramento ou assumi a responsabilidade. O meu dever está acima do meu cansaço.", type: "camada7" }
+      { text: "Reclamo com meus colegas para gerar conexão, mas na hora H eu cumpro só para não ser punido ou mal visto.", type: "camada3" },
+      { text: "Fico revoltado. Bato de frente ou quebro a regra de propósito só para provar que não sou gado.", type: "camada4" },
+      { text: "Crio um 'hack' ou um sistema inteligente para contornar a regra da forma mais eficiente e técnica possível.", type: "camada5" },
+      { text: "Cumpro a regra se for meu dever moral ou legal, mesmo achando burra, pois a ordem geral importa mais que minha opinião.", type: "camada6" }
     ]
   },
   {
-    question: "Como você lida com regras, chefes ou autoridades?",
+    id: 6,
+    question: "Na maior parte do seu dia, onde a sua atenção está focada?",
     options: [
-      { text: "Obedeço para ser o 'bom menino(a)' e garantir proteção e elogios.", type: "camada4" },
-      { text: "Incomodam profundamente. Tenho uma necessidade constante de desafiá-los ou superá-los.", type: "camada5" },
-      { text: "Respeito se eles forem tecnicamente mais competentes do que eu. Se não forem, os ignoro.", type: "camada6" },
-      { text: "Respeito a hierarquia e a ordem objetiva das coisas, pois toda sociedade precisa de estrutura.", type: "camada7" }
+      { text: "Nas minhas interações sociais. Em quem falou comigo, quem me ignorou, e como eu me encaixo no meu grupo.", type: "camada3" },
+      { text: "Nos meus sentimentos, no que fizeram comigo, ou nos meus grandes sonhos de independência.", type: "camada4" },
+      { text: "Nos processos. Em como fazer as coisas mais rápido, melhor, aprendendo ferramentas e otimizando minha rotina.", type: "camada5" },
+      { text: "Nas minhas obrigações objetivas com as outras pessoas (cônjuge, filhos, clientes). No que precisa ser resolvido no mundo real.", type: "camada6" }
+    ]
+  },
+  {
+    id: 7,
+    question: "O que é um dia 'perfeito' de descanso para você?",
+    options: [
+      { text: "Estar rodeado pela minha turma, rindo, sendo aceito e sem me preocupar com julgamentos.", type: "camada3" },
+      { text: "Fazer absolutamente o que eu quiser, na hora que eu quiser, sozinho e sem ninguém me cobrando nada.", type: "camada4" },
+      { text: "Mergulhar em um hobby complexo (marcenaria, programação), onde vejo minhas habilidades evoluindo.", type: "camada5" },
+      { text: "Ter a certeza de que todas as minhas pendências estão sanadas e as pessoas que amo estão seguras sob meu teto.", type: "camada6" }
     ]
   }
 ];
 
 const layerData: Record<LayerType, { title: string, desc: string, forces: string[], weaknesses: string[] }> = {
-  camada4: {
-    title: "Camada 4 (Afeto)",
+  camada3: {
+    title: "Camada 3 (Afeto)",
     desc: "Sua motivação principal é a busca por afeto, aceitação e pertencimento. Você age para não ser rejeitado e para agradar aos outros. O desafio é parar de depender da aprovação alheia.",
     forces: ["Empatia", "Sensibilidade", "Acolhimento"],
     weaknesses: ["Dependência Emocional", "Medo de Rejeição", "Falta de Posicionamento"]
   },
-  camada5: {
-    title: "Camada 5 (Força)",
+  camada4: {
+    title: "Camada 4 (Força)",
     desc: "Sua motivação principal é a busca por força, independência e vitória. Você age para provar que é capaz e não depender de ninguém. O desafio é entender que a vida não é apenas uma competição.",
     forces: ["Determinação", "Independência", "Força de Vontade"],
     weaknesses: ["Rebeldia", "Competitividade Exagerada", "Dificuldade em Ceder"]
   },
-  camada6: {
-    title: "Camada 6 (Utilidade)",
+  camada5: {
+    title: "Camada 5 (Utilidade)",
     desc: "Sua motivação principal é a busca por utilidade, competência e excelência técnica. Você age para ser bom no que faz e entregar resultados práticos. O desafio é não se resumir apenas ao seu trabalho.",
     forces: ["Foco no Trabalho", "Busca por Excelência", "Pragmatismo"],
     weaknesses: ["Workaholic", "Frieza Emocional", "Perfeccionismo"]
   },
-  camada7: {
-    title: "Camada 7 (Dever)",
+  camada6: {
+    title: "Camada 6 (Dever)",
     desc: "Sua motivação principal é o senso de dever e responsabilidade. Você age para cumprir seus papéis na sociedade (pai, mãe, profissional) e cuidar dos outros. O desafio é não se perder sob o peso das obrigações.",
     forces: ["Responsabilidade", "Maturidade", "Senso de Dever"],
     weaknesses: ["Excesso de Carga", "Esquecimento de Si", "Rigidez"]
@@ -377,13 +393,20 @@ export default function IdentityDashboard() {
   // Layer Test State
   const [layerTestStatus, setLayerTestStatus] = useState<TestStatus>('idle');
   const [currentLayerQuestion, setCurrentLayerQuestion] = useState(0);
-  const [layerScores, setLayerScores] = useState<Record<LayerType, number>>({
-    camada4: 0,
-    camada5: 0,
-    camada6: 0,
-    camada7: 0
-  });
+  const [layerAnswers, setLayerAnswers] = useState<Record<number, LayerType>>({});
   const [layerFinalResult, setLayerFinalResult] = useState<LayerType | null>(null);
+
+  // Shuffle options to prevent pattern recognition
+  const shuffledLayerOptions = useMemo(() => {
+    const q = layerQuestions[currentLayerQuestion];
+    if (!q) return [];
+    const options = [...q.options];
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]];
+    }
+    return options;
+  }, [currentLayerQuestion]);
 
   const handleAnswer = async (type: string) => {
     const tType = type as TemperamentType;
@@ -437,50 +460,62 @@ export default function IdentityDashboard() {
 
   const handleLayerAnswer = async (type: string) => {
     const lType = type as LayerType;
-    const newScores = { ...layerScores, [lType]: layerScores[lType] + 1 };
-    setLayerScores(newScores);
+    const newAnswers = { ...layerAnswers, [currentLayerQuestion]: lType };
+    setLayerAnswers(newAnswers);
 
     if (currentLayerQuestion < layerQuestions.length - 1) {
       setCurrentLayerQuestion(currentLayerQuestion + 1);
     } else {
-      let winner: LayerType = 'camada4';
+      const counts: Record<LayerType, number> = {
+        camada3: 0,
+        camada4: 0,
+        camada5: 0,
+        camada6: 0
+      };
+      Object.values(newAnswers).forEach(layer => {
+        counts[layer as LayerType]++;
+      });
+
+      let winner: LayerType = 'camada3';
       let maxScore = -1;
-      (Object.keys(newScores) as LayerType[]).forEach(key => {
-        if (newScores[key] > maxScore) {
-          maxScore = newScores[key];
+      
+      const layerOrder: LayerType[] = ['camada3', 'camada4', 'camada5', 'camada6'];
+      layerOrder.forEach(key => {
+        if (counts[key] > maxScore) {
+          maxScore = counts[key];
           winner = key;
         }
       });
       
       setLayerFinalResult(winner);
       setLayerTestStatus('finished');
+    }
+  };
 
-      // Save to Supabase
-      if (user) {
-        try {
-          const { error } = await supabase
-            .from('identity_layers')
-            .upsert({ 
-              user_id: user.id, 
-              result: winner 
-            }, { onConflict: 'user_id' });
+  const saveLayerDiagnosis = async () => {
+    if (!user || !layerFinalResult) return;
+    try {
+      const { error } = await supabase
+        .from('identity_layers')
+        .upsert({ 
+          user_id: user.id, 
+          result: layerFinalResult 
+        }, { onConflict: 'user_id' });
 
-          if (error) throw error;
-          setToastMsg('Anamnese salva com sucesso!');
-          setTimeout(() => setToastMsg(''), 3000);
-        } catch (error) {
-          console.error('Error saving layers:', error);
-          setToastMsg('Erro ao salvar anamnese.');
-          setTimeout(() => setToastMsg(''), 3000);
-        }
-      }
+      if (error) throw error;
+      setToastMsg('Anamnese salva com sucesso!');
+      setTimeout(() => setToastMsg(''), 3000);
+    } catch (error) {
+      console.error('Error saving layers:', error);
+      setToastMsg('Erro ao salvar anamnese.');
+      setTimeout(() => setToastMsg(''), 3000);
     }
   };
 
   const resetLayerTest = () => {
     setLayerTestStatus('idle');
     setCurrentLayerQuestion(0);
-    setLayerScores({ camada4: 0, camada5: 0, camada6: 0, camada7: 0 });
+    setLayerAnswers({});
     setLayerFinalResult(null);
   };
 
@@ -801,7 +836,7 @@ export default function IdentityDashboard() {
           </h3>
 
           <div className="flex flex-col gap-3">
-            {q.options.map((opt, idx) => (
+            {shuffledLayerOptions.map((opt, idx) => (
               <button
                 key={idx}
                 onClick={() => handleLayerAnswer(opt.type)}
@@ -863,7 +898,14 @@ export default function IdentityDashboard() {
             </div>
           </div>
 
-          <div className="mt-8 flex justify-center">
+          <div className="mt-8 flex flex-col items-center gap-4">
+            <button 
+              onClick={saveLayerDiagnosis}
+              className="group flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all hover:scale-105"
+            >
+              <CheckCircle2 className="w-5 h-5" />
+              Salvar Diagnóstico
+            </button>
             <button 
               onClick={resetLayerTest}
               className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors underline underline-offset-4"
