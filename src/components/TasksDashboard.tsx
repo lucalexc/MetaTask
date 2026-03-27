@@ -734,10 +734,10 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                       {projectId === 'none' ? 'Projeto' : projects.find(p => p.id === projectId)?.name}
                     </div>
                   </SelectTrigger>
-                  <SelectContent side="bottom" avoidCollisions={false} className="z-[110] top-full mt-1 lg:mt-2 max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-md">
-                    <SelectItem value="none" className="py-1.5 px-3 text-sm">Nenhum projeto</SelectItem>
+                  <SelectContent side="bottom" avoidCollisions={false} className="z-[110] top-full mt-1 lg:mt-2 max-h-56 overflow-y-auto custom-scrollbar bg-white border border-slate-200 shadow-lg rounded-md">
+                    <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100 data-[state=checked]:bg-blue-50 data-[state=checked]:text-blue-600 data-[state=checked]:font-medium">Nenhum projeto</SelectItem>
                     {projects.map(p => (
-                      <SelectItem key={p.id} value={p.id} className="py-1.5 px-3 text-sm">
+                      <SelectItem hideCheck key={p.id} value={p.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100 data-[state=checked]:bg-blue-50 data-[state=checked]:text-blue-600 data-[state=checked]:font-medium">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
                           {p.name}
@@ -761,11 +761,11 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                       )}
                     </div>
                   </SelectTrigger>
-                  <SelectContent side="bottom" avoidCollisions={false} className="z-[110] top-full mt-1 lg:mt-2 max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-md">
-                    <SelectItem value="none" className="py-1.5 px-3 text-sm">Nenhuma categoria</SelectItem>
+                  <SelectContent side="bottom" avoidCollisions={false} className="z-[110] top-full mt-1 lg:mt-2 max-h-56 overflow-y-auto custom-scrollbar bg-white border border-slate-200 shadow-lg rounded-md">
+                    <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100 data-[state=checked]:bg-blue-50 data-[state=checked]:text-blue-600 data-[state=checked]:font-medium">Nenhuma categoria</SelectItem>
                     {categories?.map((c: Category) => (
-                      <SelectItem key={c.id} value={c.id} className="py-1.5 px-3 text-sm">
-                        <div className="flex items-center gap-2 text-slate-700">
+                      <SelectItem hideCheck key={c.id} value={c.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100 data-[state=checked]:bg-blue-50 data-[state=checked]:text-blue-600 data-[state=checked]:font-medium">
+                        <div className="flex items-center gap-2">
                           <span>{c.name}</span>
                         </div>
                       </SelectItem>
