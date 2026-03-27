@@ -14,11 +14,14 @@ import {
   Flame,
   Wind,
   Droplets,
-  Brain
+  Brain,
+  Trash2
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
+import ConfirmDialog from './ConfirmDialog';
+import { toast } from 'sonner';
 
 type IdentityTab = 'necrologio' | 'temperamento' | 'camadas';
 type TestStatus = 'idle' | 'running' | 'finished';
@@ -211,6 +214,9 @@ export default function IdentityDashboard() {
   const [isLoadingTemperament, setIsLoadingTemperament] = useState(false);
   const [isLoadingLayers, setIsLoadingLayers] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
+  const [versionToDelete, setVersionToDelete] = useState<NecrologioVersion | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeletingVersion, setIsDeletingVersion] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -325,6 +331,35 @@ export default function IdentityDashboard() {
       setTimeout(() => setToastMsg(''), 3000);
     } finally {
       setIsSavingNecrologio(false);
+    }
+  };
+
+  const handleDeleteVersion = async () => {
+    if (!versionToDelete || !user) return;
+    setIsDeletingVersion(true);
+    try {
+      const { error } = await supabase
+        .from('identity_necrology')
+        .delete()
+        .eq('id', versionToDelete.id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast.success('Versão excluída');
+      
+      setNecrologioVersions(prev => prev.filter(v => v.id !== versionToDelete.id));
+      
+      if (selectedVersion?.id === versionToDelete.id) {
+        setSelectedVersion(null);
+      }
+    } catch (error: any) {
+      console.error('Error deleting version:', error);
+      toast.error('Erro ao excluir versão');
+    } finally {
+      setIsDeletingVersion(false);
+      setIsDeleteModalOpen(false);
+      setVersionToDelete(null);
     }
   };
 
@@ -505,27 +540,38 @@ export default function IdentityDashboard() {
             <div className="text-center p-4 text-sm text-slate-500">Carregando histórico...</div>
           ) : necrologioVersions.length > 0 ? (
             necrologioVersions.map((v) => (
-              <button
-                key={v.id}
-                onClick={() => setSelectedVersion(v)}
-                className={cn(
-                  "w-full p-4 rounded-xl border text-left transition-all group",
-                  selectedVersion?.id === v.id 
-                    ? "bg-slate-50 border-slate-300 shadow-sm" 
-                    : "bg-white border-slate-100 hover:border-slate-200 hover:shadow-md"
-                )}
-              >
-                <div className="flex justify-between items-start mb-1">
-                  <span className={cn(
-                    "font-bold text-sm",
-                    selectedVersion?.id === v.id ? "text-slate-900" : "text-slate-700"
-                  )}>{v.title}</span>
-                  <span className="text-[10px] text-slate-400 font-medium">{v.date}</span>
-                </div>
-                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                  {v.text}
-                </p>
-              </button>
+              <div key={v.id} className="relative group">
+                <button
+                  onClick={() => setSelectedVersion(v)}
+                  className={cn(
+                    "w-full p-4 rounded-xl border text-left transition-all",
+                    selectedVersion?.id === v.id 
+                      ? "bg-slate-50 border-slate-300 shadow-sm" 
+                      : "bg-white border-slate-100 hover:border-slate-200 hover:shadow-md"
+                  )}
+                >
+                  <div className="flex justify-between items-start mb-1 pr-6">
+                    <span className={cn(
+                      "font-bold text-sm",
+                      selectedVersion?.id === v.id ? "text-slate-900" : "text-slate-700"
+                    )}>{v.title}</span>
+                    <span className="text-[10px] text-slate-400 font-medium">{v.date}</span>
+                  </div>
+                  <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                    {v.text}
+                  </p>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setVersionToDelete(v);
+                    setIsDeleteModalOpen(true);
+                  }}
+                  className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-slate-400 hover:text-red-500"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             ))
           ) : (
             <div className="p-6 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center text-center gap-2 opacity-50">
@@ -537,6 +583,18 @@ export default function IdentityDashboard() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setVersionToDelete(null);
+        }}
+        onConfirm={handleDeleteVersion}
+        title="Excluir Versão"
+        description="Tem certeza que deseja excluir esta versão do seu necrológio? Esta ação não poderá ser desfeita."
+        isLoading={isDeletingVersion}
+      />
     </div>
   );
 
