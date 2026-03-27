@@ -1866,7 +1866,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
 
   return (
     <div className="w-full flex flex-col bg-[#FCFAF8]">
-      <div className="max-w-4xl mx-auto w-full pt-6 md:pt-10 px-4 md:px-8 pb-12">
+      <div className="w-full max-w-7xl mx-auto px-6 lg:px-12 pt-6 md:pt-10 pb-12 flex flex-col gap-8">
         
         {/* Header */}
           <header className="flex flex-col gap-4 mb-6">
@@ -1951,7 +1951,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="space-y-6"
+              className="space-y-6 w-full"
             >
               {/* Horizontal Days Strip */}
               <WeeklyCalendar 
@@ -1964,7 +1964,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               />
 
               {/* Active Missions Area */}
-              <div>
+              <div className="w-full">
                 <div className="space-y-0">
                   {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-12 text-[#808080]">

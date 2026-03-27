@@ -62,8 +62,8 @@ export default function MyRoutinePage({
 
   return (
     <div className="w-full bg-[#FCFAF8] text-[#202020] p-8">
-      <div className="max-w-3xl mx-auto mb-8">
-        <div className="flex items-center justify-between border-b border-gray-200 pb-6 mb-8">
+      <div className="w-full max-w-7xl mx-auto px-6 lg:px-12 flex flex-col gap-8">
+        <div className="flex items-center justify-between border-b border-gray-200 pb-6">
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <h1 className="text-[26px] leading-[35px] font-bold text-[#202020] tracking-tight">Minha Rotina</h1>
@@ -91,7 +91,7 @@ export default function MyRoutinePage({
           </div>
         </div>
 
-        <div className="max-w-3xl mx-auto mb-8">
+        <div className="w-full">
           <WeeklyCalendar 
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
@@ -103,7 +103,7 @@ export default function MyRoutinePage({
           />
         </div>
 
-        <div className="max-w-3xl mx-auto">
+        <div className="w-full">
           {isPastDate && (
             <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-amber-800">
               <Lock className="w-5 h-5 mt-0.5 shrink-0" />

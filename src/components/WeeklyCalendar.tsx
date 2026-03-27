@@ -26,14 +26,14 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
   isDayFailed
 }) => {
   return (
-    <div className="flex items-center bg-white py-3 px-2 border-b border-gray-100">
+    <div className="flex items-center max-w-3xl mx-auto w-full bg-slate-50/50 border border-slate-200 rounded-3xl p-4 shadow-sm">
       <Button variant="ghost" size="icon" onClick={handlePrevWeek} className="text-[#808080] hover:text-[#202020] shrink-0 transition-colors ease-out duration-200">
         <ChevronLeft className="w-5 h-5" />
       </Button>
       
       <div className="flex-1 flex flex-col overflow-hidden px-2">
         {/* Static Labels */}
-        <div className="flex justify-around mb-2">
+        <div className="flex justify-center gap-4 sm:gap-6 mb-2">
           {['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'].map(day => (
             <div key={day} className="w-10 text-center text-[10px] font-semibold uppercase tracking-wider text-[#808080]">
               {day}
@@ -56,7 +56,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
               animate="animate"
               exit="exit"
               transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="absolute inset-0 flex justify-around"
+              className="absolute inset-0 flex justify-center gap-4 sm:gap-6"
             >
               {eachDayOfInterval({ start: currentWeekStart, end: addDays(currentWeekStart, 6) }).map(day => {
                 const isSelected = isSameDay(day, selectedDate);
@@ -68,9 +68,9 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                     key={day.toISOString()}
                     onClick={() => setSelectedDate(day)}
                     className={cn(
-                      "flex items-center justify-center w-10 h-10 rounded-lg transition-all ease-out duration-200",
+                      "flex items-center justify-center w-10 h-10 rounded-xl transition-all ease-out duration-200",
                       isSelected 
-                        ? "bg-[#dceaff] text-[#1f60c2] font-bold shadow-sm" 
+                        ? "bg-blue-100 text-blue-600 font-bold shadow-sm" 
                         : failed
                           ? "bg-red-50 text-red-600 hover:bg-red-100"
                           : "hover:bg-gray-50 text-[#808080]"
@@ -78,7 +78,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                   >
                     <span className={cn(
                       "text-[14px]",
-                      isToday && !isSelected && !failed && "text-[#1f60c2] font-bold",
+                      isToday && !isSelected && !failed && "text-blue-600 font-bold",
                       failed && !isSelected && "text-red-600 font-bold"
                     )}>
                       {format(day, 'd')}
