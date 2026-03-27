@@ -9,7 +9,7 @@ import ConfirmDialog from './ConfirmDialog';
 interface CreateActivityModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: () => Promise<void> | void;
   activityToEdit?: any;
 }
 
@@ -41,7 +41,13 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
         else if (hours >= 12 && hours < 18) setPeriod('Tarde');
         else if (hours >= 18 && hours <= 23) setPeriod('Noite');
       } else {
-        setPeriod(activityToEdit.period || 'Manhã');
+        const reversePeriodMap: Record<string, string> = {
+          'morning': 'Manhã',
+          'afternoon': 'Tarde',
+          'evening': 'Noite',
+          'night': 'Noite'
+        };
+        setPeriod(reversePeriodMap[activityToEdit.period] || 'Manhã');
       }
     } else {
       setType('routine');
@@ -115,38 +121,67 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
 
     setIsLoading(true);
     try {
+      // 1. Injeção Obrigatória do Usuário (user_id)
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) throw new Error('Usuário não autenticado');
 
-      const activityData = {
+      const periodMap: Record<string, string> = {
+        'Manhã': 'morning',
+        'Tarde': 'afternoon',
+        'Noite': 'evening'
+      };
+
+      const payload = {
         user_id: user.id,
         name: name.trim(),
         description: description.trim() || null,
         type,
-        period: type === 'routine' ? period : null,
-        time: type === 'routine' && time.length === 5 ? time : null,
+        period: type === 'routine' ? (periodMap[period] || 'anytime') : 'anytime',
+        scheduled_time: type === 'routine' && time.length === 5 ? time : null,
         duration_days: type === 'goal' && duration ? parseInt(duration) : null,
         reps_per_day: type === 'goal' && repetitions ? parseInt(repetitions) : 1,
-        xp_reward: type === 'routine' ? 10 : 50, // Recompensa base
+        xp_reward: type === 'routine' ? 10 : 50,
+        is_active: true,
+        active_days: [true, true, true, true, true, true, true], // Ativo todos os dias por padrão
+        start_date: new Date().toISOString()
       };
 
       if (activityToEdit) {
-        const { error } = await supabase
+        // 2. Tratamento de Erro Implacável
+        const { data, error } = await supabase
           .from('activities')
-          .update(activityData)
-          .eq('id', activityToEdit.id);
-        if (error) throw error;
+          .update(payload)
+          .eq('id', activityToEdit.id)
+          .select();
+
+        if (error) {
+          console.error("ERRO SUPABASE:", error);
+          toast.error("Erro ao salvar: " + error.message);
+          return;
+        }
+        
+        // 3. Atualização Instantânea da Tela
+        await onSuccess?.();
         toast.success('Atividade atualizada com sucesso!');
       } else {
-        const { error } = await supabase
+        // 2. Tratamento de Erro Implacável
+        const { data, error } = await supabase
           .from('activities')
-          .insert([{ ...activityData, is_completed: false, streak: 0 }]);
-        if (error) throw error;
+          .insert([payload])
+          .select();
+
+        if (error) {
+          console.error("ERRO SUPABASE:", error);
+          toast.error("Erro ao salvar: " + error.message);
+          return;
+        }
+        
+        // 3. Atualização Instantânea da Tela
+        await onSuccess?.();
         toast.success('Atividade criada com sucesso!');
       }
 
       resetForm();
-      onSuccess?.();
       onClose();
     } catch (error: any) {
       console.error('Erro ao salvar atividade:', error);
@@ -166,8 +201,8 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
         .delete()
         .eq('id', activityToEdit.id);
       if (error) throw error;
+      await onSuccess?.();
       toast.success('Atividade excluída com sucesso!');
-      onSuccess?.();
       onClose();
     } catch (error: any) {
       toast.error('Erro ao excluir atividade');

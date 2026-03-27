@@ -343,10 +343,10 @@ export default function RoutinesDashboard({
         if (activitiesError) throw activitiesError;
       }
 
+      await queryClient.invalidateQueries({ queryKey: ['routines'] });
       toast.success(editingRoutine ? 'Rotina atualizada com sucesso!' : 'Rotina criada com sucesso!');
       setIsCreateModalOpen(false);
       setEditingRoutine(null);
-      queryClient.invalidateQueries({ queryKey: ['routines'] });
     } catch (error: any) {
       console.error('Error saving routine:', error);
       toast.error(error.message || 'Erro ao salvar rotina. Tente novamente.');
