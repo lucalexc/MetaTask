@@ -42,11 +42,18 @@ export default function MyRoutinePage({
     return failedDays.has(startOfDay(date).toISOString());
   };
 
-  const totalActivities = activities?.length || 0;
-  const completedActivities = activities?.filter(a => a.is_completed).length || 0;
+  const filteredActivities = (activities || []).filter(activity => {
+    if (activity.type === 'routine' && activity.selected_days && Array.isArray(activity.selected_days)) {
+      return activity.selected_days.includes(selectedDate.getDay());
+    }
+    return true; // Goals or old routines without selected_days
+  });
+
+  const totalActivities = filteredActivities.length || 0;
+  const completedActivities = filteredActivities.filter(a => a.is_completed).length || 0;
   const progressPercentage = totalActivities === 0 ? 0 : Math.round((completedActivities / totalActivities) * 100);
 
-  const groupedActivities = (activities || []).reduce((acc, activity) => {
+  const groupedActivities = filteredActivities.reduce((acc, activity) => {
     const period = activity.period || 'anytime';
     if (!acc[period]) acc[period] = [];
     acc[period].push(activity);
@@ -85,7 +92,7 @@ export default function MyRoutinePage({
                 </div>
               </div>
               <span className="text-[11px] font-bold text-[#1f60c2] mt-1">
-                +{activities?.filter(a => a.is_completed).reduce((sum, a) => sum + a.xp_reward, 0) || 0} XP
+                +{filteredActivities.filter(a => a.is_completed).reduce((sum, a) => sum + a.xp_reward, 0) || 0} XP
               </span>
             </div>
           </div>

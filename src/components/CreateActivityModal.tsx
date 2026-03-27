@@ -21,6 +21,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
   const [time, setTime] = useState('');
   const [duration, setDuration] = useState('');
   const [repetitions, setRepetitions] = useState('1');
+  const [selectedDays, setSelectedDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -33,6 +34,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
       setTime(activityTime);
       setDuration(activityToEdit.duration_days?.toString() || '');
       setRepetitions(activityToEdit.reps_per_day?.toString() || '1');
+      setSelectedDays(activityToEdit.selected_days || [0, 1, 2, 3, 4, 5, 6]);
       
       // Auto-calculate period from time if it's a routine
       if (activityToEdit.type === 'routine' && activityTime.length >= 2) {
@@ -57,6 +59,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
       setTime('');
       setDuration('');
       setRepetitions('1');
+      setSelectedDays([0, 1, 2, 3, 4, 5, 6]);
     }
     setIsLoading(false);
   };
@@ -143,6 +146,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
         xp_reward: type === 'routine' ? 10 : 50,
         is_active: true,
         active_days: [true, true, true, true, true, true, true], // Ativo todos os dias por padrão
+        selected_days: type === 'routine' ? selectedDays : [0, 1, 2, 3, 4, 5, 6],
         start_date: new Date().toISOString()
       };
 
@@ -289,16 +293,47 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
 
             {/* Conditional Fields */}
             {type === 'routine' ? (
-              <div className="space-y-2">
-                <label className="text-[13px] font-bold text-[#202020]">Horário</label>
-                <input
-                  type="text"
-                  value={time}
-                  onChange={handleTimeChange}
-                  placeholder="00:00"
-                  maxLength={5}
-                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
-                />
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[13px] font-bold text-[#202020]">Horário</label>
+                  <input
+                    type="text"
+                    value={time}
+                    onChange={handleTimeChange}
+                    placeholder="00:00"
+                    maxLength={5}
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-[13px] font-bold text-[#202020]">Dias da Semana</label>
+                  <div className="flex items-center justify-between gap-1">
+                    {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, index) => {
+                      const isActive = selectedDays.includes(index);
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            if (isActive) {
+                              setSelectedDays(selectedDays.filter(d => d !== index));
+                            } else {
+                              setSelectedDays([...selectedDays, index].sort());
+                            }
+                          }}
+                          className={cn(
+                            "w-10 h-10 rounded-xl text-[13px] font-bold transition-all duration-200 flex items-center justify-center",
+                            isActive 
+                              ? "bg-blue-600 text-white shadow-sm" 
+                              : "bg-slate-100 text-slate-400 hover:bg-slate-200"
+                          )}
+                        >
+                          {day}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4">

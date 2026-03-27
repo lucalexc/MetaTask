@@ -15,6 +15,7 @@ export interface Activity {
   period: Period;
   scheduled_time?: string;
   active_days: boolean[];
+  selected_days?: number[];
   duration_days?: number;
   reps_per_day: number;
   start_date: string;
