@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, Circle, Plus, Calendar as CalendarIcon, 
-  ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause, Trash2, Tag, Minus
+  ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause, Trash2, Tag, Minus, Filter
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, addDays, startOfMonth, endOfMonth, getDay, addMonths, subMonths, parseISO, isBefore, startOfDay } from 'date-fns';
@@ -191,12 +191,12 @@ const TaskCard: React.FC<{
                 </span>
               )}
               {isOverdue && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-md border font-bold flex items-center gap-1 bg-red-50 text-red-600 border-red-200 uppercase tracking-wider">
-                  Atrasada
+                <span className="text-xs px-2 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-red-50 text-red-600 border-red-100">
+                  ATRASADA
                 </span>
               )}
               {(task.time || (task.recurrence && task.recurrence !== 'none') || isOverdue) && (
-                <div className={cn("flex items-center gap-2 text-[13px]", isOverdue ? "text-red-500 font-medium" : "text-[#808080]")}>
+                <div className={cn("flex items-center gap-2 text-[13px]", isOverdue ? "text-red-500" : "text-[#808080]")}>
                   {task.due_date && isOverdue && (
                     <span className="flex items-center gap-1">
                       {format(parseISO(task.due_date), "dd/MM")}
@@ -227,7 +227,7 @@ const TaskCard: React.FC<{
               e.preventDefault();
               onDelete(task.id);
             }}
-            className="p-2 text-[#808080] hover:text-red-600 hover:bg-red-50 rounded-lg transition-all ease-out duration-200 shrink-0"
+            className="p-2 text-[#808080] hover:text-red-600 hover:bg-red-50 rounded-lg transition-all ease-out duration-200 shrink-0 opacity-0 group-hover:opacity-100"
             title="Excluir tarefa"
           >
             <Trash2 className="w-4 h-4" />
@@ -260,12 +260,12 @@ const TaskCard: React.FC<{
                   {task.is_running ? (
                     <Pause className="w-3.5 h-3.5 text-amber-500" />
                   ) : (
-                    <Play className="w-3.5 h-3.5 text-[#808080] hover:text-[#1f60c2]" />
+                    <Play className="w-3.5 h-3.5 text-slate-400 hover:text-[#1f60c2]" />
                   )}
                 </button>
                 <span className={cn(
-                  "text-[13px] font-mono font-medium",
-                  isOvertime ? "text-red-600" : "text-[#808080]"
+                  "text-xs font-mono font-medium",
+                  isOvertime ? "text-red-600" : "text-slate-500"
                 )}>
                   {formatTime(currentElapsed)}
                   {task.estimated_time ? ` / ${task.estimated_time}:00` : ''}
@@ -277,7 +277,7 @@ const TaskCard: React.FC<{
           {(task.estimated_time || currentElapsed > 0 || task.is_running) && (
             <button 
               onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenHistory(task); }}
-              className="hover:bg-gray-100 p-1.5 rounded-lg transition-colors ease-out duration-200 text-[#808080] hover:text-[#202020]"
+              className="hover:bg-gray-100 p-1.5 rounded-lg transition-colors ease-out duration-200 text-slate-400 hover:text-[#202020]"
               title="Ver Histórico"
             >
               <Clock className="w-3.5 h-3.5" />
@@ -335,14 +335,14 @@ const TaskCard: React.FC<{
             </span>
           )}
           {isOverdue && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-md border font-bold flex items-center gap-1 bg-red-50 text-red-600 border-red-200 uppercase tracking-wider">
-              Atrasada
+            <span className="text-xs px-2 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-red-50 text-red-600 border-red-100">
+              ATRASADA
             </span>
           )}
         </div>
         
         {(task.time || (task.recurrence && task.recurrence !== 'none') || isOverdue) && (
-          <div className={cn("flex items-center gap-2 mt-0.5 text-[13px]", isOverdue ? "text-red-500 font-medium" : "text-[#808080]")}>
+          <div className={cn("flex items-center gap-2 mt-0.5 text-[13px]", isOverdue ? "text-red-500" : "text-[#808080]")}>
             {task.due_date && isOverdue && (
               <span className="flex items-center gap-1">
                 {format(parseISO(task.due_date), "dd/MM")}
@@ -391,12 +391,12 @@ const TaskCard: React.FC<{
               {task.is_running ? (
                 <Pause className="w-3.5 h-3.5 text-amber-500" />
               ) : (
-                <Play className="w-3.5 h-3.5 text-[#808080] hover:text-[#1f60c2]" />
+                <Play className="w-3.5 h-3.5 text-slate-400 hover:text-[#1f60c2]" />
               )}
             </button>
             <span className={cn(
-              "text-[13px] font-mono font-medium",
-              isOvertime ? "text-red-600" : "text-[#808080]"
+              "text-xs font-mono font-medium",
+              isOvertime ? "text-red-600" : "text-slate-500"
             )}>
               {formatTime(currentElapsed)}
               {task.estimated_time ? ` / ${task.estimated_time}:00` : ''}
@@ -406,7 +406,7 @@ const TaskCard: React.FC<{
               className="hover:bg-gray-200 p-1 rounded transition-colors ease-out duration-200"
               title="Ver Histórico"
             >
-              <Clock className="w-3.5 h-3.5 text-[#808080] hover:text-[#202020]" />
+              <Clock className="w-3.5 h-3.5 text-slate-400 hover:text-[#202020]" />
             </button>
           </div>
         )}
@@ -418,7 +418,7 @@ const TaskCard: React.FC<{
           e.preventDefault();
           onDelete(task.id);
         }}
-        className="p-2 text-[#808080] hover:text-red-600 hover:bg-red-50 rounded-lg transition-all ease-out duration-200"
+        className="p-2 text-[#808080] hover:text-red-600 hover:bg-red-50 rounded-lg transition-all ease-out duration-200 opacity-0 group-hover:opacity-100"
         title="Excluir tarefa"
       >
         <Trash2 className="w-4 h-4" />
@@ -1914,35 +1914,55 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               </div>
             </div>
 
-            {/* Project Filters (Pills) */}
+            {/* Project Filters (Dropdown) */}
             {projects.length > 0 && (
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                <button
-                  onClick={() => setSelectedProject(null)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-colors ease-out duration-200 border",
-                    selectedProject === null 
-                      ? "bg-[#202020] text-white border-[#202020]" 
-                      : "bg-white text-[#808080] border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                  )}
-                >
-                  Todas
-                </button>
-                {projects.map(project => (
-                  <button
-                    key={project.id}
-                    onClick={() => setSelectedProject(project.id)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-colors ease-out duration-200 border flex items-center gap-1.5",
-                      selectedProject === project.id 
-                        ? "bg-[#202020] text-white border-[#202020]" 
-                        : "bg-white text-[#808080] border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                    )}
-                  >
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: project.color }} />
-                    {project.name}
-                  </button>
-                ))}
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className={cn(
+                        "flex items-center gap-2 px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors ease-out duration-200 border",
+                        selectedProject === null 
+                          ? "bg-white text-[#808080] border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                          : "bg-[#202020] text-white border-[#202020]"
+                      )}
+                    >
+                      <Filter className="w-3.5 h-3.5" />
+                      {selectedProject === null ? "Filtros" : projects.find(p => p.id === selectedProject)?.name}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-2 rounded-xl shadow-lg border border-gray-100 bg-white" align="start">
+                    <div className="flex flex-col gap-1">
+                      <button
+                        onClick={() => setSelectedProject(null)}
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors text-left",
+                          selectedProject === null 
+                            ? "bg-gray-100 text-[#202020]" 
+                            : "text-[#808080] hover:bg-gray-50 hover:text-[#202020]"
+                        )}
+                      >
+                        Todas as Tarefas
+                      </button>
+                      <div className="h-px bg-gray-100 my-1" />
+                      {projects.map(project => (
+                        <button
+                          key={project.id}
+                          onClick={() => setSelectedProject(project.id)}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors text-left",
+                            selectedProject === project.id 
+                              ? "bg-gray-100 text-[#202020]" 
+                              : "text-[#808080] hover:bg-gray-50 hover:text-[#202020]"
+                          )}
+                        >
+                          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
+                          <span className="truncate">{project.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             )}
           </header>

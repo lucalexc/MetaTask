@@ -26,12 +26,12 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
   isDayFailed
 }) => {
   return (
-    <div className="flex items-center max-w-3xl mx-auto w-full bg-slate-50/50 border border-slate-200 rounded-3xl p-4 shadow-sm">
+    <div className="flex items-center justify-center max-w-fit mx-auto bg-slate-50/50 border border-slate-200 rounded-3xl p-4 px-6 sm:px-8 shadow-sm gap-2 sm:gap-4">
       <Button variant="ghost" size="icon" onClick={handlePrevWeek} className="text-[#808080] hover:text-[#202020] shrink-0 transition-colors ease-out duration-200">
         <ChevronLeft className="w-5 h-5" />
       </Button>
       
-      <div className="flex-1 flex flex-col overflow-hidden px-2">
+      <div className="flex flex-col overflow-hidden px-2">
         {/* Static Labels */}
         <div className="flex justify-center gap-4 sm:gap-6 mb-2">
           {['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'].map(day => (
