@@ -4,7 +4,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import TasksDashboard from '@/src/components/TasksDashboard';
 import ProjectsDashboard from '@/src/components/ProjectsDashboard';
 import MyRoutinePage from '@/src/components/MyRoutinePage';
-import RoadmapDashboard from '@/src/components/RoadmapDashboard';
+import RoadmapPage from '@/src/pages/RoadmapPage';
 import IdentityDashboard from '@/src/components/IdentityDashboard';
 import SettingsDashboard from '@/src/components/SettingsDashboard';
 import InsightsDashboard from '@/src/components/InsightsDashboard';
@@ -138,8 +138,8 @@ export default function Dashboard() {
         <div className={cn("flex flex-col", activeTab !== 'identity' && "hidden")}>
           <IdentityDashboard />
         </div>
-        <div className={cn("flex flex-col", activeTab !== 'roadmap' && "hidden")}>
-          <RoadmapDashboard />
+        <div className={cn("flex flex-col h-full", activeTab !== 'roadmap' && "hidden")}>
+          <RoadmapPage />
         </div>
         <div className={cn("flex flex-col", activeTab !== 'tasks' && "hidden")}>
           <TasksDashboard isCreateModalOpen={isTaskModalOpen} setIsCreateModalOpen={setIsTaskModalOpen} />
