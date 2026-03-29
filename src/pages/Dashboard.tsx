@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Target, Plus, Inbox, Sword, RefreshCcw, Map, Fingerprint, Settings, Folder, Menu, X, BarChart2 } from 'lucide-react';
+import { Target, Plus, Inbox, Sword, RefreshCcw, Map, Fingerprint, Settings, Folder, Menu, X, BarChart2, Compass } from 'lucide-react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import TasksDashboard from '@/src/components/TasksDashboard';
 import ProjectsDashboard from '@/src/components/ProjectsDashboard';
 import MyRoutinePage from '@/src/components/MyRoutinePage';
-import MissionsMapDashboard from '@/src/components/MissionsMapDashboard';
+import RoadmapDashboard from '@/src/components/RoadmapDashboard';
 import IdentityDashboard from '@/src/components/IdentityDashboard';
 import SettingsDashboard from '@/src/components/SettingsDashboard';
 import InsightsDashboard from '@/src/components/InsightsDashboard';
 import { cn } from '@/src/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 
-type TabType = 'tasks' | 'projects' | 'my-routine' | 'missions' | 'identity' | 'insights' | 'settings';
+type TabType = 'tasks' | 'projects' | 'my-routine' | 'roadmap' | 'identity' | 'insights' | 'settings';
 
 export default function Dashboard() {
   const { tab, projectId } = useParams<{ tab?: string; projectId?: string }>();
@@ -88,14 +88,14 @@ export default function Dashboard() {
             Minha Rotina
           </button>
           <button 
-            onClick={() => handleTabChange('missions')}
+            onClick={() => handleTabChange('roadmap')}
             className={cn(
               "w-full flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium rounded-md transition-colors ease-out duration-200",
-              activeTab === 'missions' ? "text-[#1f60c2] bg-[#dceaff]" : "text-[#202020] hover:bg-gray-100"
+              activeTab === 'roadmap' ? "text-[#1f60c2] bg-[#dceaff]" : "text-[#202020] hover:bg-gray-100"
             )}
           >
-            <Sword className={cn("w-4 h-4", activeTab === 'missions' ? "text-[#1f60c2]" : "text-[#808080]")} />
-            Missões
+            <Compass className={cn("w-4 h-4", activeTab === 'roadmap' ? "text-[#1f60c2]" : "text-[#808080]")} />
+            Seu Roadmap
           </button>
           <button 
             onClick={() => handleTabChange('identity')}
@@ -138,8 +138,8 @@ export default function Dashboard() {
         <div className={cn("flex flex-col", activeTab !== 'identity' && "hidden")}>
           <IdentityDashboard />
         </div>
-        <div className={cn("flex flex-col", activeTab !== 'missions' && "hidden")}>
-          <MissionsMapDashboard />
+        <div className={cn("flex flex-col", activeTab !== 'roadmap' && "hidden")}>
+          <RoadmapDashboard />
         </div>
         <div className={cn("flex flex-col", activeTab !== 'tasks' && "hidden")}>
           <TasksDashboard isCreateModalOpen={isTaskModalOpen} setIsCreateModalOpen={setIsTaskModalOpen} />
@@ -183,7 +183,7 @@ export default function Dashboard() {
           <RefreshCcw className="w-5 h-5" />
           <span className="text-[10px] mt-1 font-medium">Rotina</span>
         </button>
-        <button onClick={() => setIsMobileMenuOpen(true)} className={cn("flex flex-col items-center justify-center w-16 h-16 transition-colors ease-out duration-200", ['missions', 'identity', 'insights', 'settings'].includes(activeTab) ? "text-[#1f60c2]" : "text-[#808080]")}>
+        <button onClick={() => setIsMobileMenuOpen(true)} className={cn("flex flex-col items-center justify-center w-16 h-16 transition-colors ease-out duration-200", ['roadmap', 'identity', 'insights', 'settings'].includes(activeTab) ? "text-[#1f60c2]" : "text-[#808080]")}>
           <Menu className="w-5 h-5" />
           <span className="text-[10px] mt-1 font-medium">Mais</span>
         </button>
@@ -215,11 +215,11 @@ export default function Dashboard() {
               </div>
               <div className="p-2 space-y-1">
                 <button 
-                  onClick={() => handleTabChange('missions')}
-                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors ease-out duration-200", activeTab === 'missions' ? "bg-[#dceaff] text-[#1f60c2]" : "text-[#202020] hover:bg-gray-50")}
+                  onClick={() => handleTabChange('roadmap')}
+                  className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors ease-out duration-200", activeTab === 'roadmap' ? "bg-[#dceaff] text-[#1f60c2]" : "text-[#202020] hover:bg-gray-50")}
                 >
-                  <Sword className={cn("w-5 h-5", activeTab === 'missions' ? "text-[#1f60c2]" : "text-[#808080]")} />
-                  <span className="font-medium">Missões</span>
+                  <Compass className={cn("w-5 h-5", activeTab === 'roadmap' ? "text-[#1f60c2]" : "text-[#808080]")} />
+                  <span className="font-medium">Seu Roadmap</span>
                 </button>
                 <button 
                   onClick={() => handleTabChange('identity')}
