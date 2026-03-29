@@ -2,22 +2,39 @@ import React, { useState } from 'react';
 import { useRoadmap, Milestone } from '@/src/hooks/useRoadmap';
 import RoadmapTimeline from './RoadmapTimeline';
 import MilestoneDetailDrawer from './MilestoneDetailDrawer';
+import TreasureModal from './TreasureModal';
+import MilestoneModal from './MilestoneModal';
 import { Compass, Loader2 } from 'lucide-react';
 
 export default function RoadmapDashboard() {
-  const { roadmap, milestones, isLoading, addMilestone, updateMilestone } = useRoadmap();
+  const { roadmap, milestones, isLoading, addMilestone, updateMilestone, updateRoadmap } = useRoadmap();
   const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
+  const [isTreasureModalOpen, setIsTreasureModalOpen] = useState(false);
+  const [isMilestoneModalOpen, setIsMilestoneModalOpen] = useState(false);
+  const [newMilestoneOrderIndex, setNewMilestoneOrderIndex] = useState(0);
 
-  const handleAddMilestone = async (orderIndex: number) => {
-    const title = prompt('Nome do novo marco:');
-    if (!title) return;
-    
+  const handleAddMilestoneClick = (orderIndex: number) => {
+    setNewMilestoneOrderIndex(orderIndex);
+    setIsMilestoneModalOpen(true);
+  };
+
+  const handleSaveMilestone = async (title: string, icon: string, targetDate: string) => {
     await addMilestone({
       title,
       status: 'pending',
-      order_index: orderIndex,
-      icon: '🎯'
+      order_index: newMilestoneOrderIndex,
+      icon,
+      target_date: targetDate
     });
+  };
+
+  const handleSaveTreasure = async (title: string) => {
+    await updateRoadmap({ title });
+  };
+
+  const handleMilestoneClick = (milestone: Milestone) => {
+    console.log('Milestone clicked:', milestone);
+    setSelectedMilestone(milestone);
   };
 
   if (isLoading) {
@@ -49,8 +66,9 @@ export default function RoadmapDashboard() {
       <div className="flex-1 relative overflow-hidden">
         <RoadmapTimeline
           milestones={milestones}
-          onMilestoneClick={setSelectedMilestone}
-          onAddMilestone={handleAddMilestone}
+          onMilestoneClick={handleMilestoneClick}
+          onAddMilestone={handleAddMilestoneClick}
+          onTreasureClick={() => setIsTreasureModalOpen(true)}
         />
       </div>
 
@@ -59,6 +77,19 @@ export default function RoadmapDashboard() {
         isOpen={!!selectedMilestone}
         onClose={() => setSelectedMilestone(null)}
         onUpdate={updateMilestone}
+      />
+
+      <TreasureModal
+        isOpen={isTreasureModalOpen}
+        onClose={() => setIsTreasureModalOpen(false)}
+        currentTitle={roadmap?.title || 'Seu Roadmap'}
+        onSave={handleSaveTreasure}
+      />
+
+      <MilestoneModal
+        isOpen={isMilestoneModalOpen}
+        onClose={() => setIsMilestoneModalOpen(false)}
+        onSave={handleSaveMilestone}
       />
     </div>
   );

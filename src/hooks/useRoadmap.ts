@@ -118,7 +118,21 @@ export function useRoadmap() {
     setMilestones(milestones.map(m => m.id === id ? { ...m, ...updates } : m));
   };
 
-  return { roadmap, milestones, isLoading, addMilestone, updateMilestone, refresh: fetchRoadmap };
+  const updateRoadmap = async (updates: Partial<Roadmap>) => {
+    if (!roadmap) return;
+    const { error } = await supabase
+      .from('roadmaps')
+      .update(updates)
+      .eq('id', roadmap.id);
+      
+    if (error) {
+      console.error('Error updating roadmap:', error);
+      return;
+    }
+    setRoadmap({ ...roadmap, ...updates });
+  };
+
+  return { roadmap, milestones, isLoading, addMilestone, updateMilestone, updateRoadmap, refresh: fetchRoadmap };
 }
 
 export function useMilestoneDesires(milestoneId: string | undefined) {

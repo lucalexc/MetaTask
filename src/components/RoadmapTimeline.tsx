@@ -7,9 +7,10 @@ interface RoadmapTimelineProps {
   milestones: Milestone[];
   onMilestoneClick: (milestone: Milestone) => void;
   onAddMilestone: (orderIndex: number) => void;
+  onTreasureClick: () => void;
 }
 
-export default function RoadmapTimeline({ milestones, onMilestoneClick, onAddMilestone }: RoadmapTimelineProps) {
+export default function RoadmapTimeline({ milestones, onMilestoneClick, onAddMilestone, onTreasureClick }: RoadmapTimelineProps) {
   const NODE_SPACING = 300;
   const AMPLITUDE = 120;
   const CENTER_Y = 250;
@@ -94,8 +95,9 @@ export default function RoadmapTimeline({ milestones, onMilestoneClick, onAddMil
             return (
               <div
                 key="end"
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center cursor-pointer hover:scale-105 transition-transform duration-300"
                 style={{ left: pt.x, top: pt.y }}
+                onClick={onTreasureClick}
               >
                 <div className="w-16 h-16 rounded-full bg-amber-400 text-amber-900 flex items-center justify-center shadow-lg shadow-amber-400/40 z-10 border-4 border-white">
                   <Star className="w-8 h-8 fill-current" />
@@ -122,7 +124,7 @@ export default function RoadmapTimeline({ milestones, onMilestoneClick, onAddMil
               >
                 <button
                   onClick={() => onAddMilestone(m.order_index)}
-                  className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center hover:bg-blue-200 hover:scale-110 transition-all shadow-sm"
+                  className="w-8 h-8 rounded-full bg-white border border-blue-500 text-blue-600 flex items-center justify-center hover:bg-blue-50 hover:scale-110 transition-all shadow-sm"
                 >
                   <Plus className="w-5 h-5" />
                 </button>
@@ -172,7 +174,7 @@ export default function RoadmapTimeline({ milestones, onMilestoneClick, onAddMil
         >
           <button
             onClick={() => onAddMilestone(milestones.length > 0 ? milestones[milestones.length - 1].order_index + 1 : 0)}
-            className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center hover:bg-blue-200 hover:scale-110 transition-all shadow-sm"
+            className="w-8 h-8 rounded-full bg-white border border-blue-500 text-blue-600 flex items-center justify-center hover:bg-blue-50 hover:scale-110 transition-all shadow-sm"
           >
             <Plus className="w-5 h-5" />
           </button>
