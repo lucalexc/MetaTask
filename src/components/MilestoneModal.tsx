@@ -126,7 +126,7 @@ export default function MilestoneModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg max-h-[90vh] flex flex-col bg-white rounded-2xl shadow-2xl z-[70] overflow-hidden"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] flex flex-col bg-white rounded-2xl shadow-2xl z-[70] overflow-hidden"
           >
             <div className="p-4 border-b border-gray-100 flex justify-between items-center shrink-0">
               <h3 className="font-bold text-[#202020] text-lg">
@@ -141,7 +141,7 @@ export default function MilestoneModal({
               <form id="milestone-form" onSubmit={handleSubmit} className="space-y-6">
                 
                 {/* Header / Title & Icon */}
-                <div className="flex gap-4">
+                <div className="flex items-end gap-3">
                   <div className="space-y-2 w-20 shrink-0">
                     <label className="text-[13px] font-bold text-[#202020]">Ícone</label>
                     <input
@@ -168,7 +168,7 @@ export default function MilestoneModal({
                 {/* Image Section */}
                 <div className="space-y-2">
                   <label className="text-[13px] font-bold text-[#202020]">Imagem de Destaque</label>
-                  <div className="relative group rounded-xl overflow-hidden bg-gray-50 border border-gray-200 aspect-video flex items-center justify-center">
+                  <div className="relative group rounded-lg overflow-hidden bg-gray-50 border border-gray-200 h-32 flex items-center justify-center">
                     {imageUrl ? (
                       <>
                         <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
@@ -188,8 +188,8 @@ export default function MilestoneModal({
                 </div>
 
                 {/* Grid 2 Columns */}
-                <div className="flex gap-4">
-                  <div className="space-y-2 flex-1">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
                     <label className="text-[13px] font-bold text-[#202020]">Data Alvo</label>
                     <input
                       type="date"
@@ -198,7 +198,7 @@ export default function MilestoneModal({
                       className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                     />
                   </div>
-                  <div className="space-y-2 flex-1">
+                  <div className="space-y-2">
                     <label className="text-[13px] font-bold text-[#202020]">Status</label>
                     <select
                       value={status}
