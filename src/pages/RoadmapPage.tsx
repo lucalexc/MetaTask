@@ -2,14 +2,13 @@ import React from 'react';
 import { useRoadmaps } from '@/src/hooks/useRoadmaps';
 import { useMilestones } from '@/src/hooks/useMilestones';
 import { useImageUpload } from '@/src/hooks/useImageUpload';
-import RoadmapSidebar from '@/src/components/roadmap/RoadmapSidebar';
 import RoadmapTimeline from '@/src/components/roadmap/RoadmapTimeline';
 import MilestoneDetailPanel from '@/src/components/roadmap/MilestoneDetailPanel';
 import { Loader2 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 
 export default function RoadmapPage() {
-  const { roadmaps, activeRoadmap, loading, selectRoadmap, createRoadmap, updateRoadmap, deleteRoadmap } = useRoadmaps();
+  const { activeRoadmap, loading, updateRoadmap } = useRoadmaps();
   const { 
     milestones, selectedMilestone, desires, 
     selectMilestone, addMilestone, updateMilestone, deleteMilestone, 
@@ -27,16 +26,7 @@ export default function RoadmapPage() {
 
   return (
     <div className="flex-1 flex h-full w-full bg-[#FCFAF8] overflow-hidden">
-      {/* Coluna 1: Sidebar de roadmaps */}
-      <RoadmapSidebar
-        roadmaps={roadmaps}
-        activeRoadmapId={activeRoadmap?.id || null}
-        onSelect={selectRoadmap}
-        onCreate={(title) => createRoadmap(title)}
-        onDelete={deleteRoadmap}
-      />
-
-      {/* Coluna 2: Timeline */}
+      {/* Coluna Principal: Timeline */}
       <div className="flex-1 flex flex-col h-full bg-[#FCFAF8] overflow-hidden relative">
         {activeRoadmap ? (
           <>
@@ -54,12 +44,12 @@ export default function RoadmapPage() {
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-400">
-            Selecione ou crie um roadmap para começar
+            Criando sua Visão de Vida...
           </div>
         )}
       </div>
 
-      {/* Coluna 3: Detail panel */}
+      {/* Detail panel */}
       <AnimatePresence>
         {selectedMilestone && (
           <MilestoneDetailPanel
