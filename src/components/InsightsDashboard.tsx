@@ -134,9 +134,9 @@ export default function InsightsDashboard() {
 
     // Tag Distribution
     const categoryCounts: Record<string, number> = {};
-    completedTasks.forEach(t => {
-      const category = categories.find(c => c.id === t.category_id);
-      const categoryName = category?.name || 'Sem Categoria';
+    (completedTasks || []).forEach(t => {
+      const category = (categories || []).find(c => c.id === t?.category_id);
+      const categoryName = category?.name ?? 'Sem Categoria';
       categoryCounts[categoryName] = (categoryCounts[categoryName] || 0) + 1;
     });
 
@@ -144,7 +144,7 @@ export default function InsightsDashboard() {
       .map(([name, value], index) => ({
         name,
         value,
-        color: categories.find(c => c.name === name)?.color || COLORS[index % COLORS.length]
+        color: (categories || []).find(c => c.name === name)?.color ?? COLORS[index % COLORS.length]
       }))
       .sort((a, b) => b.value - a.value);
 
