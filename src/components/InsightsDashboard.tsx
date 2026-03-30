@@ -14,30 +14,6 @@ import { ptBR } from 'date-fns/locale';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#f97316', '#ec4899'];
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    const tasks = payload.find((p: any) => p.dataKey === 'tasksCompleted')?.value;
-    const energy = payload.find((p: any) => p.dataKey === 'energyLevel')?.value;
-    
-    let energyLabel = 'Normal';
-    if (energy >= 4) energyLabel = 'Alta';
-    else if (energy <= 2) energyLabel = 'Baixa';
-
-    return (
-      <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100 text-sm">
-        <p className="font-bold text-gray-800 mb-1">{label}</p>
-        <p className="text-gray-600">
-          <span className="font-semibold text-blue-600">{tasks || 0}</span> tarefas concluídas
-        </p>
-        <p className="text-gray-600">
-          Energia: <span className="font-semibold text-orange-500">{energy || 0}/5</span> ({energy ? energyLabel : 'Não registrada'})
-        </p>
-      </div>
-    );
-  }
-  return null;
-};
-
 export default function InsightsDashboard() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -214,39 +190,6 @@ export default function InsightsDashboard() {
     <div className="w-full bg-gray-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-8">
         
-        {/* Energy Banner */}
-        <Card className="border-none shadow-sm bg-gradient-to-r from-orange-50 to-amber-50">
-          <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-bold text-orange-900 flex items-center gap-2">
-                <Zap className="w-5 h-5 text-orange-500" />
-                Como está sua energia hoje?
-              </h3>
-              <p className="text-orange-700 text-sm mt-1">Registre seu nível de energia para correlacionar com sua produtividade.</p>
-            </div>
-            <div className="flex items-center gap-2">
-              {[1, 2, 3, 4, 5].map((level) => (
-                <button
-                  key={level}
-                  onClick={() => logEnergyMutation.mutate(level)}
-                  disabled={logEnergyMutation.isPending}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all ${
-                    todayEnergy?.level === level 
-                      ? 'bg-orange-500 text-white shadow-md scale-110' 
-                      : 'bg-white text-gray-400 hover:bg-orange-100 hover:text-orange-600 hover:scale-105'
-                  }`}
-                >
-                  {level === 1 && '🥱'}
-                  {level === 2 && '😪'}
-                  {level === 3 && '😐'}
-                  {level === 4 && '🙂'}
-                  {level === 5 && '🤩'}
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -395,45 +338,6 @@ export default function InsightsDashboard() {
                 </CardContent>
               </Card>
             </div>
-
-            {/* Row 3: Full Width Composed Chart */}
-            <Card className="border-none shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold text-gray-800">Mapa de Produtividade vs Energia</CardTitle>
-                <p className="text-sm text-gray-500">Relação entre tarefas concluídas e seu nível de energia no dia.</p>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[350px] w-full mt-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={insightsData.weeklyTrend} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
-                      <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} dy={10} />
-                      <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />
-                      <YAxis yAxisId="right" orientation="right" domain={[0, 5]} hide />
-                      <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f3f4f6' }} />
-                      <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                      <Bar 
-                        yAxisId="left" 
-                        dataKey="tasksCompleted" 
-                        name="Tarefas Concluídas" 
-                        fill="#bfdbfe" // blue-200
-                        radius={[4, 4, 0, 0]} 
-                        barSize={40} 
-                      />
-                      <Line 
-                        yAxisId="right" 
-                        type="monotone" 
-                        dataKey="energyLevel" 
-                        name="Nível de Energia (1-5)" 
-                        stroke="#f97316" // orange-500
-                        strokeWidth={3} 
-                        dot={{ r: 4, fill: '#f97316', strokeWidth: 2, stroke: '#fff' }} 
-                        activeDot={{ r: 6 }} 
-                      />
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
           </>
         )}
 
