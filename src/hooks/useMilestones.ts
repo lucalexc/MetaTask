@@ -8,7 +8,7 @@ export interface UseMilestonesReturn {
   desires: Desire[];
   loading: boolean;
   selectMilestone: (m: Milestone | null) => void;
-  addMilestone: (data: { title: string; icon?: string; color?: string; target_date?: string }) => Promise<void>;
+  addMilestone: (data: Partial<Milestone>) => Promise<void>;
   updateMilestone: (id: string, data: Partial<Milestone>) => Promise<void>;
   deleteMilestone: (id: string) => Promise<void>;
   addDesire: (data: { title: string; category?: string; estimated_cost?: number }) => Promise<void>;
@@ -59,7 +59,7 @@ export function useMilestones(roadmapId: string | null): UseMilestonesReturn {
     setDesires(data || []);
   };
 
-  const addMilestone = async (data: { title: string; icon?: string; color?: string; target_date?: string }) => {
+  const addMilestone = async (data: Partial<Milestone>) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !roadmapId) return;
     
@@ -71,6 +71,9 @@ export function useMilestones(roadmapId: string | null): UseMilestonesReturn {
       icon: data.icon || '📍', 
       color: data.color || '#3B82F6',
       target_date: data.target_date || null, 
+      status: data.status || 'pending',
+      description: data.description || null,
+      image_url: data.image_url || null,
       position: newPosition
     }).select().single();
     

@@ -1,39 +1,22 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { MapPin, Plus } from 'lucide-react';
 import { Milestone } from '@/src/types/roadmap';
 import MilestoneNode from './MilestoneNode';
-import { cn } from '@/src/lib/utils';
 
 interface RoadmapTimelineProps {
   milestones: Milestone[];
   selectedMilestoneId: string | null;
   onSelectMilestone: (m: Milestone) => void;
-  onAddMilestone: (data: { title: string; icon?: string }) => void;
-  isCreateModalOpen?: boolean;
+  onAddMilestone?: (data: { title: string; icon?: string }) => void; // Kept for compatibility if needed, but we'll use modal
   setIsCreateModalOpen?: (open: boolean) => void;
 }
-
-const EMOJI_OPTIONS = ['📍', '🎯', '💼', '💰', '🏠', '🎓', '✈️', '💪', '🚗', '💎'];
 
 export default function RoadmapTimeline({ 
   milestones, 
   selectedMilestoneId, 
   onSelectMilestone, 
-  onAddMilestone,
-  isCreateModalOpen,
   setIsCreateModalOpen
 }: RoadmapTimelineProps) {
-  const [addingAtIndex, setAddingAtIndex] = useState<number | null>(null);
-  const [newTitle, setNewTitle] = useState('');
-  const [newIcon, setNewIcon] = useState('📍');
-
-  useEffect(() => {
-    if (isCreateModalOpen) {
-      setAddingAtIndex(milestones.length);
-      setIsCreateModalOpen?.(false);
-    }
-  }, [isCreateModalOpen, milestones.length, setIsCreateModalOpen]);
-
   const NODE_SPACING = 180;
   const AMPLITUDE = 35;
   const CENTER_Y = 200;
@@ -75,25 +58,18 @@ export default function RoadmapTimeline({
 
   const totalWidth = Math.max((milestones.length + 2) * NODE_SPACING, 600);
 
-  const handleSaveNew = () => {
-    if (newTitle.trim()) {
-      onAddMilestone({ title: newTitle.trim(), icon: newIcon });
-    }
-    setAddingAtIndex(null);
-    setNewTitle('');
-    setNewIcon('📍');
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSaveNew();
-    if (e.key === 'Escape') setAddingAtIndex(null);
-  };
-
   return (
     <div className="w-full flex-1 min-h-[500px] overflow-x-auto overflow-y-hidden custom-scrollbar relative bg-transparent">
-      {milestones.length === 0 && addingAtIndex === null ? (
+      {milestones.length === 0 ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 z-0">
-          <p>Clique em + para adicionar sua primeira estação</p>
+          <p className="mb-4">Nenhuma estação criada ainda.</p>
+          <button 
+            onClick={() => setIsCreateModalOpen?.(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Adicionar primeira estação
+          </button>
         </div>
       ) : null}
 
@@ -133,7 +109,7 @@ export default function RoadmapTimeline({
               style={{ left: midX, top: midY }}
             >
               <button
-                onClick={() => setAddingAtIndex(i - 1)}
+                onClick={() => setIsCreateModalOpen?.(true)}
                 className="w-8 h-8 rounded-full bg-white border border-blue-500 text-blue-600 flex items-center justify-center hover:bg-blue-50 hover:scale-110 transition-all shadow-sm"
               >
                 <Plus className="w-5 h-5" />
@@ -159,45 +135,6 @@ export default function RoadmapTimeline({
             </div>
           );
         })}
-
-        {/* Inline Add Form */}
-        {addingAtIndex !== null && (
-          <div
-            className="absolute transform -translate-x-1/2 -translate-y-1/2 z-40 bg-white p-3 rounded-xl shadow-xl border border-gray-100 w-64"
-            style={{ 
-              left: START_X + (addingAtIndex + 1) * NODE_SPACING, 
-              top: CENTER_Y 
-            }}
-          >
-            <input
-              type="text"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Título da estação..."
-              className="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-              autoFocus
-            />
-            <div className="flex flex-wrap gap-1 mb-3">
-              {EMOJI_OPTIONS.map(emoji => (
-                <button
-                  key={emoji}
-                  onClick={() => setNewIcon(emoji)}
-                  className={cn(
-                    "w-8 h-8 rounded flex items-center justify-center text-lg hover:bg-gray-100 transition-colors",
-                    newIcon === emoji ? "bg-blue-50 border border-blue-200" : ""
-                  )}
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setAddingAtIndex(null)} className="text-xs px-3 py-1.5 text-gray-500 hover:bg-gray-100 rounded">Cancelar</button>
-              <button onClick={handleSaveNew} disabled={!newTitle.trim()} className="text-xs px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50">Salvar</button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

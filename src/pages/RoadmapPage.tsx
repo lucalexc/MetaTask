@@ -3,9 +3,8 @@ import { useRoadmaps } from '@/src/hooks/useRoadmaps';
 import { useMilestones } from '@/src/hooks/useMilestones';
 import { useImageUpload } from '@/src/hooks/useImageUpload';
 import RoadmapTimeline from '@/src/components/roadmap/RoadmapTimeline';
-import MilestoneDetailPanel from '@/src/components/roadmap/MilestoneDetailPanel';
+import MilestoneModal from '@/src/components/MilestoneModal';
 import { Loader2 } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
 
 export default function RoadmapPage({
   isCreateModalOpen,
@@ -45,7 +44,6 @@ export default function RoadmapPage({
                 selectedMilestoneId={selectedMilestone?.id || null}
                 onSelectMilestone={selectMilestone}
                 onAddMilestone={addMilestone}
-                isCreateModalOpen={isCreateModalOpen}
                 setIsCreateModalOpen={setIsCreateModalOpen}
               />
             </div>
@@ -57,26 +55,30 @@ export default function RoadmapPage({
         )}
       </div>
 
-      {/* Detail panel */}
-      <AnimatePresence>
-        {selectedMilestone && (
-          <MilestoneDetailPanel
-            milestone={selectedMilestone}
-            desires={desires}
-            onClose={() => selectMilestone(null)}
-            onUpdateMilestone={updateMilestone}
-            onDeleteMilestone={deleteMilestone}
-            onAddDesire={addDesire}
-            onDeleteDesire={deleteDesire}
-            onToggleDesireAchieved={toggleDesireAchieved}
-            onUploadImage={async (file) => {
-              const url = await upload(file, 'milestone');
-              if (url) await updateMilestone(selectedMilestone.id, { image_url: url });
-              return url;
-            }}
-          />
-        )}
-      </AnimatePresence>
+      {/* Milestone Modal (Create & Edit) */}
+      <MilestoneModal
+        isOpen={!!isCreateModalOpen || !!selectedMilestone}
+        onClose={() => {
+          if (isCreateModalOpen) setIsCreateModalOpen?.(false);
+          if (selectedMilestone) selectMilestone(null);
+        }}
+        milestone={selectedMilestone}
+        desires={desires}
+        onSave={async (data) => {
+          if (selectedMilestone) {
+            await updateMilestone(selectedMilestone.id, data);
+          } else {
+            await addMilestone(data);
+          }
+        }}
+        onDelete={deleteMilestone}
+        onAddDesire={addDesire}
+        onDeleteDesire={deleteDesire}
+        onToggleDesireAchieved={toggleDesireAchieved}
+        onUploadImage={async (file) => {
+          return await upload(file, 'milestone');
+        }}
+      />
     </div>
   );
 }
