@@ -45,6 +45,9 @@ export default function MilestoneModal({
   const [newDesireCategory, setNewDesireCategory] = useState('general');
   const [newDesireCost, setNewDesireCost] = useState('');
 
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const PREDEFINED_EMOJIS = ['📍', '🎯', '💼', '💰', '🏠', '🎓', '✈️', '💪', '🚗', '💎'];
+
   useEffect(() => {
     if (isOpen) {
       if (milestone) {
@@ -142,15 +145,39 @@ export default function MilestoneModal({
                 
                 {/* Header / Title & Icon */}
                 <div className="flex items-end gap-3">
-                  <div className="space-y-2 w-20 shrink-0">
+                  <div className="space-y-2 shrink-0 relative">
                     <label className="text-[13px] font-bold text-[#202020]">Ícone</label>
-                    <input
-                      type="text"
-                      value={icon}
-                      onChange={(e) => setIcon(e.target.value)}
-                      maxLength={2}
-                      className="w-full text-center text-xl bg-white border border-gray-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
-                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                      className="w-12 h-12 rounded-lg border border-gray-200 bg-white flex items-center justify-center text-xl hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                    >
+                      {icon || '📍'}
+                    </button>
+                    
+                    {showEmojiPicker && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-40" 
+                          onClick={() => setShowEmojiPicker(false)}
+                        />
+                        <div className="absolute top-full left-0 mt-2 z-50 bg-white border border-gray-200 shadow-lg rounded-xl p-3 grid grid-cols-5 gap-2 w-max">
+                          {PREDEFINED_EMOJIS.map((emoji) => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => {
+                                setIcon(emoji);
+                                setShowEmojiPicker(false);
+                              }}
+                              className="w-10 h-10 flex items-center justify-center text-xl hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div className="space-y-2 flex-1">
                     <label className="text-[13px] font-bold text-[#202020]">Título do Marco</label>
