@@ -29,7 +29,7 @@ export default function InsightsDashboard() {
   }, [timeRange]);
 
   // Fetch Tasks
-  const { data: tasks, isLoading: isLoadingTasks } = useQuery({
+  const { data: tasks, isLoading: isLoadingTasks, refetch: refetchTasks } = useQuery({
     queryKey: ['tasks', user?.id, timeRange],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -53,7 +53,7 @@ export default function InsightsDashboard() {
   });
 
   // Fetch Categories
-  const { data: categories, isLoading: isLoadingCategories } = useQuery({
+  const { data: categories, isLoading: isLoadingCategories, refetch: refetchCategories } = useQuery({
     queryKey: ['categories', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -66,6 +66,14 @@ export default function InsightsDashboard() {
     },
     enabled: !!user,
   });
+
+  // Refetch on mount to ensure fresh data
+  React.useEffect(() => {
+    if (user) {
+      refetchTasks();
+      refetchCategories();
+    }
+  }, [user, refetchTasks, refetchCategories]);
 
   const insightsData = useMemo(() => {
     if (!tasks || !categories) return null;

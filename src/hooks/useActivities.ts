@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
 import { startOfDay, endOfDay, format } from 'date-fns';
+import { useQueryClient } from '@tanstack/react-query';
 
 export type ActivityType = 'routine' | 'goal';
 export type Period = 'morning' | 'afternoon' | 'night' | 'anytime';
@@ -43,6 +44,7 @@ export interface DailyActivity extends Activity {
 
 export function useActivities(date: Date = new Date()) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [activities, setActivities] = useState<DailyActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -167,6 +169,10 @@ export function useActivities(date: Date = new Date()) {
           }]);
 
         if (error) throw error;
+
+        // Invalidate queries for InsightsDashboard (if activities are ever added there)
+        queryClient.invalidateQueries({ queryKey: ['activities'] });
+        queryClient.invalidateQueries({ queryKey: ['tasks'] }); // In case they are related
       } else {
         // Delete log for today
         const { error } = await supabase
@@ -196,6 +202,11 @@ export function useActivities(date: Date = new Date()) {
         .single();
 
       if (error) throw error;
+      
+      // Invalidate queries
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      
       fetchActivities();
       return data;
     } catch (err) {
@@ -214,6 +225,11 @@ export function useActivities(date: Date = new Date()) {
         .select();
 
       if (error) throw error;
+
+      // Invalidate queries
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+
       fetchActivities();
     } catch (err) {
       console.error('Error updating activity:', err);
@@ -230,6 +246,11 @@ export function useActivities(date: Date = new Date()) {
         .eq('id', id);
 
       if (error) throw error;
+
+      // Invalidate queries
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+
       fetchActivities();
     } catch (err) {
       console.error('Error deleting activity:', err);
