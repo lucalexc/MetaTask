@@ -29,12 +29,16 @@ export default function SettingsDashboard() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   useEffect(() => {
+    const controller = new AbortController();
+    
     if (user) {
-      fetchProfile();
+      fetchProfile(controller.signal);
     }
+
+    return () => controller.abort();
   }, [user]);
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (signal?: AbortSignal) => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -43,6 +47,7 @@ export default function SettingsDashboard() {
         .eq('id', user?.id)
         .single();
 
+      if (signal?.aborted) return;
       if (error) throw error;
 
       if (data) {
@@ -51,9 +56,12 @@ export default function SettingsDashboard() {
         setGender(data.gender || '');
       }
     } catch (error) {
+      if (signal?.aborted) return;
       console.error('Error fetching profile:', error);
     } finally {
-      setIsLoading(false);
+      if (!signal?.aborted) {
+        setIsLoading(false);
+      }
     }
   };
 

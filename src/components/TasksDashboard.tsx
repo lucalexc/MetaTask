@@ -1301,12 +1301,14 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
   const [dragOverColumn, setDragOverColumn] = useState<'pending' | 'in_progress' | 'completed' | null>(null);
 
   const { data: categories = [], refetch: refetchCategories } = useQuery({
-    queryKey: ['categories'],
+    queryKey: ['categories', user?.id],
     queryFn: async () => {
+      if (!user) return [];
       console.log('Fetching categories...');
       const { data, error } = await supabase
         .from('categories')
         .select('*')
+        .eq('user_id', user.id)
         .order('name');
       
       if (error) {
@@ -1318,11 +1320,11 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
       if (!data || data.length === 0) {
         console.log('No categories found, seeding defaults...');
         const defaultCategories = [
-          { name: 'Saúde', icon: 'Heart', color: '#ff4d4f' },
-          { name: 'Trabalho', icon: 'Briefcase', color: '#1890ff' },
-          { name: 'Aprendizado', icon: 'Book', color: '#722ed1' },
-          { name: 'Pessoal', icon: 'User', color: '#52c41a' },
-          { name: 'Finanças', icon: 'DollarSign', color: '#faad14' }
+          { name: 'Saúde', icon: 'Heart', color: '#ff4d4f', user_id: user.id },
+          { name: 'Trabalho', icon: 'Briefcase', color: '#1890ff', user_id: user.id },
+          { name: 'Aprendizado', icon: 'Book', color: '#722ed1', user_id: user.id },
+          { name: 'Pessoal', icon: 'User', color: '#52c41a', user_id: user.id },
+          { name: 'Finanças', icon: 'DollarSign', color: '#faad14', user_id: user.id }
         ];
 
         const { data: seededData, error: seedError } = await supabase
@@ -1340,7 +1342,8 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
 
       console.log('Categories fetched:', data);
       return data as Category[];
-    }
+    },
+    enabled: !!user,
   });
 
   useEffect(() => {

@@ -67,65 +67,8 @@ export default function InsightsDashboard() {
     enabled: !!user,
   });
 
-  // Fetch Daily Energy
-  const { data: energyLogs, isLoading: isLoadingEnergy } = useQuery({
-    queryKey: ['daily_energy', user?.id, timeRange],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('daily_energy')
-        .select('*')
-        .eq('user_id', user?.id)
-        .gte('date', format(dateRange.start, 'yyyy-MM-dd'))
-        .lte('date', format(dateRange.end, 'yyyy-MM-dd'));
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user,
-  });
-
-  // Fetch Today's Energy
-  const { data: todayEnergy } = useQuery({
-    queryKey: ['daily_energy_today', user?.id],
-    queryFn: async () => {
-      const today = format(new Date(), 'yyyy-MM-dd');
-      const { data, error } = await supabase
-        .from('daily_energy')
-        .select('*')
-        .eq('user_id', user?.id)
-        .eq('date', today)
-        .maybeSingle(); // FIX: Changed from .single() to .maybeSingle() to avoid 406 Not Acceptable error when no record is found
-      
-      if (error) throw error; // FIX: maybeSingle() returns null data instead of throwing PGRST116, so we can just throw real errors
-      return data;
-    },
-    enabled: !!user,
-  });
-
-  const logEnergyMutation = useMutation({
-    mutationFn: async (level: number) => {
-      const today = format(new Date(), 'yyyy-MM-dd');
-      const { data, error } = await supabase
-        .from('daily_energy')
-        .upsert({ 
-          user_id: user?.id, 
-          date: today, 
-          level 
-        }, { onConflict: 'user_id,date' })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['daily_energy'] });
-      queryClient.invalidateQueries({ queryKey: ['daily_energy_today'] });
-    }
-  });
-
   const insightsData = useMemo(() => {
-    if (!tasks || !energyLogs || !categories) return null;
+    if (!tasks || !categories) return null;
 
     const completedTasks = tasks.filter(t => t.status === 'completed');
     const totalFocusSeconds = tasks.reduce((acc, t) => acc + (t.elapsed_time || 0), 0);
@@ -148,7 +91,7 @@ export default function InsightsDashboard() {
       }))
       .sort((a, b) => b.value - a.value);
 
-    // Weekly Trend & Productivity vs Energy
+    // Weekly Trend
     const days = eachDayOfInterval({ start: dateRange.start, end: dateRange.end });
     
     const weeklyTrend = days.map(day => {
@@ -156,14 +99,11 @@ export default function InsightsDashboard() {
       const dayCompletedTasks = dayTasks.filter(t => t.status === 'completed');
       const dayFocusSeconds = dayTasks.reduce((acc, t) => acc + (t.elapsed_time || 0), 0);
       
-      const dayEnergy = energyLogs.find(e => e.date === format(day, 'yyyy-MM-dd'));
-
       return {
         day: format(day, 'EEE', { locale: ptBR }),
         fullDate: format(day, 'yyyy-MM-dd'),
         focusMinutes: Math.round(dayFocusSeconds / 60),
-        tasksCompleted: dayCompletedTasks.length,
-        energyLevel: dayEnergy?.level || 0
+        tasksCompleted: dayCompletedTasks.length
       };
     });
 
@@ -191,9 +131,9 @@ export default function InsightsDashboard() {
       tagDistribution,
       weeklyTrend
     };
-  }, [tasks, energyLogs, categories, dateRange]);
+  }, [tasks, categories, dateRange]);
 
-  if (isLoadingTasks || isLoadingEnergy || isLoadingCategories) {
+  if (isLoadingTasks || isLoadingCategories) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />

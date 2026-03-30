@@ -235,14 +235,18 @@ export default function IdentityDashboard() {
   const [isDeletingVersion, setIsDeletingVersion] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
+    
     if (user) {
-      if (activeTab === 'necrologio') fetchNecrologioVersions();
-      if (activeTab === 'temperamento') fetchTemperamentResult();
-      if (activeTab === 'camadas') fetchLayerResult();
+      if (activeTab === 'necrologio') fetchNecrologioVersions(controller.signal);
+      if (activeTab === 'temperamento') fetchTemperamentResult(controller.signal);
+      if (activeTab === 'camadas') fetchLayerResult(controller.signal);
     }
+
+    return () => controller.abort();
   }, [user, activeTab]);
 
-  const fetchTemperamentResult = async () => {
+  const fetchTemperamentResult = async (signal?: AbortSignal) => {
     if (!user) return;
     setIsLoadingTemperament(true);
     try {
@@ -252,6 +256,7 @@ export default function IdentityDashboard() {
         .eq('user_id', user.id)
         .single();
 
+      if (signal?.aborted) return;
       if (error && error.code !== 'PGRST116') throw error;
 
       if (data) {
@@ -259,13 +264,16 @@ export default function IdentityDashboard() {
         setTestStatus('finished');
       }
     } catch (error) {
+      if (signal?.aborted) return;
       console.error('Error fetching temperament:', error);
     } finally {
-      setIsLoadingTemperament(false);
+      if (!signal?.aborted) {
+        setIsLoadingTemperament(false);
+      }
     }
   };
 
-  const fetchLayerResult = async () => {
+  const fetchLayerResult = async (signal?: AbortSignal) => {
     if (!user) return;
     setIsLoadingLayers(true);
     try {
@@ -275,6 +283,7 @@ export default function IdentityDashboard() {
         .eq('user_id', user.id)
         .single();
 
+      if (signal?.aborted) return;
       if (error && error.code !== 'PGRST116') throw error;
 
       if (data) {
@@ -282,13 +291,16 @@ export default function IdentityDashboard() {
         setLayerTestStatus('finished');
       }
     } catch (error) {
+      if (signal?.aborted) return;
       console.error('Error fetching layers:', error);
     } finally {
-      setIsLoadingLayers(false);
+      if (!signal?.aborted) {
+        setIsLoadingLayers(false);
+      }
     }
   };
 
-  const fetchNecrologioVersions = async () => {
+  const fetchNecrologioVersions = async (signal?: AbortSignal) => {
     if (!user) return;
     setIsLoadingNecrologio(true);
     try {
@@ -298,6 +310,7 @@ export default function IdentityDashboard() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
+      if (signal?.aborted) return;
       if (error) throw error;
 
       if (data) {
@@ -313,9 +326,12 @@ export default function IdentityDashboard() {
         setNecrologioVersions(formattedVersions);
       }
     } catch (error) {
+      if (signal?.aborted) return;
       console.error('Error fetching necrology:', error);
     } finally {
-      setIsLoadingNecrologio(false);
+      if (!signal?.aborted) {
+        setIsLoadingNecrologio(false);
+      }
     }
   };
 
