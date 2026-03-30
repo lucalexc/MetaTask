@@ -38,6 +38,7 @@ export interface DailyActivity extends Activity {
   completed_reps: number;
   is_completed: boolean;
   streak: number;
+  total_completed_days: number;
 }
 
 export function useActivities(date: Date = new Date()) {
@@ -59,7 +60,7 @@ export function useActivities(date: Date = new Date()) {
       // 1. Fetch active activities for the user
       const { data: allActivities, error: activitiesError } = await supabase
         .from('activities')
-        .select('*')
+        .select('*, activity_logs(count)')
         .eq('user_id', user.id)
         .eq('is_active', true);
 
@@ -92,7 +93,7 @@ export function useActivities(date: Date = new Date()) {
       if (logsError) throw logsError;
 
       // 3. Combine activities with logs
-      const dailyActivities: DailyActivity[] = todayActivities.map((activity: Activity) => {
+      const dailyActivities: DailyActivity[] = todayActivities.map((activity: any) => {
         const activityLogs = (logs || []).filter((log: ActivityLog) => log.activity_id === activity.id);
         const completedReps = activityLogs.length;
         const isCompleted = completedReps >= activity.reps_per_day;
@@ -101,11 +102,14 @@ export function useActivities(date: Date = new Date()) {
         const latestLog = activityLogs.sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())[0];
         const streak = latestLog ? latestLog.streak_count : 0; // In a real app, we'd fetch the streak from the previous day if no log today
 
+        const total_completed_days = activity.activity_logs?.[0]?.count || 0;
+
         return {
           ...activity,
           completed_reps: completedReps,
           is_completed: isCompleted,
           streak,
+          total_completed_days,
         };
       });
 
@@ -140,7 +144,12 @@ export function useActivities(date: Date = new Date()) {
     // Optimistic update
     setActivities(prev => prev.map(a => 
       a.id === activity.id 
-        ? { ...a, is_completed: isCompleting, completed_reps: isCompleting ? a.reps_per_day : 0 } 
+        ? { 
+            ...a, 
+            is_completed: isCompleting, 
+            completed_reps: isCompleting ? a.reps_per_day : 0,
+            total_completed_days: isCompleting ? a.total_completed_days + 1 : Math.max(0, a.total_completed_days - 1)
+          } 
         : a
     ));
 

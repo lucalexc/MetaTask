@@ -192,6 +192,11 @@ const ActivityRow: React.FC<{
   const isGoal = activity.type === 'goal';
   const isCompleted = activity.is_completed;
 
+  const hasProgress = isGoal && activity.duration_days && activity.duration_days > 1;
+  const progressPercentage = hasProgress 
+    ? Math.min(Math.round((activity.total_completed_days / activity.duration_days!) * 100), 100) 
+    : 0;
+
   return (
     <motion.div
       layout
@@ -242,6 +247,20 @@ const ActivityRow: React.FC<{
             <span className="text-[11px] font-bold text-[#1f60c2]">+ {activity.xp_reward} XP</span>
           </div>
         </div>
+
+        {hasProgress && (
+          <div className="flex flex-col gap-1.5 w-full max-w-sm mt-2">
+            <span className="text-xs text-slate-500 font-medium">
+              Progresso: {activity.total_completed_days}/{activity.duration_days} dias ({progressPercentage}%)
+            </span>
+            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div 
+                className="bg-purple-500 h-full rounded-full transition-all duration-500"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );
