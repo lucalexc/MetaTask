@@ -85,7 +85,7 @@ export default function Dashboard() {
             )}
           >
             <RefreshCcw className={cn("w-4 h-4", activeTab === 'my-routine' ? "text-[#1f60c2]" : "text-[#808080]")} />
-            Minha Rotina
+            Rotina
           </button>
           <button 
             onClick={() => handleTabChange('roadmap')}
@@ -95,7 +95,7 @@ export default function Dashboard() {
             )}
           >
             <Compass className={cn("w-4 h-4", activeTab === 'roadmap' ? "text-[#1f60c2]" : "text-[#808080]")} />
-            Seu Roadmap
+            Visão de Vida
           </button>
           <button 
             onClick={() => handleTabChange('identity')}
@@ -219,7 +219,7 @@ export default function Dashboard() {
                   className={cn("w-full flex items-center gap-3 p-3 rounded-xl transition-colors ease-out duration-200", activeTab === 'roadmap' ? "bg-[#dceaff] text-[#1f60c2]" : "text-[#202020] hover:bg-gray-50")}
                 >
                   <Compass className={cn("w-5 h-5", activeTab === 'roadmap' ? "text-[#1f60c2]" : "text-[#808080]")} />
-                  <span className="font-medium">Seu Roadmap</span>
+                  <span className="font-medium">Visão de Vida</span>
                 </button>
                 <button 
                   onClick={() => handleTabChange('identity')}
