@@ -46,9 +46,9 @@ export default function MilestoneDetailDrawer({ milestone, isOpen, onClose, onUp
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
+            className="fixed top-0 right-0 h-screen w-full max-w-md bg-white border-l border-slate-200 shadow-2xl z-50 flex flex-col"
           >
-            <div className="flex items-center justify-between p-4 border-b border-slate-100">
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 shrink-0">
               <h2 className="font-bold text-lg text-slate-800 flex items-center gap-2">
                 <span className="text-2xl">{milestone.icon || '🎯'}</span>
                 Detalhes do Marco

@@ -71,9 +71,9 @@ export default function MilestoneDetailPanel({
       animate={{ x: 0 }}
       exit={{ x: 360 }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="w-[360px] bg-white border-l border-gray-200 flex flex-col h-full shrink-0 shadow-xl md:shadow-none absolute md:relative right-0 z-50"
+      className="absolute top-0 right-0 h-full md:relative w-[360px] bg-white border-l border-slate-200 flex flex-col shrink-0 shadow-xl md:shadow-none z-50"
     >
-      <div className="p-4 border-b border-gray-100 flex items-start justify-between">
+      <div className="p-4 border-b border-gray-100 flex items-start justify-between shrink-0">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <span className="text-3xl shrink-0">{milestone.icon}</span>
           {isEditingTitle ? (
