@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { MapPin, Plus } from 'lucide-react';
 import { Milestone } from '@/src/types/roadmap';
 import MilestoneNode from './MilestoneNode';
@@ -9,14 +9,30 @@ interface RoadmapTimelineProps {
   selectedMilestoneId: string | null;
   onSelectMilestone: (m: Milestone) => void;
   onAddMilestone: (data: { title: string; icon?: string }) => void;
+  isCreateModalOpen?: boolean;
+  setIsCreateModalOpen?: (open: boolean) => void;
 }
 
 const EMOJI_OPTIONS = ['📍', '🎯', '💼', '💰', '🏠', '🎓', '✈️', '💪', '🚗', '💎'];
 
-export default function RoadmapTimeline({ milestones, selectedMilestoneId, onSelectMilestone, onAddMilestone }: RoadmapTimelineProps) {
+export default function RoadmapTimeline({ 
+  milestones, 
+  selectedMilestoneId, 
+  onSelectMilestone, 
+  onAddMilestone,
+  isCreateModalOpen,
+  setIsCreateModalOpen
+}: RoadmapTimelineProps) {
   const [addingAtIndex, setAddingAtIndex] = useState<number | null>(null);
   const [newTitle, setNewTitle] = useState('');
   const [newIcon, setNewIcon] = useState('📍');
+
+  useEffect(() => {
+    if (isCreateModalOpen) {
+      setAddingAtIndex(milestones.length);
+      setIsCreateModalOpen?.(false);
+    }
+  }, [isCreateModalOpen, milestones.length, setIsCreateModalOpen]);
 
   const NODE_SPACING = 180;
   const AMPLITUDE = 35;
@@ -80,15 +96,6 @@ export default function RoadmapTimeline({ milestones, selectedMilestoneId, onSel
           <p>Clique em + para adicionar sua primeira estação</p>
         </div>
       ) : null}
-
-      <div className="absolute top-4 right-6 z-30">
-        <button
-          onClick={() => setAddingAtIndex(milestones.length)}
-          className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition-colors shadow-sm border border-blue-200"
-        >
-          <Plus className="w-5 h-5" />
-        </button>
-      </div>
 
       <div className="relative h-[400px] min-h-full flex items-center" style={{ width: totalWidth }}>
         <svg className="absolute inset-0 w-full h-full pointer-events-none">

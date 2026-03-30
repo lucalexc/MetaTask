@@ -23,10 +23,14 @@ export default function Dashboard() {
   
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isRoutineModalOpen, setIsRoutineModalOpen] = useState(false);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [isMilestoneModalOpen, setIsMilestoneModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleFabClick = () => {
     if (activeTab === 'my-routine') setIsRoutineModalOpen(true);
+    else if (activeTab === 'projects') setIsProjectModalOpen(true);
+    else if (activeTab === 'roadmap') setIsMilestoneModalOpen(true);
     else setIsTaskModalOpen(true); // Default to task
   };
 
@@ -45,13 +49,13 @@ export default function Dashboard() {
         </div>
 
         <div className="px-3 mb-4">
-          {(activeTab === 'tasks' || activeTab === 'my-routine') && (
+          {['tasks', 'my-routine', 'projects', 'roadmap'].includes(activeTab) && (
             <button 
               onClick={handleFabClick}
-              className="flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium text-[#d1453b] hover:bg-gray-100 rounded-md transition-colors ease-out duration-200 w-full"
+              className="flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium text-red-500 hover:bg-red-50 rounded-md transition-colors ease-out duration-200 w-full text-left"
             >
               <Plus className="w-4 h-4" />
-              Adicionar {activeTab === 'tasks' ? 'Tarefa' : 'Rotina'}
+              Adicionar {activeTab === 'tasks' ? 'Tarefa' : activeTab === 'my-routine' ? 'Rotina' : activeTab === 'projects' ? 'Projeto' : 'Marco'}
             </button>
           )}
         </div>
@@ -139,13 +143,13 @@ export default function Dashboard() {
           <IdentityDashboard />
         </div>
         <div className={cn("flex-1 flex flex-col h-full", activeTab !== 'roadmap' && "hidden")}>
-          <RoadmapPage />
+          <RoadmapPage isCreateModalOpen={isMilestoneModalOpen} setIsCreateModalOpen={setIsMilestoneModalOpen} />
         </div>
         <div className={cn("flex flex-col", activeTab !== 'tasks' && "hidden")}>
           <TasksDashboard isCreateModalOpen={isTaskModalOpen} setIsCreateModalOpen={setIsTaskModalOpen} />
         </div>
         <div className={cn("flex flex-col", activeTab !== 'projects' && "hidden")}>
-          <ProjectsDashboard projectId={projectId} />
+          <ProjectsDashboard projectId={projectId} isCreateModalOpen={isProjectModalOpen} setIsCreateModalOpen={setIsProjectModalOpen} />
         </div>
         <div className={cn("flex flex-col", activeTab !== 'my-routine' && "hidden")}>
           <MyRoutinePage isCreateModalOpen={isRoutineModalOpen} setIsCreateModalOpen={setIsRoutineModalOpen} />

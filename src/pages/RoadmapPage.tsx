@@ -7,7 +7,13 @@ import MilestoneDetailPanel from '@/src/components/roadmap/MilestoneDetailPanel'
 import { Loader2 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 
-export default function RoadmapPage() {
+export default function RoadmapPage({
+  isCreateModalOpen,
+  setIsCreateModalOpen
+}: {
+  isCreateModalOpen?: boolean;
+  setIsCreateModalOpen?: (open: boolean) => void;
+}) {
   const { activeRoadmap, loading, updateRoadmap } = useRoadmaps();
   const { 
     milestones, selectedMilestone, desires, 
@@ -39,6 +45,8 @@ export default function RoadmapPage() {
                 selectedMilestoneId={selectedMilestone?.id || null}
                 onSelectMilestone={selectMilestone}
                 onAddMilestone={addMilestone}
+                isCreateModalOpen={isCreateModalOpen}
+                setIsCreateModalOpen={setIsCreateModalOpen}
               />
             </div>
           </>

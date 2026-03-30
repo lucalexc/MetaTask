@@ -30,11 +30,18 @@ const PRESET_COLORS = [
   '#94a3b8', // slate-400
 ];
 
-export default function ProjectsDashboard({ projectId }: { projectId?: string }) {
+export default function ProjectsDashboard({ 
+  projectId,
+  isCreateModalOpen,
+  setIsCreateModalOpen
+}: { 
+  projectId?: string;
+  isCreateModalOpen?: boolean;
+  setIsCreateModalOpen?: (open: boolean) => void;
+}) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ['projects', user?.id],
@@ -102,7 +109,7 @@ export default function ProjectsDashboard({ projectId }: { projectId?: string })
         color
       }]);
       if (error) throw error;
-      setIsModalOpen(false);
+      setIsCreateModalOpen?.(false);
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       toast.success('Projeto criado com sucesso!');
     } catch (error) {
@@ -178,14 +185,6 @@ export default function ProjectsDashboard({ projectId }: { projectId?: string })
             Projetos: {projects.length} / 7
           </span>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          disabled={!canCreateMore}
-          className="flex items-center gap-2 px-4 py-2 bg-[#202020] text-white text-[13px] font-bold rounded-lg hover:bg-black transition-colors ease-out duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Plus className="w-4 h-4" />
-          Novo Projeto
-        </button>
       </header>
 
       <div className="flex-1 p-4 md:p-8 pb-24 md:pb-8">
@@ -198,7 +197,7 @@ export default function ProjectsDashboard({ projectId }: { projectId?: string })
               <h3 className="text-[16px] font-bold text-[#202020] mb-1">Nenhum projeto ainda</h3>
               <p className="text-[13px] text-[#808080] mb-6">Crie seu primeiro projeto para organizar suas tarefas.</p>
               <button
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => setIsCreateModalOpen?.(true)}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-[#202020] text-white text-[13px] font-bold rounded-lg hover:bg-black transition-colors ease-out duration-200"
               >
                 <Plus className="w-4 h-4" />
@@ -274,9 +273,9 @@ export default function ProjectsDashboard({ projectId }: { projectId?: string })
       </div>
 
       <AnimatePresence>
-        {isModalOpen && (
+        {isCreateModalOpen && (
           <NewProjectModal
-            onClose={() => setIsModalOpen(false)}
+            onClose={() => setIsCreateModalOpen?.(false)}
             onSave={handleCreateProject}
           />
         )}
