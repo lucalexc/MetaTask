@@ -26,7 +26,7 @@ export default function RoadmapPage() {
   }
 
   return (
-    <div className="flex h-full bg-[#FCFAF8] overflow-hidden">
+    <div className="flex-1 flex h-full w-full bg-[#FCFAF8] overflow-hidden">
       {/* Coluna 1: Sidebar de roadmaps */}
       <RoadmapSidebar
         roadmaps={roadmaps}

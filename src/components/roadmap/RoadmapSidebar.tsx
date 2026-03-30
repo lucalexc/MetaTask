@@ -33,7 +33,7 @@ export default function RoadmapSidebar({ roadmaps, activeRoadmapId, onSelect, on
   };
 
   return (
-    <div className="w-60 md:w-64 bg-white border-r border-gray-200 flex flex-col h-full shrink-0">
+    <aside className="w-60 md:w-64 bg-white border-r border-gray-200 flex flex-col h-full shrink-0">
       <div className="p-4 flex items-center justify-between border-b border-gray-100">
         <h3 className="font-bold text-sm text-gray-800 tracking-wide">MEUS ROADMAPS</h3>
         <button 
@@ -134,6 +134,6 @@ export default function RoadmapSidebar({ roadmaps, activeRoadmapId, onSelect, on
       <div className="p-3 border-t border-gray-100 text-xs text-gray-400 text-center">
         {roadmaps.length} {roadmaps.length === 1 ? 'roadmap' : 'roadmaps'}
       </div>
-    </div>
+    </aside>
   );
 }
