@@ -74,7 +74,7 @@ export default function RoadmapTimeline({ milestones, selectedMilestoneId, onSel
   };
 
   return (
-    <div className="w-full h-full overflow-x-auto overflow-y-hidden custom-scrollbar relative bg-transparent">
+    <div className="w-full flex-1 min-h-[500px] overflow-x-auto overflow-y-hidden custom-scrollbar relative bg-transparent">
       {milestones.length === 0 && addingAtIndex === null ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 z-0">
           <p>Clique em + para adicionar sua primeira estação</p>

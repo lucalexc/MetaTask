@@ -138,7 +138,7 @@ export default function Dashboard() {
         <div className={cn("flex flex-col", activeTab !== 'identity' && "hidden")}>
           <IdentityDashboard />
         </div>
-        <div className={cn("flex flex-col h-full", activeTab !== 'roadmap' && "hidden")}>
+        <div className={cn("flex-1 flex flex-col h-full", activeTab !== 'roadmap' && "hidden")}>
           <RoadmapPage />
         </div>
         <div className={cn("flex flex-col", activeTab !== 'tasks' && "hidden")}>

@@ -37,13 +37,13 @@ export default function RoadmapPage() {
       />
 
       {/* Coluna 2: Timeline */}
-      <div className="flex-1 flex flex-col overflow-hidden relative">
+      <div className="flex-1 flex flex-col h-full bg-[#FCFAF8] overflow-hidden relative">
         {activeRoadmap ? (
           <>
             <div className="px-6 pt-6 pb-2 flex items-center justify-between z-10">
               <h2 className="text-2xl font-bold text-gray-800 tracking-tight">{activeRoadmap.title}</h2>
             </div>
-            <div className="flex-1 relative">
+            <div className="flex-1 flex flex-col relative">
               <RoadmapTimeline
                 milestones={milestones}
                 selectedMilestoneId={selectedMilestone?.id || null}
