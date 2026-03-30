@@ -5,7 +5,7 @@ import { cn } from '@/src/lib/utils';
 import { Button } from '@/src/components/ui/button';
 import { useActivities, DailyActivity } from '@/src/hooks/useActivities';
 import CreateActivityModal from './CreateActivityModal';
-import { format, isBefore, startOfDay, startOfWeek, addDays, subDays } from 'date-fns';
+import { format, isBefore, isAfter, startOfDay, startOfWeek, addDays, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { WeeklyCalendar } from './WeeklyCalendar';
 import { useWeeklyRoutineStatus } from '@/src/hooks/useWeeklyRoutineStatus';
@@ -37,6 +37,8 @@ export default function MyRoutinePage({
   };
 
   const isPastDate = isBefore(startOfDay(selectedDate), startOfDay(new Date()));
+  const isFutureDate = isAfter(startOfDay(selectedDate), startOfDay(new Date()));
+  const isLocked = isPastDate || isFutureDate;
 
   const isDayFailed = (date: Date) => {
     return failedDays.has(startOfDay(date).toISOString());
@@ -111,13 +113,17 @@ export default function MyRoutinePage({
         </div>
 
         <div className="w-full">
-          {isPastDate && (
+          {isLocked && (
             <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-amber-800">
               <Lock className="w-5 h-5 mt-0.5 shrink-0" />
               <div>
-                <h4 className="text-[14px] font-bold">Modo Leitura (Data Passada)</h4>
+                <h4 className="text-[14px] font-bold">
+                  {isFutureDate ? 'Modo Visualização (Data Futura)' : 'Modo Leitura (Data Passada)'}
+                </h4>
                 <p className="text-[13px] mt-1 opacity-90">
-                  Você está visualizando uma data no passado. As rotinas estão bloqueadas e não podem ser marcadas como concluídas hoje.
+                  {isFutureDate 
+                    ? 'Você está visualizando uma data futura. As rotinas estão bloqueadas e não podem ser marcadas como concluídas antes da data.'
+                    : 'Você está visualizando uma data no passado. As rotinas estão bloqueadas e não podem ser marcadas como concluídas hoje.'}
                 </p>
               </div>
             </div>
@@ -149,15 +155,15 @@ export default function MyRoutinePage({
                             key={activity.id} 
                             activity={activity} 
                             onToggle={() => {
-                              if (!isPastDate) toggleActivity(activity);
+                              if (!isLocked) toggleActivity(activity);
                             }}
                             onEdit={() => {
-                              if (!isPastDate) {
+                              if (!isLocked) {
                                 setActivityToEdit(activity);
                                 setIsCreateModalOpen(true);
                               }
                             }}
-                            isLocked={isPastDate}
+                            isLocked={isLocked}
                           />
                         ))}
                       </AnimatePresence>
@@ -221,6 +227,7 @@ const ActivityRow: React.FC<{
         <div className={cn(
             "w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-200 ease-out",
             isCompleted ? "bg-[#058527] border-[#058527] text-white" : "border-gray-300 bg-white",
+            isLocked && "bg-slate-50 border-slate-200 opacity-40 cursor-not-allowed",
             !isLocked && !isCompleted && "group-hover:border-[#1f60c2]"
           )}
         >

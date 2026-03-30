@@ -48,6 +48,8 @@ export default function MilestoneModal({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const PREDEFINED_EMOJIS = ['📍', '🎯', '💼', '💰', '🏠', '🎓', '✈️', '💪', '🚗', '💎'];
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       if (milestone) {
@@ -344,12 +346,7 @@ export default function MilestoneModal({
               {isEditing ? (
                 <button
                   type="button"
-                  onClick={() => {
-                    if (milestone && onDelete) {
-                      onDelete(milestone.id);
-                      onClose();
-                    }
-                  }}
+                  onClick={() => setShowDeleteConfirm(true)}
                   className="px-4 py-2 text-[13px] font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -378,6 +375,45 @@ export default function MilestoneModal({
               </div>
             </div>
           </motion.div>
+
+          {/* Delete Confirmation Modal */}
+          {showDeleteConfirm && (
+            <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white p-6 rounded-xl shadow-xl max-w-sm w-full mx-4"
+              >
+                <h3 className="text-lg font-bold text-[#202020] mb-2">Excluir Marco?</h3>
+                <p className="text-[13px] text-[#808080] mb-6">
+                  Tem certeza? Todos os itens e desejos atrelados a este marco serão removidos permanentemente.
+                </p>
+                <div className="flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="px-4 py-2 text-[13px] font-bold text-[#808080] hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (milestone && onDelete) {
+                        onDelete(milestone.id);
+                        setShowDeleteConfirm(false);
+                        onClose();
+                      }
+                    }}
+                    className="px-4 py-2 text-[13px] font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                  >
+                    Sim, excluir
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
         </>
       )}
     </AnimatePresence>

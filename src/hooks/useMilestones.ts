@@ -97,8 +97,6 @@ export function useMilestones(roadmapId: string | null): UseMilestonesReturn {
   };
 
   const deleteMilestone = async (id: string) => {
-    if (!window.confirm("Tem certeza? Os itens desta estação serão removidos.")) return;
-    
     await supabase.from('milestones').delete().eq('id', id);
     let updated = milestones.filter(m => m.id !== id);
     
