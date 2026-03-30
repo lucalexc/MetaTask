@@ -40,12 +40,26 @@ export default function InsightsDashboard() {
           elapsed_time, 
           created_at, 
           updated_at,
-          tag_id,
-          task_tags ( id, name )
+          category_id
         `)
         .eq('user_id', user?.id)
         .gte('created_at', dateRange.start.toISOString())
         .lte('created_at', dateRange.end.toISOString());
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  // Fetch Categories
+  const { data: categories, isLoading: isLoadingCategories } = useQuery({
+    queryKey: ['categories', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('user_id', user?.id);
       
       if (error) throw error;
       return data;
@@ -111,7 +125,7 @@ export default function InsightsDashboard() {
   });
 
   const insightsData = useMemo(() => {
-    if (!tasks || !energyLogs) return null;
+    if (!tasks || !energyLogs || !categories) return null;
 
     const completedTasks = tasks.filter(t => t.status === 'completed');
     const totalFocusSeconds = tasks.reduce((acc, t) => acc + (t.elapsed_time || 0), 0);
@@ -119,17 +133,18 @@ export default function InsightsDashboard() {
     const totalFocusMinutes = Math.floor((totalFocusSeconds % 3600) / 60);
 
     // Tag Distribution
-    const tagCounts: Record<string, number> = {};
+    const categoryCounts: Record<string, number> = {};
     completedTasks.forEach(t => {
-      const tagName = (Array.isArray(t.task_tags) ? t.task_tags[0]?.name : (t.task_tags as any)?.name) || 'Sem Categoria';
-      tagCounts[tagName] = (tagCounts[tagName] || 0) + 1;
+      const category = categories.find(c => c.id === t.category_id);
+      const categoryName = category?.name || 'Sem Categoria';
+      categoryCounts[categoryName] = (categoryCounts[categoryName] || 0) + 1;
     });
 
-    const tagDistribution = Object.entries(tagCounts)
+    const tagDistribution = Object.entries(categoryCounts)
       .map(([name, value], index) => ({
         name,
         value,
-        color: COLORS[index % COLORS.length]
+        color: categories.find(c => c.name === name)?.color || COLORS[index % COLORS.length]
       }))
       .sort((a, b) => b.value - a.value);
 
@@ -176,9 +191,9 @@ export default function InsightsDashboard() {
       tagDistribution,
       weeklyTrend
     };
-  }, [tasks, energyLogs, dateRange]);
+  }, [tasks, energyLogs, categories, dateRange]);
 
-  if (isLoadingTasks || isLoadingEnergy) {
+  if (isLoadingTasks || isLoadingEnergy || isLoadingCategories) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
