@@ -184,6 +184,10 @@ export function useActivities(date: Date = new Date()) {
           .lte('completed_at', end);
 
         if (error) throw error;
+
+        // Invalidate queries for InsightsDashboard
+        queryClient.invalidateQueries({ queryKey: ['activities'] });
+        queryClient.invalidateQueries({ queryKey: ['tasks'] });
       }
     } catch (err) {
       console.error('Error toggling activity:', err);

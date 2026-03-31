@@ -70,10 +70,10 @@ export default function InsightsDashboard() {
   // Refetch on mount to ensure fresh data
   React.useEffect(() => {
     if (user) {
-      refetchTasks();
-      refetchCategories();
+      queryClient.invalidateQueries({ queryKey: ['tasks', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['categories', user.id] });
     }
-  }, [user, refetchTasks, refetchCategories]);
+  }, [user, queryClient]);
 
   const insightsData = useMemo(() => {
     if (!tasks || !categories) return null;
