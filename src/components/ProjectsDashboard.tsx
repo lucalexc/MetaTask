@@ -110,7 +110,9 @@ export default function ProjectsDashboard({
       }]);
       if (error) throw error;
       setIsCreateModalOpen?.(false);
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      await queryClient.invalidateQueries({ queryKey: ['projects'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['insights'] });
       toast.success('Projeto criado com sucesso!');
     } catch (error) {
       console.error('Error creating project:', error);
@@ -132,7 +134,9 @@ export default function ProjectsDashboard({
 
       if (error) throw error;
       
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      await queryClient.invalidateQueries({ queryKey: ['projects'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['insights'] });
       toast.success('Projeto atualizado com sucesso!');
     } catch (error) {
       console.error('Error updating project:', error);
@@ -145,7 +149,9 @@ export default function ProjectsDashboard({
     try {
       const { error } = await supabase.from('projects').delete().eq('id', id);
       if (error) throw error;
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      await queryClient.invalidateQueries({ queryKey: ['projects'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['insights'] });
       toast.success('Projeto excluído com sucesso!');
       navigate('/app/projects');
     } catch (error) {

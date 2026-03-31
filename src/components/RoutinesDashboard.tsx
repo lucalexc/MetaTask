@@ -344,6 +344,8 @@ export default function RoutinesDashboard({
       }
 
       await queryClient.invalidateQueries({ queryKey: ['routines'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['insights'] });
       toast.success(editingRoutine ? 'Rotina atualizada com sucesso!' : 'Rotina criada com sucesso!');
       setIsCreateModalOpen(false);
       setEditingRoutine(null);
@@ -361,7 +363,9 @@ export default function RoutinesDashboard({
         .eq('id', id);
 
       if (error) throw error;
-      queryClient.invalidateQueries({ queryKey: ['routines'] });
+      await queryClient.invalidateQueries({ queryKey: ['routines'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['insights'] });
     } catch (error) {
       console.error('Error deleting routine:', error);
     }
@@ -467,9 +471,11 @@ export default function RoutinesDashboard({
       queryClient.setQueryData(queryKey, context?.previousRoutines);
       toast.error('Erro ao atualizar rotina');
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['routines'] });
-      queryClient.invalidateQueries({ queryKey: ['routine_logs'] });
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['routines'] });
+      await queryClient.invalidateQueries({ queryKey: ['routine_logs'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['insights'] });
     }
   });
 

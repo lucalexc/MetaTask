@@ -28,120 +28,104 @@ export default function InsightsDashboard() {
     }
   }, [timeRange]);
 
-  // Fetch Tasks
-  const { data: tasks, isLoading: isLoadingTasks, refetch: refetchTasks } = useQuery({
-    queryKey: ['tasks', user?.id, timeRange],
+  // Fetch Insights Data (Combined)
+  const { data: insightsData, isLoading } = useQuery({
+    queryKey: ['insights', user?.id, timeRange],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tasks')
-        .select(`
-          id, 
-          status, 
-          elapsed_time, 
-          created_at, 
-          updated_at,
-          category_id
-        `)
-        .eq('user_id', user?.id)
-        .gte('created_at', dateRange.start.toISOString())
-        .lte('created_at', dateRange.end.toISOString());
+      if (!user) return null;
+
+      const [tasksRes, categoriesRes] = await Promise.all([
+        supabase
+          .from('tasks')
+          .select(`
+            id, 
+            status, 
+            elapsed_time, 
+            created_at, 
+            updated_at,
+            category_id
+          `)
+          .eq('user_id', user.id)
+          .gte('created_at', dateRange.start.toISOString())
+          .lte('created_at', dateRange.end.toISOString()),
+        supabase
+          .from('categories')
+          .select('*')
+          .eq('user_id', user.id)
+      ]);
       
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user,
-  });
+      if (tasksRes.error) throw tasksRes.error;
+      if (categoriesRes.error) throw categoriesRes.error;
 
-  // Fetch Categories
-  const { data: categories, isLoading: isLoadingCategories, refetch: refetchCategories } = useQuery({
-    queryKey: ['categories', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('user_id', user?.id);
+      const tasks = tasksRes.data || [];
+      const categories = categoriesRes.data || [];
+
+      const completedTasks = tasks.filter(t => t.status === 'completed');
+      const totalFocusSeconds = tasks.reduce((acc, t) => acc + (t.elapsed_time || 0), 0);
+      const totalFocusHours = Math.floor(totalFocusSeconds / 3600);
+      const totalFocusMinutes = Math.floor((totalFocusSeconds % 3600) / 60);
+
+      // Tag Distribution
+      const categoryCounts: Record<string, number> = {};
+      completedTasks.forEach(t => {
+        const category = categories.find(c => c.id === t?.category_id);
+        const categoryName = category?.name ?? 'Sem Categoria';
+        categoryCounts[categoryName] = (categoryCounts[categoryName] || 0) + 1;
+      });
+
+      const tagDistribution = Object.entries(categoryCounts)
+        .map(([name, value], index) => ({
+          name,
+          value,
+          color: categories.find(c => c.name === name)?.color ?? COLORS[index % COLORS.length]
+        }))
+        .sort((a, b) => b.value - a.value);
+
+      // Weekly Trend
+      const days = eachDayOfInterval({ start: dateRange.start, end: dateRange.end });
       
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user,
-  });
+      const weeklyTrend = days.map(day => {
+        const dayTasks = tasks.filter(t => isSameDay(new Date(t.created_at), day));
+        const dayCompletedTasks = dayTasks.filter(t => t.status === 'completed');
+        const dayFocusSeconds = dayTasks.reduce((acc, t) => acc + (t.elapsed_time || 0), 0);
+        
+        return {
+          day: format(day, 'EEE', { locale: ptBR }),
+          fullDate: format(day, 'yyyy-MM-dd'),
+          focusMinutes: Math.round(dayFocusSeconds / 60),
+          tasksCompleted: dayCompletedTasks.length
+        };
+      });
 
-  // Refetch on mount to ensure fresh data
-  React.useEffect(() => {
-    if (user) {
-      queryClient.invalidateQueries({ queryKey: ['tasks', user.id] });
-      queryClient.invalidateQueries({ queryKey: ['categories', user.id] });
-    }
-  }, [user, queryClient]);
+      // Best Day
+      const bestDayData = [...weeklyTrend].sort((a, b) => b.tasksCompleted - a.tasksCompleted)[0];
+      const bestDay = bestDayData?.tasksCompleted > 0 ? bestDayData.day : '-';
 
-  const insightsData = useMemo(() => {
-    if (!tasks || !categories) return null;
-
-    const completedTasks = tasks.filter(t => t.status === 'completed');
-    const totalFocusSeconds = tasks.reduce((acc, t) => acc + (t.elapsed_time || 0), 0);
-    const totalFocusHours = Math.floor(totalFocusSeconds / 3600);
-    const totalFocusMinutes = Math.floor((totalFocusSeconds % 3600) / 60);
-
-    // Tag Distribution
-    const categoryCounts: Record<string, number> = {};
-    (completedTasks || []).forEach(t => {
-      const category = (categories || []).find(c => c.id === t?.category_id);
-      const categoryName = category?.name ?? 'Sem Categoria';
-      categoryCounts[categoryName] = (categoryCounts[categoryName] || 0) + 1;
-    });
-
-    const tagDistribution = Object.entries(categoryCounts)
-      .map(([name, value], index) => ({
-        name,
-        value,
-        color: (categories || []).find(c => c.name === name)?.color ?? COLORS[index % COLORS.length]
-      }))
-      .sort((a, b) => b.value - a.value);
-
-    // Weekly Trend
-    const days = eachDayOfInterval({ start: dateRange.start, end: dateRange.end });
-    
-    const weeklyTrend = days.map(day => {
-      const dayTasks = tasks.filter(t => isSameDay(new Date(t.created_at), day));
-      const dayCompletedTasks = dayTasks.filter(t => t.status === 'completed');
-      const dayFocusSeconds = dayTasks.reduce((acc, t) => acc + (t.elapsed_time || 0), 0);
-      
-      return {
-        day: format(day, 'EEE', { locale: ptBR }),
-        fullDate: format(day, 'yyyy-MM-dd'),
-        focusMinutes: Math.round(dayFocusSeconds / 60),
-        tasksCompleted: dayCompletedTasks.length
-      };
-    });
-
-    // Best Day
-    const bestDayData = [...weeklyTrend].sort((a, b) => b.tasksCompleted - a.tasksCompleted)[0];
-    const bestDay = bestDayData?.tasksCompleted > 0 ? bestDayData.day : '-';
-
-    // Streak (consecutive days with at least 1 completed task)
-    let streak = 0;
-    for (let i = weeklyTrend.length - 1; i >= 0; i--) {
-      if (weeklyTrend[i].tasksCompleted > 0) {
-        streak++;
-      } else if (i < weeklyTrend.length - 1) { // Ignore today if not completed yet, but break if past day is 0
-        break;
+      // Streak (consecutive days with at least 1 completed task)
+      let streak = 0;
+      for (let i = weeklyTrend.length - 1; i >= 0; i--) {
+        if (weeklyTrend[i].tasksCompleted > 0) {
+          streak++;
+        } else if (i < weeklyTrend.length - 1) { // Ignore today if not completed yet, but break if past day is 0
+          break;
+        }
       }
-    }
 
-    return {
-      kpis: {
-        totalFocusTime: `${totalFocusHours}h ${totalFocusMinutes}m`,
-        tasksCompleted: completedTasks.length,
-        bestDay,
-        streak: `${streak} dias`
-      },
-      tagDistribution,
-      weeklyTrend
-    };
-  }, [tasks, categories, dateRange]);
+      return {
+        kpis: {
+          totalFocusTime: `${totalFocusHours}h ${totalFocusMinutes}m`,
+          tasksCompleted: completedTasks.length,
+          bestDay,
+          streak: `${streak} dias`
+        },
+        tagDistribution,
+        weeklyTrend
+      };
+    },
+    enabled: !!user,
+  });
 
-  if (isLoadingTasks || isLoadingCategories) {
+  if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />

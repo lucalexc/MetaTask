@@ -1450,7 +1450,8 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
       if (error) throw error;
 
       // Invalidate queries for InsightsDashboard
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['insights'] });
 
       // Update time log if timer was stopped
       if (timerStoppedNow) {
@@ -1525,7 +1526,8 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
       if (error) throw error;
       
       // Invalidate queries for InsightsDashboard
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['insights'] });
     } catch (error) {
       console.error('Error deleting task:', error);
       // Revert on error
@@ -1561,7 +1563,8 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
       if (error) throw error;
 
       // Invalidate queries for InsightsDashboard
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['insights'] });
     } catch (error) {
       console.error('Error updating task time:', error);
       fetchTasks();
@@ -1581,7 +1584,8 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
       if (error) throw error;
 
       // Invalidate queries for InsightsDashboard
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['insights'] });
     } catch (error) {
       console.error('Error updating task recurrence:', error);
       fetchTasks();
@@ -1607,7 +1611,8 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
         if (taskError) throw taskError;
         
         // Invalidate queries for InsightsDashboard
-        queryClient.invalidateQueries({ queryKey: ['tasks'] });
+        await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+        await queryClient.invalidateQueries({ queryKey: ['insights'] });
         
         // Update log
         const { error: logError } = await supabase.from('task_time_logs')
@@ -1632,7 +1637,8 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
         if (taskError) throw taskError;
         
         // Invalidate queries for InsightsDashboard
-        queryClient.invalidateQueries({ queryKey: ['tasks'] });
+        await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+        await queryClient.invalidateQueries({ queryKey: ['insights'] });
         
         // Insert log
         const { error: logError } = await supabase.from('task_time_logs').insert([{
@@ -1684,8 +1690,9 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
         if (data) {
           setTasks(tasks.map(t => t.id === data.id ? data : t));
           // Invalidate queries for InsightsDashboard
-          queryClient.invalidateQueries({ queryKey: ['tasks'] });
-          if (data.category_id) queryClient.invalidateQueries({ queryKey: ['categories'] });
+          await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+          await queryClient.invalidateQueries({ queryKey: ['insights'] });
+          if (data.category_id) await queryClient.invalidateQueries({ queryKey: ['categories'] });
         }
       } else {
         // Create new task
@@ -1706,8 +1713,9 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
         if (data) {
           setTasks([data, ...tasks]);
           // Invalidate queries for InsightsDashboard
-          queryClient.invalidateQueries({ queryKey: ['tasks'] });
-          if (data.category_id) queryClient.invalidateQueries({ queryKey: ['categories'] });
+          await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+          await queryClient.invalidateQueries({ queryKey: ['insights'] });
+          if (data.category_id) await queryClient.invalidateQueries({ queryKey: ['categories'] });
         }
       }
     } catch (error) {
@@ -1809,7 +1817,8 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
       if (taskError) throw taskError;
 
       // Invalidate queries for InsightsDashboard
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['insights'] });
 
       // Handle time logs if timer state changed
       if (draggedTask.is_running && !newIsRunning) {

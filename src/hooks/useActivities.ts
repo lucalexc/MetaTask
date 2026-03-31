@@ -171,8 +171,9 @@ export function useActivities(date: Date = new Date()) {
         if (error) throw error;
 
         // Invalidate queries for InsightsDashboard (if activities are ever added there)
-        queryClient.invalidateQueries({ queryKey: ['activities'] });
-        queryClient.invalidateQueries({ queryKey: ['tasks'] }); // In case they are related
+        await queryClient.invalidateQueries({ queryKey: ['activities'] });
+        await queryClient.invalidateQueries({ queryKey: ['tasks'] }); // In case they are related
+        await queryClient.invalidateQueries({ queryKey: ['insights'] });
       } else {
         // Delete log for today
         const { error } = await supabase
@@ -186,8 +187,9 @@ export function useActivities(date: Date = new Date()) {
         if (error) throw error;
 
         // Invalidate queries for InsightsDashboard
-        queryClient.invalidateQueries({ queryKey: ['activities'] });
-        queryClient.invalidateQueries({ queryKey: ['tasks'] });
+        await queryClient.invalidateQueries({ queryKey: ['activities'] });
+        await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+        await queryClient.invalidateQueries({ queryKey: ['insights'] });
       }
     } catch (err) {
       console.error('Error toggling activity:', err);
@@ -208,8 +210,9 @@ export function useActivities(date: Date = new Date()) {
       if (error) throw error;
       
       // Invalidate queries
-      queryClient.invalidateQueries({ queryKey: ['activities'] });
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['activities'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['insights'] });
       
       fetchActivities();
       return data;
@@ -231,8 +234,9 @@ export function useActivities(date: Date = new Date()) {
       if (error) throw error;
 
       // Invalidate queries
-      queryClient.invalidateQueries({ queryKey: ['activities'] });
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['activities'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['insights'] });
 
       fetchActivities();
     } catch (err) {
@@ -252,8 +256,9 @@ export function useActivities(date: Date = new Date()) {
       if (error) throw error;
 
       // Invalidate queries
-      queryClient.invalidateQueries({ queryKey: ['activities'] });
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['activities'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['insights'] });
 
       fetchActivities();
     } catch (err) {
