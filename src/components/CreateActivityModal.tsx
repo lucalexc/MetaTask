@@ -117,8 +117,8 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
       return;
     }
 
-    if (type === 'routine' && (!time || time.length !== 5)) {
-      toast.error('O horário é obrigatório para rotinas');
+    if (!time || time.length !== 5) {
+      toast.error('O horário é obrigatório');
       return;
     }
 
@@ -139,8 +139,8 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
         name: name.trim(),
         description: description.trim() || null,
         type,
-        period: type === 'routine' ? (periodMap[period] || 'anytime') : 'anytime',
-        scheduled_time: type === 'routine' && time.length === 5 ? time : null,
+        period: periodMap[period] || 'anytime',
+        scheduled_time: time.length === 5 ? time : null,
         duration_days: type === 'goal' && duration ? parseInt(duration) : null,
         reps_per_day: type === 'goal' && repetitions ? parseInt(repetitions) : 1,
         xp_reward: type === 'routine' ? 10 : 50,
@@ -292,75 +292,90 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
             </div>
 
             {/* Conditional Fields */}
-            {type === 'routine' ? (
-              <div className="flex flex-row items-end gap-4">
-                <div className="space-y-2">
-                  <label className="text-[13px] font-bold text-[#202020]">Horário</label>
-                  <input
-                    type="text"
-                    value={time}
-                    onChange={handleTimeChange}
-                    placeholder="00:00"
-                    maxLength={5}
-                    className="w-32 bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
-                  />
-                </div>
-                
-                <div className="space-y-2 flex-1">
-                  <label className="text-[13px] font-bold text-[#202020]">Dias da Semana</label>
-                  <div className="flex items-center gap-1.5">
-                    {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, index) => {
-                      const isActive = selectedDays.includes(index);
-                      return (
-                        <button
-                          key={index}
-                          onClick={() => {
-                            if (isActive) {
-                              setSelectedDays(selectedDays.filter(d => d !== index));
-                            } else {
-                              setSelectedDays([...selectedDays, index].sort());
-                            }
-                          }}
-                          className={cn(
-                            "w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-colors",
-                            isActive 
-                              ? "bg-blue-600 text-white" 
-                              : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                          )}
-                        >
-                          {day}
-                        </button>
-                      );
-                    })}
+            <div className="space-y-6">
+              {type === 'routine' ? (
+                <div className="flex flex-row items-end gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[13px] font-bold text-[#202020]">Horário</label>
+                    <input
+                      type="text"
+                      value={time}
+                      onChange={handleTimeChange}
+                      placeholder="00:00"
+                      maxLength={5}
+                      className="w-32 bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2 flex-1">
+                    <label className="text-[13px] font-bold text-[#202020]">Dias da Semana</label>
+                    <div className="flex items-center gap-1.5">
+                      {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, index) => {
+                        const isActive = selectedDays.includes(index);
+                        return (
+                          <button
+                            key={index}
+                            onClick={() => {
+                              if (isActive) {
+                                setSelectedDays(selectedDays.filter(d => d !== index));
+                              } else {
+                                setSelectedDays([...selectedDays, index].sort());
+                              }
+                            }}
+                            className={cn(
+                              "w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-colors",
+                              isActive 
+                                ? "bg-blue-600 text-white" 
+                                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                            )}
+                          >
+                            {day}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[13px] font-bold text-[#202020]">Duração (Dias)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    placeholder="Ex: 30"
-                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
-                  />
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[13px] font-bold text-[#202020]">Duração (Dias)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={duration}
+                        onChange={(e) => setDuration(e.target.value)}
+                        placeholder="Ex: 30"
+                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[13px] font-bold text-[#202020]">Horário</label>
+                      <input
+                        type="text"
+                        value={time}
+                        onChange={handleTimeChange}
+                        placeholder="00:00"
+                        maxLength={5}
+                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[13px] font-bold text-[#202020]">Repetições/Dia</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={repetitions}
+                      onChange={(e) => setRepetitions(e.target.value)}
+                      placeholder="Ex: 1"
+                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[13px] font-bold text-[#202020]">Repetições/Dia</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={repetitions}
-                    onChange={(e) => setRepetitions(e.target.value)}
-                    placeholder="Ex: 1"
-                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
-                  />
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Footer */}
