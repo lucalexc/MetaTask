@@ -16,7 +16,6 @@ const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4'
 
 export default function InsightsDashboard() {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
   const [timeRange, setTimeRange] = useState<'week' | 'month'>('week');
 
   const dateRange = useMemo(() => {
