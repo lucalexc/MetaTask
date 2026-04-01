@@ -1,9 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, isSameDay, eachDayOfInterval, addDays } from 'date-fns';
 import { cn } from '@/src/lib/utils';
-import { Button } from '@/src/components/ui/button';
 
 interface WeeklyCalendarProps {
   selectedDate: Date;
@@ -25,27 +23,55 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
   handleNextWeek,
   isDayFailed
 }) => {
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEndEvent = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe) {
+      handleNextWeek();
+    }
+    if (isRightSwipe) {
+      handlePrevWeek();
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center max-w-fit mx-auto bg-slate-50/50 border border-slate-200 rounded-3xl p-4 px-6 sm:px-8 shadow-sm gap-2 sm:gap-4">
-      <Button variant="ghost" size="icon" onClick={handlePrevWeek} className="text-[#808080] hover:text-[#202020] shrink-0 transition-colors ease-out duration-200">
-        <ChevronLeft className="w-5 h-5" />
-      </Button>
-      
-      <div className="relative w-full overflow-hidden px-2">
+    <div 
+      className="w-full overflow-hidden"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEndEvent}
+    >
+      <div className="relative w-full">
         <AnimatePresence mode="popLayout" custom={weekDirection}>
           <motion.div
             key={currentWeekStart.toISOString()}
             custom={weekDirection}
             variants={{
-              initial: (dir: number) => ({ x: dir > 0 ? 50 : -50, opacity: 0 }),
+              initial: (dir: number) => ({ x: dir > 0 ? 100 : -100, opacity: 0 }),
               animate: { x: 0, opacity: 1 },
-              exit: (dir: number) => ({ x: dir > 0 ? -50 : 50, opacity: 0 })
+              exit: (dir: number) => ({ x: dir > 0 ? -100 : 100, opacity: 0 })
             }}
             initial="initial"
             animate="animate"
             exit="exit"
             transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="flex justify-start sm:justify-center gap-2 sm:gap-6 overflow-x-auto snap-x hide-scrollbar scroll-smooth w-full"
+            className="grid grid-cols-7 w-full gap-1 sm:gap-2"
           >
             {eachDayOfInterval({ start: currentWeekStart, end: addDays(currentWeekStart, 6) }).map((day, index) => {
               const dayLabels = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'];
@@ -55,25 +81,26 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
               const failed = isDayFailed ? isDayFailed(day) : false;
               
               return (
-                <div key={day.toISOString()} className="flex flex-col items-center gap-2 min-w-[3rem] shrink-0 snap-center">
-                  <div className="text-center text-[10px] font-semibold uppercase tracking-wider text-[#808080]">
+                <div key={day.toISOString()} className="flex flex-col items-center justify-center gap-1.5">
+                  <div className="text-[10px] text-gray-400 uppercase font-medium tracking-wider">
                     {label}
                   </div>
                   <button
                     onClick={() => setSelectedDate(day)}
                     className={cn(
-                      "flex items-center justify-center w-full h-10 rounded-xl transition-all ease-out duration-200",
+                      "flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-all ease-out duration-200",
                       isSelected 
-                        ? "bg-blue-100 text-blue-600 font-bold shadow-sm" 
+                        ? "bg-[#1f60c2] text-white font-semibold shadow-md" 
                         : failed
                           ? "bg-red-50 text-red-600 hover:bg-red-100"
-                          : "hover:bg-gray-50 text-[#808080]"
+                          : "hover:bg-gray-100 text-[#202020]"
                     )}
                   >
                     <span className={cn(
-                      "text-[14px]",
-                      isToday && !isSelected && !failed && "text-blue-600 font-bold",
-                      failed && !isSelected && "text-red-600 font-bold"
+                      "text-sm sm:text-base",
+                      isToday && !isSelected && !failed && "text-[#1f60c2] font-bold",
+                      failed && !isSelected && "text-red-600 font-bold",
+                      !isSelected && !isToday && !failed && "font-medium"
                     )}>
                       {format(day, 'd')}
                     </span>
@@ -84,10 +111,6 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
           </motion.div>
         </AnimatePresence>
       </div>
-
-      <Button variant="ghost" size="icon" onClick={handleNextWeek} className="text-[#808080] hover:text-[#202020] shrink-0 transition-colors ease-out duration-200">
-        <ChevronRight className="w-5 h-5" />
-      </Button>
     </div>
   );
 };

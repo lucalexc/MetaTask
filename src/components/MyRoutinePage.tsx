@@ -72,14 +72,30 @@ export default function MyRoutinePage({
   return (
     <div className="w-full bg-[#FCFAF8] text-[#202020] p-4 md:p-8">
       <div className="w-full max-w-7xl mx-auto px-0 md:px-6 lg:px-12 flex flex-col gap-6 md:gap-8">
-        <div className="flex items-center justify-between border-b border-gray-200 pb-6">
+        
+        {/* Calendar at the absolute top */}
+        <div className="w-full">
+          <WeeklyCalendar 
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            currentWeekStart={currentWeekStart}
+            weekDirection={weekDirection}
+            handlePrevWeek={handlePrevWeek}
+            handleNextWeek={handleNextWeek}
+            isDayFailed={isDayFailed}
+          />
+          <div className="mt-2 text-center sm:text-left px-4 md:px-0">
+            <h2 className="text-sm text-gray-500 font-medium capitalize">
+              {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
+            </h2>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between border-b border-gray-200 pb-6 px-4 md:px-0">
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <h1 className="text-[26px] leading-[35px] font-bold text-[#202020] tracking-tight">Minha Rotina</h1>
             </div>
-            <p className="text-[13px] text-[#808080] mt-1 capitalize">
-              {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
-            </p>
           </div>
           
           <div className="flex items-center gap-4">
@@ -100,19 +116,7 @@ export default function MyRoutinePage({
           </div>
         </div>
 
-        <div className="w-full">
-          <WeeklyCalendar 
-            selectedDate={selectedDate}
-            setSelectedDate={setSelectedDate}
-            currentWeekStart={currentWeekStart}
-            weekDirection={weekDirection}
-            handlePrevWeek={handlePrevWeek}
-            handleNextWeek={handleNextWeek}
-            isDayFailed={isDayFailed}
-          />
-        </div>
-
-        <div className="w-full">
+        <div className="w-full px-4 md:px-0">
           {isLocked && (
             <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-amber-800">
               <Lock className="w-5 h-5 mt-0.5 shrink-0" />

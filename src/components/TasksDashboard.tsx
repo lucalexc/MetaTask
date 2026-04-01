@@ -1927,49 +1927,59 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
     <div className="w-full flex flex-col bg-[#FCFAF8]">
       <div className="w-full max-w-7xl mx-auto px-6 lg:px-12 pt-6 md:pt-10 pb-12 flex flex-col gap-8">
         
-        {/* Header */}
-          <header className="flex flex-col gap-4 mb-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#202020] capitalize">
-                  {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
-                </h1>
-              </div>
-              
-              <div className="flex items-center gap-4 flex-wrap pb-1 md:pb-0">
-                {/* Toggle Group */}
-                <div className="flex items-center bg-gray-100 p-1 rounded-lg shrink-0 flex-wrap">
-                  <button
-                    onClick={() => setView('list')}
-                    className={cn(
-                      "flex items-center justify-center px-2.5 py-1 rounded-md text-[13px] font-medium transition-all ease-out duration-200",
-                      view === 'list' ? "bg-white text-[#202020] shadow-sm" : "text-[#808080] hover:text-[#202020]"
-                    )}
-                  >
-                    <ListTodo className="w-3.5 h-3.5 mr-1.5" />
-                    Lista
-                  </button>
-                  <button
-                    onClick={() => setView('kanban')}
-                    className={cn(
-                      "flex items-center justify-center px-2.5 py-1 rounded-md text-[13px] font-medium transition-all ease-out duration-200",
-                      view === 'kanban' ? "bg-white text-[#202020] shadow-sm" : "text-[#808080] hover:text-[#202020]"
-                    )}
-                  >
-                    <Kanban className="w-3.5 h-3.5 mr-1.5" />
-                    Kanban
-                  </button>
-                  <button
-                    onClick={() => setView('calendar')}
-                    className={cn(
-                      "flex items-center justify-center px-2.5 py-1 rounded-md text-[13px] font-medium transition-all ease-out duration-200",
-                      view === 'calendar' ? "bg-white text-[#202020] shadow-sm" : "text-[#808080] hover:text-[#202020]"
-                    )}
-                  >
-                    <CalendarIcon className="w-3.5 h-3.5 mr-1.5" />
-                    Calendário
-                  </button>
-                </div>
+        {/* Header with Calendar */}
+        <header className="flex flex-col gap-4 mb-6">
+          {/* Calendar at the absolute top */}
+          <div className="w-full">
+            <WeeklyCalendar 
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+              currentWeekStart={currentWeekStart}
+              weekDirection={weekDirection}
+              handlePrevWeek={handlePrevWeek}
+              handleNextWeek={handleNextWeek}
+            />
+            <div className="mt-2 text-center sm:text-left">
+              <h2 className="text-sm text-gray-500 font-medium capitalize">
+                {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
+              </h2>
+            </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-4">
+            <div className="flex items-center gap-4 flex-wrap pb-1 md:pb-0">
+              {/* Toggle Group */}
+              <div className="flex items-center bg-gray-100 p-1 rounded-lg shrink-0 flex-wrap">
+                <button
+                  onClick={() => setView('list')}
+                  className={cn(
+                    "flex items-center justify-center px-2.5 py-1 rounded-md text-[13px] font-medium transition-all ease-out duration-200",
+                    view === 'list' ? "bg-white text-[#202020] shadow-sm" : "text-[#808080] hover:text-[#202020]"
+                  )}
+                >
+                  <ListTodo className="w-3.5 h-3.5 mr-1.5" />
+                  Lista
+                </button>
+                <button
+                  onClick={() => setView('kanban')}
+                  className={cn(
+                    "flex items-center justify-center px-2.5 py-1 rounded-md text-[13px] font-medium transition-all ease-out duration-200",
+                    view === 'kanban' ? "bg-white text-[#202020] shadow-sm" : "text-[#808080] hover:text-[#202020]"
+                  )}
+                >
+                  <Kanban className="w-3.5 h-3.5 mr-1.5" />
+                  Kanban
+                </button>
+                <button
+                  onClick={() => setView('calendar')}
+                  className={cn(
+                    "flex items-center justify-center px-2.5 py-1 rounded-md text-[13px] font-medium transition-all ease-out duration-200",
+                    view === 'calendar' ? "bg-white text-[#202020] shadow-sm" : "text-[#808080] hover:text-[#202020]"
+                  )}
+                >
+                  <CalendarIcon className="w-3.5 h-3.5 mr-1.5" />
+                  Calendário
+                </button>
               </div>
             </div>
 
@@ -2024,7 +2034,8 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
                 </Popover>
               </div>
             )}
-          </header>
+          </div>
+        </header>
 
           {view === 'list' && (
             <motion.div 
@@ -2032,16 +2043,6 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               animate={{ opacity: 1, y: 0 }}
               className="space-y-6 w-full"
             >
-              {/* Horizontal Days Strip */}
-              <WeeklyCalendar 
-                selectedDate={selectedDate}
-                setSelectedDate={setSelectedDate}
-                currentWeekStart={currentWeekStart}
-                weekDirection={weekDirection}
-                handlePrevWeek={handlePrevWeek}
-                handleNextWeek={handleNextWeek}
-              />
-
               {/* Active Missions Area */}
               <div className="w-full">
                 <div className="space-y-0">
