@@ -31,44 +31,38 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
         <ChevronLeft className="w-5 h-5" />
       </Button>
       
-      <div className="flex flex-col overflow-hidden px-2">
-        {/* Static Labels */}
-        <div className="flex justify-center gap-4 sm:gap-6 mb-2">
-          {['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'].map(day => (
-            <div key={day} className="w-10 text-center text-[10px] font-semibold uppercase tracking-wider text-[#808080]">
-              {day}
-            </div>
-          ))}
-        </div>
-        
-        {/* Animated Numbers */}
-        <div className="relative h-10">
-          <AnimatePresence mode="popLayout" custom={weekDirection}>
-            <motion.div
-              key={currentWeekStart.toISOString()}
-              custom={weekDirection}
-              variants={{
-                initial: (dir: number) => ({ x: dir > 0 ? 50 : -50, opacity: 0 }),
-                animate: { x: 0, opacity: 1 },
-                exit: (dir: number) => ({ x: dir > 0 ? -50 : 50, opacity: 0 })
-              }}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="absolute inset-0 flex justify-center gap-4 sm:gap-6"
-            >
-              {eachDayOfInterval({ start: currentWeekStart, end: addDays(currentWeekStart, 6) }).map(day => {
-                const isSelected = isSameDay(day, selectedDate);
-                const isToday = isSameDay(day, new Date());
-                const failed = isDayFailed ? isDayFailed(day) : false;
-                
-                return (
+      <div className="relative w-full overflow-hidden px-2">
+        <AnimatePresence mode="popLayout" custom={weekDirection}>
+          <motion.div
+            key={currentWeekStart.toISOString()}
+            custom={weekDirection}
+            variants={{
+              initial: (dir: number) => ({ x: dir > 0 ? 50 : -50, opacity: 0 }),
+              animate: { x: 0, opacity: 1 },
+              exit: (dir: number) => ({ x: dir > 0 ? -50 : 50, opacity: 0 })
+            }}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="flex justify-start sm:justify-center gap-2 sm:gap-6 overflow-x-auto snap-x hide-scrollbar scroll-smooth w-full"
+          >
+            {eachDayOfInterval({ start: currentWeekStart, end: addDays(currentWeekStart, 6) }).map((day, index) => {
+              const dayLabels = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'];
+              const label = dayLabels[index];
+              const isSelected = isSameDay(day, selectedDate);
+              const isToday = isSameDay(day, new Date());
+              const failed = isDayFailed ? isDayFailed(day) : false;
+              
+              return (
+                <div key={day.toISOString()} className="flex flex-col items-center gap-2 min-w-[3rem] shrink-0 snap-center">
+                  <div className="text-center text-[10px] font-semibold uppercase tracking-wider text-[#808080]">
+                    {label}
+                  </div>
                   <button
-                    key={day.toISOString()}
                     onClick={() => setSelectedDate(day)}
                     className={cn(
-                      "flex items-center justify-center w-10 h-10 rounded-xl transition-all ease-out duration-200",
+                      "flex items-center justify-center w-full h-10 rounded-xl transition-all ease-out duration-200",
                       isSelected 
                         ? "bg-blue-100 text-blue-600 font-bold shadow-sm" 
                         : failed
@@ -84,11 +78,11 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                       {format(day, 'd')}
                     </span>
                   </button>
-                );
-              })}
-            </motion.div>
-          </AnimatePresence>
-        </div>
+                </div>
+              );
+            })}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       <Button variant="ghost" size="icon" onClick={handleNextWeek} className="text-[#808080] hover:text-[#202020] shrink-0 transition-colors ease-out duration-200">

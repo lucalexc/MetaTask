@@ -70,8 +70,8 @@ export default function MyRoutinePage({
   ];
 
   return (
-    <div className="w-full bg-[#FCFAF8] text-[#202020] p-8">
-      <div className="w-full max-w-7xl mx-auto px-6 lg:px-12 flex flex-col gap-8">
+    <div className="w-full bg-[#FCFAF8] text-[#202020] p-4 md:p-8">
+      <div className="w-full max-w-7xl mx-auto px-0 md:px-6 lg:px-12 flex flex-col gap-6 md:gap-8">
         <div className="flex items-center justify-between border-b border-gray-200 pb-6">
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
@@ -210,7 +210,7 @@ const ActivityRow: React.FC<{
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       className={cn(
-        "flex flex-row items-center py-3 border-b border-gray-200 transition-colors ease-out duration-200 group",
+        "flex flex-row items-center py-3 px-2 md:px-0 border-b border-gray-200 transition-colors ease-out duration-200 group",
         isLocked ? "opacity-60 cursor-not-allowed" : "hover:bg-gray-100 cursor-pointer"
       )}
       onClick={() => {
@@ -218,7 +218,7 @@ const ActivityRow: React.FC<{
       }}
     >
       <div 
-        className={cn("flex-shrink-0 mr-4", isLocked ? "cursor-not-allowed" : "cursor-pointer")}
+        className={cn("flex-shrink-0 mr-3 md:mr-4", isLocked ? "cursor-not-allowed" : "cursor-pointer")}
         onClick={(e) => {
           e.stopPropagation();
           if (!isLocked) onToggle();
@@ -237,17 +237,17 @@ const ActivityRow: React.FC<{
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3">
-            <span className={cn("text-[13px] leading-[18px] transition-colors ease-out duration-200", isCompleted ? "text-[#808080] line-through" : "text-[#202020] font-medium")}>
+          <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+            <span className={cn("text-[13px] leading-[18px] transition-colors ease-out duration-200 truncate", isCompleted ? "text-[#808080] line-through" : "text-[#202020] font-medium")}>
               {activity.name}
             </span>
             
-            <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider", isGoal ? "bg-purple-50 text-purple-600" : "bg-gray-100 text-[#808080]")}>
+            <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0", isGoal ? "bg-purple-50 text-purple-600" : "bg-gray-100 text-[#808080]")}>
               {isGoal ? 'Meta' : 'Rotina'}
             </span>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4 shrink-0">
             {activity.scheduled_time && (
               <span className="text-[11px] text-[#808080]">{activity.scheduled_time.substring(0, 5)}</span>
             )}
