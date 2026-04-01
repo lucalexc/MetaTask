@@ -214,8 +214,8 @@ const ActivityRow: React.FC<{
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       className={cn(
-        "flex flex-row items-center py-3 px-2 md:px-0 border-b border-gray-200 transition-colors ease-out duration-200 group",
-        isLocked ? "opacity-60 cursor-not-allowed" : "hover:bg-gray-100 cursor-pointer"
+        "flex flex-row items-center py-3 px-2 border-b border-gray-100 last:border-0 transition-colors duration-200 group",
+        isLocked ? "opacity-60 cursor-not-allowed" : "hover:bg-gray-50/50 active:bg-gray-100 cursor-pointer"
       )}
       onClick={() => {
         if (!isLocked) onEdit();

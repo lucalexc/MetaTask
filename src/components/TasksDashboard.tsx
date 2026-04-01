@@ -294,7 +294,7 @@ const TaskCard: React.FC<{
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       onClick={() => onEdit(task)}
-      className="flex flex-col md:flex-row md:items-center gap-3 py-3 md:py-2 border-b border-gray-100 bg-white group hover:bg-gray-50 transition-colors ease-out duration-200 cursor-pointer relative"
+      className="flex flex-col md:flex-row md:items-center gap-3 py-3 px-2 border-b border-gray-100 last:border-0 group hover:bg-gray-50/50 active:bg-gray-100 transition-colors duration-200 cursor-pointer relative"
     >
       {/* Drag Handle (Desktop only) */}
       <div className="hidden md:block opacity-0 group-hover:opacity-100 cursor-grab text-gray-300 transition-opacity ease-out duration-200 shrink-0">
@@ -302,11 +302,11 @@ const TaskCard: React.FC<{
       </div>
       
       {/* Top Row (Mobile) / Left Side (Desktop): Checkbox + Title */}
-      <div className="flex items-start md:items-center gap-3 flex-1 min-w-0">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
         <button 
           onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(task.id, task.status); }}
           className={cn(
-            "mt-0.5 md:mt-0 w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0",
+            "w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0",
             task.status === 'completed' 
               ? "bg-emerald-500 border-emerald-500 text-white" 
               : "border-gray-300 hover:border-gray-400"

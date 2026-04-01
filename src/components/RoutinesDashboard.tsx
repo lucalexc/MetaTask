@@ -588,7 +588,7 @@ export default function RoutinesDashboard({
                           return (
                             <div 
                               key={activity.id}
-                              className="flex items-center gap-3 py-3 border-b border-slate-100 group transition-colors hover:bg-slate-50/50 -mx-4 px-4 rounded-lg cursor-pointer"
+                              className="flex items-center gap-3 py-3 px-2 border-b border-gray-100 last:border-0 group hover:bg-gray-50/50 active:bg-gray-100 transition-colors duration-200 cursor-pointer"
                               onClick={() => toggleRoutineCompletion(activity.id, activity.routineId, isCompleted)}
                             >
                               <button 

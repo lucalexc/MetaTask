@@ -129,13 +129,15 @@ export default function ProjectDetails({
                   <Loader2 className="w-6 h-6 text-[#1f60c2] animate-spin" />
                 </div>
               ) : tasks && tasks.length > 0 ? (
-                tasks.map((task: any) => (
-                  <div key={task.id} className="group flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white shadow-sm hover:border-gray-300 transition-all ease-out duration-200">
-                    <span className="flex-1 text-[13px] text-[#202020] font-medium leading-[18px]">
-                      {task.title}
-                    </span>
-                  </div>
-                ))
+                <div className="flex flex-col">
+                  {tasks.map((task: any) => (
+                    <div key={task.id} className="group flex items-center justify-between py-3 px-2 border-b border-gray-100 last:border-0 hover:bg-gray-50/50 active:bg-gray-100 transition-colors duration-200 cursor-pointer">
+                      <span className="flex-1 text-[13px] text-[#202020] font-medium leading-[18px] truncate">
+                        {task.title}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="text-center py-20 bg-white/50 rounded-xl border border-dashed border-gray-200">
                   <p className="text-[13px] text-[#808080] italic">Nenhuma tarefa aberta neste projeto.</p>
