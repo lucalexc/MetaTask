@@ -72,16 +72,6 @@ export default function Dashboard() {
             Tarefas
           </button>
           <button 
-            onClick={() => handleTabChange('projects')}
-            className={cn(
-              "w-full flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium rounded-md transition-colors ease-out duration-200",
-              activeTab === 'projects' ? "text-[#1f60c2] bg-[#dceaff]" : "text-[#202020] hover:bg-gray-100"
-            )}
-          >
-            <Folder className={cn("w-4 h-4", activeTab === 'projects' ? "text-[#1f60c2]" : "text-[#808080]")} />
-            Projetos
-          </button>
-          <button 
             onClick={() => handleTabChange('my-routine')}
             className={cn(
               "w-full flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium rounded-md transition-colors ease-out duration-200",
@@ -90,6 +80,16 @@ export default function Dashboard() {
           >
             <RefreshCcw className={cn("w-4 h-4", activeTab === 'my-routine' ? "text-[#1f60c2]" : "text-[#808080]")} />
             Rotina
+          </button>
+          <button 
+            onClick={() => handleTabChange('projects')}
+            className={cn(
+              "w-full flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium rounded-md transition-colors ease-out duration-200",
+              activeTab === 'projects' ? "text-[#1f60c2] bg-[#dceaff]" : "text-[#202020] hover:bg-gray-100"
+            )}
+          >
+            <Folder className={cn("w-4 h-4", activeTab === 'projects' ? "text-[#1f60c2]" : "text-[#808080]")} />
+            Projetos
           </button>
           <button 
             onClick={() => handleTabChange('roadmap')}
@@ -162,30 +162,27 @@ export default function Dashboard() {
         </div>
       </main>
 
+      {/* Global FAB (Mobile Only) */}
+      <button
+        onClick={handleFabClick}
+        className="md:hidden fixed right-4 bottom-24 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-transform active:scale-95"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
+
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-between px-2 pb-[env(safe-area-inset-bottom)] z-50 h-[calc(4rem+env(safe-area-inset-bottom))]">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around px-2 pb-[env(safe-area-inset-bottom)] z-40 h-[calc(4rem+env(safe-area-inset-bottom))]">
         <button onClick={() => handleTabChange('tasks')} className={cn("flex flex-col items-center justify-center w-16 h-16 transition-colors ease-out duration-200", activeTab === 'tasks' ? "text-[#1f60c2]" : "text-[#808080]")}>
           <Inbox className="w-5 h-5" />
           <span className="text-[10px] mt-1 font-medium">Tarefas</span>
         </button>
-        <button onClick={() => handleTabChange('projects')} className={cn("flex flex-col items-center justify-center w-16 h-16 transition-colors ease-out duration-200", activeTab === 'projects' ? "text-[#1f60c2]" : "text-[#808080]")}>
-          <Folder className="w-5 h-5" />
-          <span className="text-[10px] mt-1 font-medium">Projetos</span>
-        </button>
-        
-        {/* Centered FAB */}
-        <div className="relative -top-5 flex justify-center w-16 h-16">
-          <button 
-            onClick={handleFabClick}
-            className="w-12 h-12 bg-[#1f60c2] rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-colors ease-out duration-200"
-          >
-            <Plus className="w-6 h-6" />
-          </button>
-        </div>
-
         <button onClick={() => handleTabChange('my-routine')} className={cn("flex flex-col items-center justify-center w-16 h-16 transition-colors ease-out duration-200", activeTab === 'my-routine' ? "text-[#1f60c2]" : "text-[#808080]")}>
           <RefreshCcw className="w-5 h-5" />
           <span className="text-[10px] mt-1 font-medium">Rotina</span>
+        </button>
+        <button onClick={() => handleTabChange('projects')} className={cn("flex flex-col items-center justify-center w-16 h-16 transition-colors ease-out duration-200", activeTab === 'projects' ? "text-[#1f60c2]" : "text-[#808080]")}>
+          <Folder className="w-5 h-5" />
+          <span className="text-[10px] mt-1 font-medium">Projetos</span>
         </button>
         <button onClick={() => setIsMobileMenuOpen(true)} className={cn("flex flex-col items-center justify-center w-16 h-16 transition-colors ease-out duration-200", ['roadmap', 'identity', 'insights', 'settings'].includes(activeTab) ? "text-[#1f60c2]" : "text-[#808080]")}>
           <Menu className="w-5 h-5" />
