@@ -566,12 +566,23 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
     setTime(formattedTime);
   };
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const isSaveDisabled = !title.trim();
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm overscroll-none h-[100dvh] overflow-y-auto">
       <div className="min-h-full flex items-center justify-center p-4">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}

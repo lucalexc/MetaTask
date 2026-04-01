@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -33,6 +33,17 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   };
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -43,7 +54,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overscroll-none h-[100dvh]"
           >
             {/* Modal Container */}
             <motion.div
@@ -52,7 +63,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', duration: 0.5, bounce: 0.3 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 relative"
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 relative max-h-[90dvh] overflow-y-auto"
             >
               {/* Close Button */}
               <button

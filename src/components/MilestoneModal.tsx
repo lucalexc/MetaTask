@@ -74,6 +74,17 @@ export default function MilestoneModal({
     }
   }, [isOpen, milestone]);
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !icon.trim()) return;
@@ -125,13 +136,13 @@ export default function MilestoneModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] overscroll-none h-[100dvh]"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] flex flex-col bg-white rounded-2xl shadow-2xl z-[70] overflow-hidden"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90dvh] flex flex-col bg-white rounded-2xl shadow-2xl z-[101] overflow-hidden"
           >
             <div className="p-4 border-b border-gray-100 flex justify-between items-center shrink-0">
               <h3 className="font-bold text-[#202020] text-lg">

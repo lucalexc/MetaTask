@@ -295,13 +295,20 @@ function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (na
   const [description, setDescription] = useState('');
   const [color, setColor] = useState(PRESET_COLORS[4]); // Default blue
 
+  React.useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overscroll-none h-[100dvh]">
       <motion.div
         initial={{ opacity: 0, scale: 0.98, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.98, y: 10 }}
-        className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden border border-gray-200"
+        className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden border border-gray-200 max-h-[90dvh] flex flex-col"
       >
         <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
           <h3 className="font-bold text-[16px] text-[#202020]">Novo Projeto</h3>
@@ -310,7 +317,7 @@ function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (na
           </button>
         </div>
         
-        <div className="p-5 space-y-5">
+        <div className="p-5 space-y-5 overflow-y-auto">
           <div>
             <label className="block text-[11px] uppercase tracking-wider font-bold text-[#808080] mb-1.5">Nome do Projeto</label>
             <input
