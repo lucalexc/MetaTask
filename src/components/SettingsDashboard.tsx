@@ -141,7 +141,7 @@ export default function SettingsDashboard() {
                     id="name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="block w-full px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#DC4C3E] focus:border-[#DC4C3E] transition-all bg-gray-50 focus:bg-white"
+                    className="block w-full px-3 py-2 text-base md:text-sm border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#DC4C3E] focus:border-[#DC4C3E] transition-all bg-gray-50 focus:bg-white"
                     placeholder="Seu nome"
                   />
                 </div>
@@ -158,7 +158,7 @@ export default function SettingsDashboard() {
                       onChange={handleDateChange}
                       maxLength={10}
                       placeholder="DD/MM/AAAA"
-                      className="block w-full px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#DC4C3E] focus:border-[#DC4C3E] transition-all bg-gray-50 focus:bg-white"
+                      className="block w-full px-3 py-2 text-base md:text-sm border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#DC4C3E] focus:border-[#DC4C3E] transition-all bg-gray-50 focus:bg-white"
                     />
                   </div>
                   <div>
@@ -169,7 +169,7 @@ export default function SettingsDashboard() {
                       id="gender"
                       value={gender}
                       onChange={(e) => setGender(e.target.value)}
-                      className="block w-full px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#DC4C3E] focus:border-[#DC4C3E] transition-all bg-gray-50 focus:bg-white appearance-none"
+                      className="block w-full px-3 py-2 text-base md:text-sm border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#DC4C3E] focus:border-[#DC4C3E] transition-all bg-gray-50 focus:bg-white appearance-none"
                     >
                       <option value="" disabled>Selecione</option>
                       <option value="Masculino">Masculino</option>

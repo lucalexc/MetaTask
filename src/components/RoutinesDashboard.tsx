@@ -201,14 +201,14 @@ const RoutineManagerModal = ({
                     type="text" 
                     placeholder="00:00"
                     maxLength={5}
-                    className="bg-transparent text-sm font-bold text-slate-700 w-20 focus:outline-none"
+                    className="bg-transparent text-base md:text-sm font-bold text-slate-700 w-20 focus:outline-none"
                     value={activity.time}
                     onChange={e => updateActivity(index, 'time', e.target.value)}
                   />
                   <input 
                     type="text" 
                     placeholder="Nome da atividade"
-                    className="flex-1 bg-transparent text-sm font-medium text-slate-900 focus:outline-none"
+                    className="flex-1 bg-transparent text-base md:text-sm font-medium text-slate-900 focus:outline-none"
                     value={activity.title}
                     onChange={e => updateActivity(index, 'title', e.target.value)}
                   />

@@ -163,12 +163,14 @@ export default function Dashboard() {
       </main>
 
       {/* Global FAB (Mobile Only) */}
-      <button
-        onClick={handleFabClick}
-        className="md:hidden fixed right-4 bottom-24 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-transform active:scale-95"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
+      {['tasks', 'my-routine', 'projects', 'roadmap'].includes(activeTab) && (
+        <button
+          onClick={handleFabClick}
+          className="md:hidden fixed right-4 bottom-24 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-transform active:scale-95"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
+      )}
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around px-2 pb-[env(safe-area-inset-bottom)] z-40 h-[calc(4rem+env(safe-area-inset-bottom))]">

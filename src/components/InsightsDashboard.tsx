@@ -149,7 +149,7 @@ export default function InsightsDashboard() {
           <select 
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value as 'week' | 'month')}
-            className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 shadow-sm"
+            className="bg-white border border-gray-200 text-gray-700 text-base md:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 shadow-sm"
           >
             <option value="week">Últimos 7 dias</option>
             <option value="month">Este Mês</option>

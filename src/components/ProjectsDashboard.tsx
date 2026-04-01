@@ -325,7 +325,7 @@ function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (na
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ex: Trabalho, Pessoal..."
-              className="w-full px-3 py-2 text-[13px] leading-[18px] text-[#202020] placeholder-[#808080] border border-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] font-medium transition-all ease-out duration-200"
+              className="w-full px-3 py-2 text-base md:text-[13px] leading-[18px] text-[#202020] placeholder-[#808080] border border-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] font-medium transition-all ease-out duration-200"
               autoFocus
             />
           </div>
@@ -337,7 +337,7 @@ function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (na
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Opcional..."
               rows={2}
-              className="w-full px-3 py-2 text-[13px] leading-[18px] text-[#202020] placeholder-[#808080] border border-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] resize-none transition-all ease-out duration-200"
+              className="w-full px-3 py-2 text-base md:text-[13px] leading-[18px] text-[#202020] placeholder-[#808080] border border-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] resize-none transition-all ease-out duration-200"
             />
           </div>
 

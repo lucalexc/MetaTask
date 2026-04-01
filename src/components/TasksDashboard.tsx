@@ -594,14 +594,14 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
             <input 
               type="text" 
               placeholder="Qual é a sua próxima tarefa?" 
-              className="w-full text-[26px] leading-[35px] font-bold text-[#202020] placeholder-[#808080] focus:outline-none"
+              className="w-full text-base md:text-[26px] leading-[35px] font-bold text-[#202020] placeholder-[#808080] focus:outline-none"
               value={title}
               onChange={e => setTitle(e.target.value)}
               autoFocus
             />
             <textarea 
               placeholder="Descrição da tarefa..." 
-              className="w-full text-[13px] leading-[18px] text-[#202020] placeholder-[#808080] focus:outline-none resize-none min-h-[60px]"
+              className="w-full text-base md:text-[13px] leading-[18px] text-[#202020] placeholder-[#808080] focus:outline-none resize-none min-h-[60px]"
               value={description}
               onChange={e => setDescription(e.target.value)}
             />
@@ -682,7 +682,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                     maxLength={5}
                     value={time}
                     onChange={handleTimeChange}
-                    className="w-11 bg-transparent focus:outline-none text-left justify-start placeholder-[#808080] text-[#202020]"
+                    className="w-11 bg-transparent focus:outline-none text-left justify-start placeholder-[#808080] text-[#202020] text-base md:text-[13px]"
                   />
                 </div>
               </div>
@@ -816,7 +816,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                     setDuration(parsed);
                     setDurationInput(formatDurationInput(parsed));
                   }}
-                  className="w-14 bg-transparent focus:outline-none text-center text-slate-700 placeholder-slate-400" 
+                  className="w-14 bg-transparent focus:outline-none text-center text-slate-700 placeholder-slate-400 text-base md:text-[13px]" 
                   placeholder="30m" 
                 />
                 <button 
@@ -926,12 +926,12 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                       min="1" 
                       value={customRecurrenceInterval} 
                       onChange={(e) => setCustomRecurrenceInterval(e.target.value)}
-                      className="w-20 bg-white border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                      className="w-20 bg-white border border-gray-200 rounded-lg px-3 py-2 text-base md:text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                     />
                     <select 
                       value={customRecurrenceUnit}
                       onChange={(e) => setCustomRecurrenceUnit(e.target.value as any)}
-                      className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                      className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-base md:text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                     >
                       <option value="day">Dia(s)</option>
                       <option value="week">Semana(s)</option>
@@ -982,7 +982,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                                 type="date" 
                                 value={customRecurrenceEndDate ? format(customRecurrenceEndDate, 'yyyy-MM-dd') : ''}
                                 onChange={(e) => setCustomRecurrenceEndDate(e.target.value ? new Date(e.target.value) : null)}
-                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-base md:text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                               />
                             </div>
                           </PopoverContent>
@@ -1077,7 +1077,7 @@ const TimeModal = ({ isOpen, onClose, task, onSave }: { isOpen: boolean; onClose
             maxLength={5}
             value={time}
             onChange={handleTimeChange}
-            className="w-full p-2 border border-gray-200 rounded-lg focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] outline-none transition-all ease-out duration-200 text-[#202020]"
+            className="w-full p-2 border border-gray-200 rounded-lg focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] outline-none transition-all ease-out duration-200 text-[#202020] text-base md:text-[13px]"
           />
         </div>
         <div className="p-4 bg-gray-50 flex justify-end gap-2 border-t border-gray-100">

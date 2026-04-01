@@ -160,7 +160,7 @@ export default function ProjectDetails({
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Ex: Trabalho, Pessoal..."
-                      className="w-full px-3 py-2.5 text-[13px] leading-[18px] text-[#202020] placeholder-[#808080] border border-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] font-medium transition-all ease-out duration-200"
+                      className="w-full px-3 py-2.5 text-base md:text-[13px] leading-[18px] text-[#202020] placeholder-[#808080] border border-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] font-medium transition-all ease-out duration-200"
                     />
                   </div>
 
@@ -171,7 +171,7 @@ export default function ProjectDetails({
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="Adicione uma descrição para este projeto..."
                       rows={4}
-                      className="w-full px-3 py-2.5 text-[13px] leading-[18px] text-[#202020] placeholder-[#808080] border border-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] resize-none transition-all ease-out duration-200"
+                      className="w-full px-3 py-2.5 text-base md:text-[13px] leading-[18px] text-[#202020] placeholder-[#808080] border border-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] resize-none transition-all ease-out duration-200"
                     />
                   </div>
 

@@ -199,7 +199,7 @@ export default function MilestoneModal({
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="Ex: Sair das Dívidas, Aprender Inglês"
-                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                       autoFocus
                     />
                   </div>
@@ -235,7 +235,7 @@ export default function MilestoneModal({
                       type="date"
                       value={targetDate}
                       onChange={(e) => setTargetDate(e.target.value)}
-                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                     />
                   </div>
                   <div className="space-y-2">
@@ -243,7 +243,7 @@ export default function MilestoneModal({
                     <select
                       value={status}
                       onChange={(e) => setStatus(e.target.value)}
-                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                     >
                       <option value="pending">Pendente</option>
                       <option value="in_progress">Em Progresso</option>
@@ -259,7 +259,7 @@ export default function MilestoneModal({
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Adicione notas sobre esta etapa..."
-                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200 resize-none min-h-[80px]"
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200 resize-none min-h-[80px]"
                   />
                 </div>
               </form>
@@ -317,14 +317,14 @@ export default function MilestoneModal({
                           value={newDesireTitle}
                           onChange={(e) => setNewDesireTitle(e.target.value)}
                           placeholder="Nome do item..."
-                          className="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                          className="w-full text-base md:text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                           autoFocus
                         />
                         <div className="flex gap-2">
                           <select
                             value={newDesireCategory}
                             onChange={(e) => setNewDesireCategory(e.target.value)}
-                            className="flex-1 text-xs px-2 py-2 border border-gray-200 rounded-lg focus:outline-none bg-white"
+                            className="flex-1 text-base md:text-xs px-2 py-2 border border-gray-200 rounded-lg focus:outline-none bg-white"
                           >
                             {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
                               <option key={key} value={key}>{CATEGORY_EMOJIS[key]} {label}</option>
@@ -335,7 +335,7 @@ export default function MilestoneModal({
                             value={newDesireCost}
                             onChange={(e) => setNewDesireCost(e.target.value)}
                             placeholder="R$ Custo"
-                            className="w-24 text-xs px-2 py-2 border border-gray-200 rounded-lg focus:outline-none"
+                            className="w-24 text-base md:text-xs px-2 py-2 border border-gray-200 rounded-lg focus:outline-none"
                           />
                         </div>
                         <div className="flex justify-end gap-2 pt-1">

@@ -286,7 +286,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ex: Ler 10 páginas, Meditar..."
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
               />
             </div>
 
@@ -298,7 +298,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Detalhes sobre a atividade..."
                 rows={2}
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200 resize-none"
+                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200 resize-none"
               />
             </div>
 
@@ -314,7 +314,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                       onChange={handleTimeChange}
                       placeholder="00:00"
                       maxLength={5}
-                      className="w-32 bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                      className="w-32 bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                     />
                   </div>
                   
@@ -358,7 +358,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                         value={duration}
                         onChange={(e) => setDuration(e.target.value)}
                         placeholder="Ex: 30"
-                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                       />
                     </div>
                     <div className="space-y-2">
@@ -369,7 +369,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                         onChange={handleTimeChange}
                         placeholder="00:00"
                         maxLength={5}
-                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                       />
                     </div>
                   </div>
@@ -381,7 +381,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                       value={repetitions}
                       onChange={(e) => setRepetitions(e.target.value)}
                       placeholder="Ex: 1"
-                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                     />
                   </div>
                 </div>

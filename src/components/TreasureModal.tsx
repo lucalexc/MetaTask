@@ -56,7 +56,7 @@ export default function TreasureModal({ isOpen, onClose, currentTitle, onSave }:
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Ex: Casa Própria, Liberdade Financeira"
-                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
                   autoFocus
                 />
               </div>
