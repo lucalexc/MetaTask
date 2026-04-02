@@ -1,13 +1,1274 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>MetaTask</title>
-    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAChUlEQVR4AaRSz0tUURT+7h1LytEsTJIWytBYMlIGGS0cdVAyTCfctJGyiBZBFNGm/yOqRZvM0F3oFBEG7SIw09LaiNrCECsZy0bsvXd/9N33htm07DHf3O+e853vnXN4Ev/5lAystYI4QfQT55RShM2SEyob3VW/7/utjJXqQsJAmdb6hTHmHXmOGJdSEnaCnJATQohxIsf4VBAEk9PT0ztc86EBi/soPENAKQNjrMuFcDEHMGS0heNa267GxqazThAaKF81WAqYQM/Aa/T2zWNseB1aG1iaTT3ZxtjAJl4OFaCVhQo0dGDrSwYGkJYGvm+wslrAj/w2Hj74hpF7eYzf30Tu7hbWv2tsrlooH3BaAxMrGThirWHCwgqBVHM56pMaT0c38Hz0NyoSAWpSVPElbjzrHHh1v3AEsIUoZiFiEnv2luP6zYPYNhoed5K9FUe8ugwQAtYY/GNgnAOi1iBjsDGBI01VqKgW2FlpkUjtBq1dPVVOZ7nokEJGRxR0XbgOIEUoPlAXw75aSe7KATK+PaqQ0cFYkVgjyAREjLthVvB243YNrtypooEAPcEBIJgQgn+IHkpDwrEsytj6tcE6ZLsrKRRIJONIHI4D1Df0ArXnFSRX4RZpYLk5IDTwPP3VcDnO+OpgI9InayGEgJQyhBACh07tQuuFOHdhwYERBGqFJDLI59dyv34W3nqeB36VhHICIgihlGJMc3EmPAtbf95sbKw9Kxkkk0lvcXl/++yn5Z65+S9DHz4uXp6bX7o0M+uwwLOIuYWL72cWTy8tfe5MpVL8pIojOKdMRqiujpbJdLr5cXv70Udtbc3DHR0Ox3hG6Ey3jHR3H3+VyWSUq3H4CwAA//8GBLskAAAABklEQVQDAEBrbDCGZQOVAAAAAElFTkSuQmCC" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaTask | O seu sistema operacional pessoal</title>
+    <meta name="description" content="Muito mais que uma lista de tarefas. O MetaTask é um sistema completo de produtividade, hábitos, gestão de projetos e autoconhecimento.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==========================================================================
+           VARIÁVEIS & RESET
+           ========================================================================== */
+        :root {
+            --color-bg-dark:        #0a0a0f;
+            --color-bg-section:     #0f0f1a;
+            --color-primary:        #6366f1;
+            --color-primary-hover:  #4f46e5;
+            --color-accent:         #8b5cf6;
+            --color-accent-2:       #a78bfa;
+            --color-text:           #f1f5f9;
+            --color-text-muted:     #94a3b8;
+            --color-border:         #1e1e2e;
+            --color-card:           #13131f;
+            --color-success:        #22c55e;
+            --color-warning:        #f59e0b;
+            --color-gradient-start: #6366f1;
+            --color-gradient-end:   #8b5cf6;
+            
+            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--color-bg-dark);
+            color: var(--color-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        /* ==========================================================================
+           TIPOGRAFIA & UTILITÁRIOS
+           ========================================================================== */
+        h1, h2, h3, h4 {
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        .hero-headline { font-size: clamp(2.8rem, 6vw, 5rem); letter-spacing: -0.02em; }
+        .section-headline { font-size: clamp(1.8rem, 4vw, 3rem); letter-spacing: -0.01em; margin-bottom: 1rem; }
+        .subheadline { font-size: clamp(1rem, 2vw, 1.25rem); color: var(--color-text-muted); margin-bottom: 2rem; }
+        .body-text { font-size: 1rem; }
+        .small-text { font-size: 0.875rem; color: var(--color-text-muted); }
+
+        .text-gradient {
+            background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .section {
+            padding: 100px 0;
+        }
+
+        .section-alt {
+            background-color: var(--color-bg-section);
+        }
+
+        .text-center { text-align: center; }
+
+        /* ==========================================================================
+           BOTÕES
+           ========================================================================== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(99,102,241,0.2);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 15px 40px rgba(99,102,241,0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #fff;
+            border: 1px solid rgba(99,102,241,0.4);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(99,102,241,0.1);
+            border-color: var(--color-primary);
+        }
+
+        /* ==========================================================================
+           ANIMAÇÕES (Intersection Observer)
+           ========================================================================== */
+        .animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            will-change: transform, opacity;
+        }
+
+        .animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.2s; }
+        .delay-3 { transition-delay: 0.3s; }
+
+        /* ==========================================================================
+           NAVBAR
+           ========================================================================== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            padding: 20px 0;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--color-text-muted);
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* ==========================================================================
+           HERO SECTION
+           ========================================================================== */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 80px;
+            overflow: hidden;
+        }
+
+        #hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 32px;
+            margin-bottom: 16px;
+        }
+
+        .social-proof {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.05);
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 24px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .social-proof span {
+            color: var(--color-success);
+            font-weight: 700;
+        }
+
+        /* ==========================================================================
+           TICKER
+           ========================================================================== */
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            background: linear-gradient(90deg, var(--color-gradient-start), var(--color-gradient-end));
+            padding: 12px 0;
+            white-space: nowrap;
+        }
+
+        .ticker {
+            display: inline-block;
+            animation: marquee 30s linear infinite;
+            font-size: 0.875rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: #fff;
+        }
+
+        @keyframes marquee {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
+        }
+
+        /* ==========================================================================
+           CARDS DE PROBLEMA
+           ========================================================================== */
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .problem-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 32px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .problem-card:hover {
+            border-color: rgba(245, 158, 11, 0.4);
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .problem-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .problem-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .problem-card p {
+            color: var(--color-text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* ==========================================================================
+           POSICIONAMENTO BANNER
+           ========================================================================== */
+        .positioning-banner {
+            background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1));
+            border-top: 1px solid rgba(99,102,241,0.2);
+            border-bottom: 1px solid rgba(99,102,241,0.2);
+            padding: 80px 24px;
+            text-align: center;
+        }
+
+        .positioning-banner h2 {
+            max-width: 800px;
+            margin: 0 auto 24px;
+        }
+
+        .positioning-banner p {
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 1.125rem;
+            color: var(--color-text-muted);
+        }
+
+        /* ==========================================================================
+           FEATURES (Alternadas)
+           ========================================================================== */
+        .feature-row {
+            display: flex;
+            align-items: center;
+            gap: 64px;
+            margin-bottom: 120px;
+        }
+
+        .feature-row.reverse {
+            flex-direction: row-reverse;
+        }
+
+        .feature-content {
+            flex: 1;
+        }
+
+        .feature-mockup-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .feature-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(99,102,241,0.15);
+            color: var(--color-accent-2);
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+
+        .feature-list {
+            margin: 24px 0 32px;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+            color: var(--color-text-muted);
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            color: var(--color-success);
+            font-weight: bold;
+        }
+
+        /* Estilos Base dos Mockups CSS */
+        .mockup-container {
+            background: var(--color-card);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .mockup-container:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .mockup-header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .mockup-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #333;
+        }
+
+        .mockup-dot:nth-child(1) { background: #ff5f56; }
+        .mockup-dot:nth-child(2) { background: #ffbd2e; }
+        .mockup-dot:nth-child(3) { background: #27c93f; }
+
+        /* Mockup 1: Rotina & XP */
+        .mk-xp-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            margin: 16px 0 24px;
+            overflow: hidden;
+        }
+        .mk-xp-fill {
+            height: 100%;
+            width: 65%;
+            background: var(--color-success);
+            box-shadow: 0 0 10px var(--color-success);
+        }
+        .mk-habit {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .mk-habit-left { display: flex; align-items: center; gap: 12px; }
+        .mk-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--color-primary); }
+        .mk-check.done { background: var(--color-primary); }
+        .mk-badge { font-size: 0.7rem; color: var(--color-success); background: rgba(34,197,94,0.1); padding: 2px 6px; border-radius: 4px; }
+
+        /* Mockup 2: Kanban */
+        .mk-kanban { display: flex; gap: 12px; }
+        .mk-col { flex: 1; background: rgba(255,255,255,0.02); border-radius: 8px; padding: 12px; }
+        .mk-col-title { font-size: 0.7rem; color: var(--color-text-muted); margin-bottom: 12px; text-transform: uppercase; }
+        .mk-card { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid var(--color-primary); }
+        .mk-card.c2 { border-left-color: var(--color-warning); }
+        .mk-card.c3 { border-left-color: var(--color-success); }
+        .mk-line { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-bottom: 6px; }
+        .mk-line.short { width: 60%; }
+
+        /* Mockup 3: Roadmap */
+        .mk-roadmap { position: relative; padding: 20px 0; }
+        .mk-timeline { position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.1); transform: translateY(-50%); }
+        .mk-timeline-fill { position: absolute; top: 0; left: 0; width: 50%; height: 100%; background: var(--color-primary); }
+        .mk-nodes { display: flex; justify-content: space-between; position: relative; z-index: 1; }
+        .mk-node { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .mk-circle { width: 16px; height: 16px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid var(--color-primary); }
+        .mk-circle.done { background: var(--color-primary); box-shadow: 0 0 10px var(--color-primary); }
+        .mk-node-text { font-size: 0.7rem; color: var(--color-text-muted); }
+
+        /* Mockup 4: Identidade */
+        .mk-stack { position: relative; height: 200px; }
+        .mk-stack-card { 
+            position: absolute; width: 80%; left: 10%; padding: 16px; 
+            background: rgba(30,30,46,0.9); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 12px; backdrop-filter: blur(5px);
+            display: flex; align-items: center; gap: 12px;
+        }
+        .mk-stack-card:nth-child(1) { top: 0; transform: scale(0.9) translateY(0); z-index: 1; opacity: 0.6; }
+        .mk-stack-card:nth-child(2) { top: 30px; transform: scale(0.95) translateY(0); z-index: 2; opacity: 0.8; }
+        .mk-stack-card:nth-child(3) { top: 60px; transform: scale(1) translateY(0); z-index: 3; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-color: rgba(99,102,241,0.3); }
+        .mk-icon-box { width: 32px; height: 32px; border-radius: 8px; background: rgba(99,102,241,0.2); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+
+        /* Mockup 5: Insights */
+        .mk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .mk-stat { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; }
+        .mk-stat-val { font-size: 1.2rem; font-weight: bold; color: #fff; margin-top: 4px; }
+        .mk-chart { display: flex; align-items: flex-end; gap: 8px; height: 80px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .mk-bar { flex: 1; background: rgba(99,102,241,0.3); border-radius: 4px 4px 0 0; transition: height 0.3s; }
+        .mk-bar:hover { background: var(--color-primary); }
+
+        /* ==========================================================================
+           FAQ
+           ========================================================================== */
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: 16px;
+        }
+
+        .faq-question {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.125rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            font-family: var(--font-main);
+        }
+
+        .faq-icon {
+            font-size: 1.5rem;
+            color: var(--color-primary);
+            transition: transform 0.3s ease;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+            color: var(--color-text-muted);
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 300px;
+            padding-bottom: 20px;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        /* ==========================================================================
+           CTA FINAL
+           ========================================================================== */
+        .cta-final {
+            background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+            padding: 100px 24px;
+            text-align: center;
+            border-radius: 24px;
+            margin: 40px 24px 80px;
+        }
+
+        .cta-final h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 16px;
+            color: #fff;
+        }
+
+        .cta-final p {
+            font-size: 1.25rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn-white {
+            background: #fff;
+            color: var(--color-primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .btn-white:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        /* ==========================================================================
+           FOOTER
+           ========================================================================== */
+        footer {
+            border-top: 1px solid var(--color-border);
+            padding: 60px 0 40px;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .footer-tagline {
+            color: var(--color-text-muted);
+            margin-bottom: 32px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .footer-links a {
+            color: var(--color-text-muted);
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #fff;
+        }
+
+        .copyright {
+            font-size: 0.875rem;
+            color: rgba(148, 163, 184, 0.5);
+        }
+
+        /* ==========================================================================
+           MEDIA QUERIES
+           ========================================================================== */
+        @media (max-width: 1024px) {
+            .feature-row, .feature-row.reverse {
+                flex-direction: column;
+                gap: 40px;
+            }
+            .feature-mockup-wrapper {
+                width: 100%;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: rgba(10, 10, 15, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 24px;
+                border-bottom: 1px solid var(--color-border);
+            }
+            .nav-links.active {
+                display: flex;
+            }
+            .hamburger {
+                display: block;
+            }
+            .hero-buttons {
+                flex-direction: column;
+            }
+            .cta-final {
+                margin: 20px 12px 40px;
+                padding: 60px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SEÇÃO: NAVBAR -->
+    <nav id="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo">MetaTask</a>
+            <button class="hamburger" id="mobile-menu-btn">☰</button>
+            <div class="nav-links" id="nav-links">
+                <a href="#features">Funcionalidades</a>
+                <a href="#identidade">Identidade</a>
+                <a href="#estatisticas">Estatísticas</a>
+                <a href="#faq">FAQ</a>
+                <a href="https://www.metatask.com.br/app" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.875rem;">Acessar Plataforma</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SEÇÃO: HERO -->
+    <header class="hero">
+        <canvas id="hero-canvas"></canvas>
+        <div class="container hero-content">
+            <div class="social-proof animate">
+                🏆 Junte-se a <span id="counter">0</span> realizadores que já subiram de nível na vida real.
+            </div>
+            <h1 class="hero-headline animate delay-1">Transforme sua vida em um <span class="text-gradient">jogo</span> que você realmente quer vencer.</h1>
+            <p class="subheadline animate delay-2" style="margin-top: 24px;">Muito mais que uma lista de tarefas. O MetaTask é um sistema completo de produtividade, hábitos, gestão de projetos e autoconhecimento para você parar de procrastinar e construir a vida que deseja.</p>
+            
+            <div class="hero-buttons animate delay-3">
+                <a href="https://www.metatask.com.br/app" class="btn btn-primary">Começar meus 7 dias grátis</a>
+                <a href="#features" class="btn btn-secondary">Ver como funciona ▶</a>
+            </div>
+            <p class="small-text animate delay-3">Cancele a qualquer momento com 1 clique. Sem cartão de crédito.</p>
+        </div>
+    </header>
+
+    <!-- SEÇÃO: TICKER -->
+    <div class="ticker-wrap">
+        <div class="ticker">
+            JUNTE-SE A +10.000 REALIZADORES &nbsp;•&nbsp; PRODUTIVIDADE GAMIFICADA &nbsp;•&nbsp; ROTINA COM XP &nbsp;•&nbsp; PROJETOS COM KANBAN &nbsp;•&nbsp; VISÃO DE VIDA &nbsp;•&nbsp; AUTOCONHECIMENTO &nbsp;•&nbsp; JUNTE-SE A +10.000 REALIZADORES &nbsp;•&nbsp; PRODUTIVIDADE GAMIFICADA &nbsp;•&nbsp; ROTINA COM XP &nbsp;•&nbsp; PROJETOS COM KANBAN &nbsp;•&nbsp; VISÃO DE VIDA &nbsp;•&nbsp; AUTOCONHECIMENTO &nbsp;•&nbsp;
+        </div>
+    </div>
+
+    <!-- SEÇÃO: O PROBLEMA -->
+    <section class="section container" id="problema">
+        <div class="text-center animate">
+            <h2 class="section-headline">Por que os aplicativos de produtividade tradicionais falham com você?</h2>
+        </div>
+        <div class="problems-grid">
+            <div class="problem-card animate delay-1">
+                <div class="problem-icon">🧠</div>
+                <h3>Sobrecarga Cognitiva</h3>
+                <p>Listas infinitas de tarefas que só geram ansiedade e nunca terminam.</p>
+            </div>
+            <div class="problem-card animate delay-2">
+                <div class="problem-icon">⚡</div>
+                <h3>Falta de Dopamina</h3>
+                <p>Riscar um item no papel não traz a recompensa química que seu cérebro precisa para continuar.</p>
+            </div>
+            <div class="problem-card animate delay-3">
+                <div class="problem-icon">🌀</div>
+                <h3>Ausência de Contexto</h3>
+                <p>Você faz por fazer, sem saber como aquela tarefa se conecta com o grande propósito da sua vida.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEÇÃO: POSICIONAMENTO -->
+    <section class="positioning-banner animate">
+        <div class="container">
+            <h2 class="section-headline">Nós não somos uma lista de tarefas. Somos o seu <span class="text-gradient">sistema operacional pessoal</span>.</h2>
+            <p>O MetaTask une a execução impecável do mundo corporativo com a motivação e a dopamina dos jogos de RPG. Aqui, cada ação tem um propósito, e você é o personagem principal.</p>
+        </div>
+    </section>
+
+    <!-- SEÇÃO: FEATURES -->
+    <section class="section container" id="features">
+        
+        <!-- Feature 1: Rotina -->
+        <div class="feature-row animate">
+            <div class="feature-content">
+                <span class="feature-tag">ROTINA & XP</span>
+                <h2 class="section-headline">Suba de nível na vida real.</h2>
+                <p class="subheadline">Transforme hábitos chatos em conquistas viciantes. Ganhe XP e mantenha sua ofensiva diária.</p>
+                <ul class="feature-list">
+                    <li>Cadastre hábitos e metas diárias no módulo Rotina</li>
+                    <li>Ganhe XP ao completar sua rotina e suba de nível</li>
+                    <li>Construa um streak (ofensiva) de dias consecutivos</li>
+                    <li>Dois tipos: Rotina (hábito recorrente) e Meta (objetivo com prazo em dias)</li>
+                    <li>Visualize seu progresso com contador de XP diário</li>
+                </ul>
+                <a href="https://www.metatask.com.br/app" class="btn btn-primary">Começar a ganhar XP →</a>
+            </div>
+            <div class="feature-mockup-wrapper">
+                <div class="mockup-container">
+                    <div class="mockup-header">
+                        <div class="mockup-dot"></div><div class="mockup-dot"></div><div class="mockup-dot"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #fff; font-weight: bold;">Nível 12</span>
+                        <span style="color: var(--color-success); font-weight: bold;">1450 / 2000 XP</span>
+                    </div>
+                    <div class="mk-xp-bar"><div class="mk-xp-fill"></div></div>
+                    
+                    <div class="mk-habit">
+                        <div class="mk-habit-left">
+                            <div class="mk-check done"></div>
+                            <span style="color: #fff; font-size: 0.9rem;">Ler 10 páginas</span>
+                        </div>
+                        <span class="mk-badge">+50 XP</span>
+                    </div>
+                    <div class="mk-habit">
+                        <div class="mk-habit-left">
+                            <div class="mk-check"></div>
+                            <span style="color: #fff; font-size: 0.9rem;">Treino de Força</span>
+                        </div>
+                        <span class="mk-badge">+100 XP</span>
+                    </div>
+                    <div class="mk-habit">
+                        <div class="mk-habit-left">
+                            <div class="mk-check done"></div>
+                            <span style="color: #fff; font-size: 0.9rem;">Meditação (10m)</span>
+                        </div>
+                        <span class="mk-badge">+30 XP</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 2: Projetos -->
+        <div class="feature-row reverse animate">
+            <div class="feature-content">
+                <span class="feature-tag">PROJETOS</span>
+                <h2 class="section-headline">Domine o caos. Execute como um profissional.</h2>
+                <p class="subheadline">Organize tudo em Lista, Kanban ou Calendário. O poder que profissionais exigem, com a simplicidade que você precisa.</p>
+                <ul class="feature-list">
+                    <li>Crie até 7 projetos com nome e cor personalizados</li>
+                    <li>Três visões por projeto: Lista, Kanban e Calendário</li>
+                    <li>Gerencie tarefas com prioridade, categoria, duração e recorrência</li>
+                    <li>Separe projetos pessoais dos profissionais com facilidade</li>
+                    <li>Navegação semanal integrada para manter o foco no presente</li>
+                </ul>
+                <a href="https://www.metatask.com.br/app" class="btn btn-primary">Organizar meus projetos →</a>
+            </div>
+            <div class="feature-mockup-wrapper">
+                <div class="mockup-container">
+                    <div class="mockup-header">
+                        <div class="mockup-dot"></div><div class="mockup-dot"></div><div class="mockup-dot"></div>
+                    </div>
+                    <div class="mk-kanban">
+                        <div class="mk-col">
+                            <div class="mk-col-title">A Fazer</div>
+                            <div class="mk-card c1"><div class="mk-line"></div><div class="mk-line short"></div></div>
+                            <div class="mk-card c1"><div class="mk-line"></div></div>
+                        </div>
+                        <div class="mk-col">
+                            <div class="mk-col-title">Em Progresso</div>
+                            <div class="mk-card c2"><div class="mk-line"></div><div class="mk-line short"></div></div>
+                        </div>
+                        <div class="mk-col">
+                            <div class="mk-col-title">Concluído</div>
+                            <div class="mk-card c3"><div class="mk-line"></div></div>
+                            <div class="mk-card c3"><div class="mk-line short"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 3: Visão de Vida -->
+        <div class="feature-row animate">
+            <div class="feature-content">
+                <span class="feature-tag">VISÃO DE VIDA</span>
+                <h2 class="section-headline">O mapa do tesouro para o seu futuro.</h2>
+                <p class="subheadline">Crie um roadmap visual e emocional do seu futuro. Saiba exatamente por que você está acordando cedo hoje.</p>
+                <ul class="feature-list">
+                    <li>Crie sua linha do tempo de vida com marcos de longo prazo</li>
+                    <li>Adicione fotos inspiradoras e datas-alvo para cada marco</li>
+                    <li>Acompanhe o status: Pendente, Em Andamento ou Concluído</li>
+                    <li>Conecte sua execução diária ao seu propósito maior</li>
+                    <li>Visualize toda a sua jornada a partir do presente</li>
+                </ul>
+                <a href="https://www.metatask.com.br/app" class="btn btn-primary">Criar minha Visão de Vida →</a>
+            </div>
+            <div class="feature-mockup-wrapper">
+                <div class="mockup-container">
+                    <div class="mockup-header">
+                        <div class="mockup-dot"></div><div class="mockup-dot"></div><div class="mockup-dot"></div>
+                    </div>
+                    <div class="mk-roadmap">
+                        <div class="mk-timeline"><div class="mk-timeline-fill"></div></div>
+                        <div class="mk-nodes">
+                            <div class="mk-node">
+                                <div class="mk-circle done"></div>
+                                <span class="mk-node-text">2024</span>
+                            </div>
+                            <div class="mk-node">
+                                <div class="mk-circle done"></div>
+                                <span class="mk-node-text">Hoje</span>
+                            </div>
+                            <div class="mk-node">
+                                <div class="mk-circle"></div>
+                                <span class="mk-node-text">2026</span>
+                            </div>
+                            <div class="mk-node">
+                                <div class="mk-circle"></div>
+                                <span class="mk-node-text">2030</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; display: flex; gap: 12px;">
+                        <div style="width: 60px; height: 60px; background: rgba(99,102,241,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">🏔️</div>
+                        <div>
+                            <div style="color: #fff; font-size: 0.9rem; font-weight: bold; margin-bottom: 4px;">Independência Financeira</div>
+                            <div style="color: var(--color-text-muted); font-size: 0.75rem;">Alvo: Dezembro 2030</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 4: Identidade -->
+        <div class="feature-row reverse animate" id="identidade">
+            <div class="feature-content">
+                <span class="feature-tag">IDENTIDADE</span>
+                <h2 class="section-headline">Conheça o jogador antes de jogar o jogo.</h2>
+                <p class="subheadline">Ferramentas profundas de autoconhecimento: Necrológio, Temperamentos e as 12 Camadas da Personalidade.</p>
+                
+                <div style="margin-top: 24px;">
+                    <div style="margin-bottom: 16px;">
+                        <h4 style="color: #fff; display: flex; align-items: center; gap: 8px;">📜 O Necrológio (Memento Mori)</h4>
+                        <p class="small-text" style="margin-top: 4px;">Escreva como você quer ser lembrado. Confronte sua mortalidade para dar urgência e sentido ao seu presente. Com histórico de versões para acompanhar sua evolução.</p>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <h4 style="color: #fff; display: flex; align-items: center; gap: 8px;">🔥 Os 4 Temperamentos</h4>
+                        <p class="small-text" style="margin-top: 4px;">Entenda sua natureza base — Colérico, Sanguíneo, Fleumático ou Melancólico — e aprenda como você realmente reage ao mundo.</p>
+                    </div>
+                    <div style="margin-bottom: 24px;">
+                        <h4 style="color: #fff; display: flex; align-items: center; gap: 8px;">🧠 As 12 Camadas da Personalidade</h4>
+                        <p class="small-text" style="margin-top: 4px;">Descubra em qual estágio de maturidade humana você está — da infância até a vida espiritual — e o que precisa fazer para alcançar a próxima camada.</p>
+                    </div>
+                </div>
+                <a href="https://www.metatask.com.br/app" class="btn btn-primary">Explorar minha Identidade →</a>
+            </div>
+            <div class="feature-mockup-wrapper">
+                <div class="mockup-container" style="padding-bottom: 0; background: transparent; border: none; box-shadow: none;">
+                    <div class="mk-stack">
+                        <div class="mk-stack-card">
+                            <div class="mk-icon-box">🧠</div>
+                            <div>
+                                <div style="color: #fff; font-size: 0.85rem; font-weight: bold;">12 Camadas</div>
+                                <div style="color: var(--color-text-muted); font-size: 0.7rem;">Camada 4: História Pessoal</div>
+                            </div>
+                        </div>
+                        <div class="mk-stack-card">
+                            <div class="mk-icon-box">🔥</div>
+                            <div>
+                                <div style="color: #fff; font-size: 0.85rem; font-weight: bold;">Temperamento</div>
+                                <div style="color: var(--color-text-muted); font-size: 0.7rem;">Colérico-Melancólico</div>
+                            </div>
+                        </div>
+                        <div class="mk-stack-card">
+                            <div class="mk-icon-box">📜</div>
+                            <div>
+                                <div style="color: #fff; font-size: 0.85rem; font-weight: bold;">Necrológio</div>
+                                <div style="color: var(--color-text-muted); font-size: 0.7rem;">Memento Mori. Atualizado há 2 dias.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 5: Insights -->
+        <div class="feature-row animate" id="estatisticas">
+            <div class="feature-content">
+                <span class="feature-tag">ESTATÍSTICAS</span>
+                <h2 class="section-headline">Seus resultados não mentem.</h2>
+                <p class="subheadline">Acompanhe seu tempo de foco, dias mais produtivos e evolução contínua através de gráficos detalhados.</p>
+                <ul class="feature-list">
+                    <li>Visualize onde você está investindo seu tempo</li>
+                    <li>Gráfico de ritmo diário (minutos focados por dia)</li>
+                    <li>Filtros: Últimos 7 dias ou Este Mês</li>
+                    <li>Dados reais para decisões inteligentes sobre sua rotina</li>
+                </ul>
+                <a href="https://www.metatask.com.br/app" class="btn btn-primary">Ver minhas estatísticas →</a>
+            </div>
+            <div class="feature-mockup-wrapper">
+                <div class="mockup-container">
+                    <div class="mockup-header">
+                        <div class="mockup-dot"></div><div class="mockup-dot"></div><div class="mockup-dot"></div>
+                    </div>
+                    <div class="mk-grid">
+                        <div class="mk-stat">
+                            <div style="font-size: 0.7rem; color: var(--color-text-muted);">⏱️ Tempo de Foco</div>
+                            <div class="mk-stat-val">12h 45m</div>
+                        </div>
+                        <div class="mk-stat">
+                            <div style="font-size: 0.7rem; color: var(--color-text-muted);">⚡ Ofensiva (Streak)</div>
+                            <div class="mk-stat-val" style="color: var(--color-warning);">14 Dias</div>
+                        </div>
+                        <div class="mk-stat">
+                            <div style="font-size: 0.7rem; color: var(--color-text-muted);">✅ Tarefas</div>
+                            <div class="mk-stat-val">42</div>
+                        </div>
+                        <div class="mk-stat">
+                            <div style="font-size: 0.7rem; color: var(--color-text-muted);">📅 Melhor Dia</div>
+                            <div class="mk-stat-val">Terça</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 8px;">Ritmo Diário (Minutos)</div>
+                    <div class="mk-chart">
+                        <div class="mk-bar" style="height: 40%;"></div>
+                        <div class="mk-bar" style="height: 70%;"></div>
+                        <div class="mk-bar" style="height: 50%;"></div>
+                        <div class="mk-bar" style="height: 90%; background: var(--color-primary);"></div>
+                        <div class="mk-bar" style="height: 30%;"></div>
+                        <div class="mk-bar" style="height: 60%;"></div>
+                        <div class="mk-bar" style="height: 80%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- SEÇÃO: FAQ -->
+    <section class="section section-alt" id="faq">
+        <div class="container faq-container animate">
+            <div class="text-center">
+                <h2 class="section-headline">Perguntas Frequentes</h2>
+                <p class="subheadline">Tudo o que você precisa saber sobre o MetaTask.</p>
+            </div>
+
+            <div class="faq-list" style="margin-top: 40px;">
+                
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Qual a diferença entre Tarefas e Rotina no MetaTask?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>As Tarefas são ações pontuais organizadas dentro de Projetos (como "Enviar relatório" ou "Comprar passagem"). Já a Rotina é onde a gamificação acontece: são seus hábitos e metas diárias. Ao completar sua Rotina você acumula XP, sobe de nível e constrói seu streak.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        O que é a Visão de Vida?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>É o seu mapa do tesouro pessoal. Uma ferramenta visual onde você define marcos de longo prazo, adiciona fotos inspiradoras e estabelece datas-alvo. Ela serve para te lembrar todos os dias do porquê você está executando suas tarefas e rotinas.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        O que são as ferramentas de Identidade?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>O MetaTask acredita que produtividade sem autoconhecimento é vazia. Nosso módulo de Identidade inclui três ferramentas: o Necrológio (prática estóica de Memento Mori), a descoberta dos 4 Temperamentos base e o mapeamento das 12 Camadas da Personalidade.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Como funciona a gamificação com XP?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Você ganha XP ao ser consistente. Ao marcar seus hábitos e metas diárias na Rotina como concluídos, seu personagem sobe de nível e você constrói um streak de dias seguidos. É a dopamina dos videogames aplicada ao seu crescimento real.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Existe limite de projetos?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>No plano atual você pode criar até 7 projetos simultâneos, cada um com suas próprias visões em Lista, Kanban e Calendário.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Como funciona o período de teste?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Você tem 7 dias inteiros para usar 100% das ferramentas do MetaTask de forma totalmente gratuita. Se não gostar, cancele com um clique antes do fim do período — nada será cobrado, sem burocracia.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        O MetaTask serve para trabalho ou vida pessoal?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Para ambos! O módulo de Projetos com Kanban é robusto para demandas profissionais, enquanto Rotina, Visão de Vida e Identidade garantem que sua vida pessoal e saúde mental evoluam em paralelo.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- SEÇÃO: CTA FINAL -->
+    <section class="container animate">
+        <div class="cta-final">
+            <h2>Pronto para iniciar sua jornada épica?</h2>
+            <p>Pare de adiar a vida que você planejou. Teste o sistema completo do MetaTask gratuitamente por 7 dias.</p>
+            <a href="https://www.metatask.com.br/app" class="btn btn-white">Desbloquear meu acesso grátis agora</a>
+            <p class="small-text" style="margin-top: 16px; color: rgba(255,255,255,0.7);">7 dias grátis • Sem cartão de crédito • Cancele quando quiser</p>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-logo">MetaTask</div>
+            <p class="footer-tagline">O seu sistema operacional pessoal.</p>
+            <div class="footer-links">
+                <a href="#">Termos de Uso</a>
+                <a href="#">Política de Privacidade</a>
+                <a href="#">Suporte</a>
+            </div>
+            <p class="copyright">© 2025 MetaTask. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        // 1. Partículas no Hero (Canvas)
+        const canvas = document.getElementById('hero-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = document.querySelector('.hero').offsetHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.color = Math.random() > 0.5 ? 'rgba(99, 102, 241, 0.3)' : 'rgba(139, 92, 246, 0.3)';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 60; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+
+        // 2. Intersection Observer para animações de entrada
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    
+                    // 3. Animação do contador (+10.000)
+                    if (entry.target.querySelector('#counter')) {
+                        animateCounter();
+                        observer.unobserve(entry.target); // Anima só uma vez
+                    }
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate').forEach(el => observer.observe(el));
+
+        function animateCounter() {
+            const counter = document.getElementById('counter');
+            const target = 10000;
+            const duration = 2000; // 2 segundos
+            const steps = 60;
+            const stepTime = Math.abs(Math.floor(duration / steps));
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += target / steps;
+                if (current >= target) {
+                    counter.innerText = "+10.000";
+                    clearInterval(timer);
+                } else {
+                    counter.innerText = "+" + Math.floor(current).toLocaleString('pt-BR');
+                }
+            }, stepTime);
+        }
+
+        // 4. Navbar scroll behavior
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.style.background = 'rgba(10, 10, 15, 0.95)';
+                nav.style.backdropFilter = 'blur(20px)';
+                nav.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+            } else {
+                nav.style.background = 'transparent';
+                nav.style.backdropFilter = 'none';
+                nav.style.borderBottom = 'none';
+            }
+        });
+
+        // 5. Mobile Menu Toggle
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const navLinks = document.getElementById('nav-links');
+        
+        mobileBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            mobileBtn.innerText = navLinks.classList.contains('active') ? '✕' : '☰';
+        });
+
+        // Fechar menu ao clicar em um link
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                mobileBtn.innerText = '☰';
+            });
+        });
+
+        // 6. FAQ Accordion
+        const faqItems = document.querySelectorAll('.faq-item');
+        
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            question.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                
+                // Fechar todos
+                faqItems.forEach(faq => {
+                    faq.classList.remove('active');
+                    faq.style.borderColor = 'var(--color-border)';
+                });
+
+                // Abrir o clicado se não estava ativo
+                if (!isActive) {
+                    item.classList.add('active');
+                    item.style.borderColor = 'var(--color-primary)';
+                }
+            });
+        });
+    </script>
+</body>
 </html>
