@@ -1,366 +1,566 @@
-import React, { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { Button } from '@/src/components/ui/button';
-import { 
-  CheckCircle2, Target, Zap, Shield, ArrowRight, Play, 
-  Brain, Activity, BarChart3, Clock, Sparkles, ChevronDown 
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import AuthModal from '@/src/components/AuthModal';
-import { cn } from '@/src/lib/utils';
-
-const Reveal = ({ children, delay = 0, className }: { children: React.ReactNode, delay?: number, className?: string, key?: React.Key }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-100px" }}
-    transition={{ duration: 0.7, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
-    className={className}
-  >
-    {children}
-  </motion.div>
-);
+import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import AuthModal from '../components/AuthModal';
+import './LandingPage.css';
 
 export default function LandingPage() {
-  const navigate = useNavigate();
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const { scrollYProgress } = useScroll();
-  const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+    const [counterValue, setCounterValue] = useState(0);
+    const [activeFaq, setActiveFaq] = useState<number | null>(null);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    useEffect(() => {
+        // 1. Partículas no Hero (Canvas)
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        let particles: Particle[] = [];
+        let animationFrameId: number;
 
-  const openAuthModal = () => {
-    setIsAuthModalOpen(true);
-  };
+        function resizeCanvas() {
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                const hero = document.querySelector('.hero') as HTMLElement;
+                canvas.height = hero ? hero.offsetHeight : window.innerHeight;
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
-  return (
-    <div className="min-h-screen bg-[#06080F] text-slate-300 font-sans selection:bg-blue-500/30 overflow-hidden">
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
-      
-      {/* Background Effects */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px]" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-[0.03]" />
-      </div>
+        class Particle {
+            x: number;
+            y: number;
+            size: number;
+            speedX: number;
+            speedY: number;
+            color: string;
 
-      {/* Navigation */}
-      <nav className={cn(
-        "fixed top-0 w-full z-50 transition-all duration-300",
-        scrolled ? "bg-[#06080F]/80 backdrop-blur-md border-b border-white/10 py-4" : "bg-transparent py-6"
-      )}>
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="font-display font-bold text-2xl tracking-tight text-white">MetaTask</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button 
-              className="bg-white text-black hover:bg-slate-200 shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:shadow-[0_0_30px_rgba(255,255,255,0.4)]"
-              onClick={() => openAuthModal()}
-            >
-              Acessar Plataforma
-            </Button>
-          </div>
-        </div>
-      </nav>
+            constructor() {
+                this.x = Math.random() * canvas!.width;
+                this.y = Math.random() * canvas!.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.color = Math.random() > 0.5 ? 'rgba(99, 102, 241, 0.3)' : 'rgba(139, 92, 246, 0.3)';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas!.width) this.x = 0;
+                if (this.x < 0) this.x = canvas!.width;
+                if (this.y > canvas!.height) this.y = 0;
+                if (this.y < 0) this.y = canvas!.height;
+            }
+            draw() {
+                if (!ctx) return;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
 
-      <main className="relative z-10">
-        {/* Hero Section */}
-        <section className="pt-40 pb-24 px-6 relative">
-          <div className="max-w-5xl mx-auto text-center">
-            <Reveal delay={0.1}>
-              <h1 className="text-5xl sm:text-7xl md:text-8xl font-display font-extrabold tracking-tight text-white mb-8 leading-[1.1]">
-                Transforme suas metas em <br className="hidden md:block" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400">
-                  missões épicas.
-                </span>
-              </h1>
-            </Reveal>
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 60; i++) {
+                particles.push(new Particle());
+            }
+        }
 
-            <Reveal delay={0.2}>
-              <p className="text-xl md:text-2xl text-slate-400 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
-                Pare de procrastinar. Aplique a psicologia dos RPGs e engenharia de vida para construir disciplina inabalável e conquistar seus objetivos.
-              </p>
-            </Reveal>
+        function animateParticles() {
+            if (!ctx || !canvas) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            animationFrameId = requestAnimationFrame(animateParticles);
+        }
 
-            <Reveal delay={0.3}>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                <Button 
-                  size="lg" 
-                  className="w-full sm:w-auto text-lg h-16 px-10 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border-0 shadow-[0_0_40px_rgba(59,130,246,0.4)] hover:shadow-[0_0_60px_rgba(59,130,246,0.6)] transition-all duration-300 rounded-2xl"
-                  onClick={() => openAuthModal()}
-                >
-                  Acessar Plataforma
-                  <ArrowRight className="ml-2 w-6 h-6" />
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="w-full sm:w-auto text-lg h-16 px-10 border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-2xl backdrop-blur-sm"
-                >
-                  <Play className="mr-2 w-6 h-6" />
-                  Ver como funciona
-                </Button>
-              </div>
-              <p className="mt-6 text-sm text-slate-500">Cancele quando quiser. 7 dias grátis.</p>
-            </Reveal>
-          </div>
-        </section>
+        initParticles();
+        animateParticles();
 
-        {/* Social Proof Marquee */}
-        <section className="py-12 border-y border-white/5 bg-white/5 backdrop-blur-sm overflow-hidden flex relative">
-          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#06080F] to-transparent z-10" />
-          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#06080F] to-transparent z-10" />
-          
-          <motion.div 
-            className="flex gap-16 items-center whitespace-nowrap opacity-50"
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{ repeat: Infinity, ease: "linear", duration: 20 }}
-          >
-            {[...Array(2)].map((_, i) => (
-              <React.Fragment key={i}>
-                <div className="text-2xl font-display font-bold text-white">JUNTE-SE A +10.000 REALIZADORES</div>
-                <div className="w-2 h-2 rounded-full bg-blue-500" />
-                <div className="text-2xl font-display font-bold text-white">PRODUTIVIDADE GAMIFICADA</div>
-                <div className="w-2 h-2 rounded-full bg-purple-500" />
-                <div className="text-2xl font-display font-bold text-white">ENGENHARIA DE VIDA</div>
-                <div className="w-2 h-2 rounded-full bg-cyan-500" />
-              </React.Fragment>
-            ))}
-          </motion.div>
-        </section>
+        return () => {
+            window.removeEventListener('resize', resizeCanvas);
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, []);
 
-        {/* Problem Section */}
-        <section className="py-32 px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <Reveal>
-              <h2 className="text-3xl md:text-5xl font-display font-bold text-white mb-8">
-                Listas de tarefas tradicionais <span className="text-red-400">são feitas para falhar.</span>
-              </h2>
-              <p className="text-xl text-slate-400 mb-16 leading-relaxed">
-                Elas geram ansiedade, não priorizam o que importa e não te recompensam pelo esforço. O resultado? Você adia o que é difícil e foca no que é fácil.
-              </p>
-            </Reveal>
+    useEffect(() => {
+        // 2. Intersection Observer para animações de entrada
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        };
 
-            <div className="grid md:grid-cols-3 gap-8 text-left items-stretch">
-              {[
-                { icon: Brain, title: "Sobrecarga Cognitiva", desc: "Ver 50 tarefas de uma vez paralisa seu cérebro." },
-                { icon: Activity, title: "Falta de Dopamina", desc: "Riscar um item no papel não libera a química da motivação." },
-                { icon: Clock, title: "Ausência de Contexto", desc: "Tarefas sem tempo definido viram buracos negros de produtividade." }
-              ].map((item, i) => (
-                <Reveal key={i} delay={i * 0.1} className="h-full">
-                  <div className="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm h-full flex flex-col">
-                    <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center mb-6 border border-red-500/20 shrink-0">
-                      <item.icon className="w-6 h-6 text-red-400" />
+        let counterAnimated = false;
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    
+                    // 3. Animação do contador (+10.000)
+                    if (entry.target.querySelector('#counter') && !counterAnimated) {
+                        counterAnimated = true;
+                        animateCounter();
+                        observer.unobserve(entry.target);
+                    }
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate').forEach(el => observer.observe(el));
+
+        function animateCounter() {
+            const target = 10000;
+            const duration = 2000; // 2 segundos
+            const steps = 60;
+            const stepTime = Math.abs(Math.floor(duration / steps));
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += target / steps;
+                if (current >= target) {
+                    setCounterValue(target);
+                    clearInterval(timer);
+                } else {
+                    setCounterValue(Math.floor(current));
+                }
+            }, stepTime);
+        }
+
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        // 4. Navbar scroll behavior
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 50);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const toggleFaq = (index: number) => {
+        setActiveFaq(activeFaq === index ? null : index);
+    };
+
+    return (
+        <div className="landing-page-wrapper">
+            {/* SEÇÃO: NAVBAR */}
+            <nav id="navbar" style={{
+                background: scrolled ? 'rgba(10, 10, 15, 0.95)' : 'transparent',
+                backdropFilter: scrolled ? 'blur(20px)' : 'none',
+                borderBottom: scrolled ? '1px solid rgba(255,255,255,0.05)' : 'none'
+            }}>
+                <div className="container nav-container">
+                    <a href="#" className="logo">MetaTask</a>
+                    <button className="hamburger" id="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                        {isMobileMenuOpen ? '✕' : '☰'}
+                    </button>
+                    <div className={`nav-links ${isMobileMenuOpen ? 'active' : ''}`} id="nav-links">
+                        <a href="#features" onClick={() => setIsMobileMenuOpen(false)}>Funcionalidades</a>
+                        <a href="#identidade" onClick={() => setIsMobileMenuOpen(false)}>Identidade</a>
+                        <a href="#estatisticas" onClick={() => setIsMobileMenuOpen(false)}>Estatísticas</a>
+                        <a href="#faq" onClick={() => setIsMobileMenuOpen(false)}>FAQ</a>
+                        <button onClick={() => setIsAuthModalOpen(true)} className="btn btn-primary nav-cta" style={{ padding: '10px 24px', fontSize: '0.875rem' }}>Acessar Plataforma</button>
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
-                    <p className="text-slate-400">{item.desc}</p>
-                  </div>
-                </Reveal>
-              ))}
+                </div>
+            </nav>
+
+            {/* SEÇÃO: HERO */}
+            <header className="hero">
+                <canvas id="hero-canvas" ref={canvasRef}></canvas>
+                <div className="container hero-content">
+                    <div className="social-proof animate">
+                        🏆 Junte-se a <span id="counter">+{counterValue.toLocaleString('pt-BR')}</span> realizadores que já subiram de nível na vida real.
+                    </div>
+                    <h1 className="hero-headline animate delay-1">Transforme sua vida em um <span className="text-gradient">jogo</span> que você realmente quer vencer.</h1>
+                    <p className="subheadline animate delay-2" style={{ marginTop: '24px' }}>Muito mais que uma lista de tarefas. O MetaTask é um sistema completo de produtividade, hábitos, gestão de projetos e autoconhecimento para você parar de procrastinar e construir a vida que deseja.</p>
+                    
+                    <div className="hero-buttons animate delay-3">
+                        <button onClick={() => setIsAuthModalOpen(true)} className="btn btn-primary">Começar meus 7 dias grátis</button>
+                        <a href="#features" className="btn btn-secondary">Ver como funciona ▶</a>
+                    </div>
+                    <p className="small-text animate delay-3">Cancele a qualquer momento com 1 clique. Sem cartão de crédito.</p>
+                </div>
+            </header>
+
+            {/* SEÇÃO: TICKER */}
+            <div className="ticker-wrap">
+                <div className="ticker">
+                    JUNTE-SE A +10.000 REALIZADORES &nbsp;•&nbsp; PRODUTIVIDADE GAMIFICADA &nbsp;•&nbsp; ROTINA COM XP &nbsp;•&nbsp; PROJETOS COM KANBAN &nbsp;•&nbsp; VISÃO DE VIDA &nbsp;•&nbsp; AUTOCONHECIMENTO &nbsp;•&nbsp; JUNTE-SE A +10.000 REALIZADORES &nbsp;•&nbsp; PRODUTIVIDADE GAMIFICADA &nbsp;•&nbsp; ROTINA COM XP &nbsp;•&nbsp; PROJETOS COM KANBAN &nbsp;•&nbsp; VISÃO DE VIDA &nbsp;•&nbsp; AUTOCONHECIMENTO &nbsp;•&nbsp;
+                </div>
             </div>
-          </div>
-        </section>
 
-        {/* Bento Grid Features */}
-        <section className="py-32 px-6 max-w-7xl mx-auto relative">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-blue-600/10 rounded-full blur-[150px] pointer-events-none" />
-          
-          <div className="text-center mb-20">
-            <Reveal>
-              <h2 className="text-4xl md:text-6xl font-display font-bold text-white mb-6">Engenharia de Vida na Prática</h2>
-              <p className="text-xl text-slate-400 max-w-2xl mx-auto">Tudo que você precisa para dominar seu tempo, energia e atenção, em um único sistema.</p>
-            </Reveal>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[320px]">
-            {/* Feature 1: Missions */}
-            <Reveal className="md:col-span-2 h-full" delay={0.1}>
-              <div className="h-full bg-gradient-to-br from-white/5 to-white/[0.02] p-10 rounded-[2rem] border border-white/10 backdrop-blur-md relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative z-10 h-full flex flex-col">
-                  <div className="w-14 h-14 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-6 border border-blue-500/30">
-                    <Target className="w-7 h-7 text-blue-400" />
-                  </div>
-                  <h3 className="text-3xl font-display font-bold text-white mb-4">Missões, não tarefas</h3>
-                  <p className="text-lg text-slate-400 mb-8 max-w-md">Agende blocos de tempo precisos. Defina durações e nunca mais perca o controle do seu dia.</p>
-                  
-                  <div className="mt-auto bg-black/40 rounded-2xl p-4 border border-white/5">
-                    <div className="flex items-center gap-4 mb-4 opacity-50">
-                      <div className="w-5 h-5 rounded-full border-2 border-blue-500 flex items-center justify-center bg-blue-500/20">
-                        <CheckCircle2 className="w-3 h-3 text-blue-400" />
-                      </div>
-                      <span className="font-medium line-through text-slate-400">Treino de Força (1h)</span>
-                      <span className="ml-auto text-sm text-blue-400">+50 XP</span>
+            {/* SEÇÃO: O PROBLEMA */}
+            <section className="section container" id="problema">
+                <div className="text-center animate">
+                    <h2 className="section-headline">Por que os aplicativos de produtividade tradicionais falham com você?</h2>
+                </div>
+                <div className="problems-grid">
+                    <div className="problem-card animate delay-1">
+                        <div className="problem-icon">🧠</div>
+                        <h3>Sobrecarga Cognitiva</h3>
+                        <p>Listas infinitas de tarefas que só geram ansiedade e nunca terminam.</p>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-5 h-5 rounded-full border-2 border-slate-500" />
-                      <span className="font-medium text-white">Deep Work: Projeto X (2h)</span>
-                      <span className="ml-auto text-sm text-slate-500">Em progresso...</span>
+                    <div className="problem-card animate delay-2">
+                        <div className="problem-icon">⚡</div>
+                        <h3>Falta de Dopamina</h3>
+                        <p>Riscar um item no papel não traz a recompensa química que seu cérebro precisa para continuar.</p>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </Reveal>
-
-            {/* Feature 2: Gamification */}
-            <Reveal className="h-full" delay={0.2}>
-              <div className="h-full bg-gradient-to-br from-white/5 to-white/[0.02] p-10 rounded-[2rem] border border-white/10 backdrop-blur-md relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative z-10 flex flex-col h-full">
-                  <div className="w-14 h-14 bg-emerald-500/20 rounded-2xl flex items-center justify-center mb-6 border border-emerald-500/30">
-                    <Zap className="w-7 h-7 text-emerald-400" />
-                  </div>
-                  <h3 className="text-2xl font-display font-bold text-white mb-4">Gamificação Real</h3>
-                  <p className="text-slate-400">Ganhe XP, suba de nível e desbloqueie conquistas ao manter sua consistência diária.</p>
-                  
-                  <div className="mt-auto pt-6">
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-emerald-400 font-bold">Nível 12</span>
-                      <span className="text-slate-400">2400 / 3000 XP</span>
+                    <div className="problem-card animate delay-3">
+                        <div className="problem-icon">🌀</div>
+                        <h3>Ausência de Contexto</h3>
+                        <p>Você faz por fazer, sem saber como aquela tarefa se conecta com o grande propósito da sua vida.</p>
                     </div>
-                    <div className="h-2 bg-black/50 rounded-full overflow-hidden">
-                      <div className="h-full bg-emerald-500 w-[80%] rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                </div>
+            </section>
+
+            {/* SEÇÃO: POSICIONAMENTO */}
+            <section className="positioning-banner animate">
+                <div className="container">
+                    <h2 className="section-headline">Nós não somos uma lista de tarefas. Somos o seu <span className="text-gradient">sistema operacional pessoal</span>.</h2>
+                    <p>O MetaTask une a execução impecável do mundo corporativo com a motivação e a dopamina dos jogos de RPG. Aqui, cada ação tem um propósito, e você é o personagem principal.</p>
+                </div>
+            </section>
+
+            {/* SEÇÃO: FEATURES */}
+            <section className="section container" id="features">
+                
+                {/* Feature 1: Rotina */}
+                <div className="feature-row animate">
+                    <div className="feature-content">
+                        <span className="feature-tag">ROTINA & XP</span>
+                        <h2 className="section-headline">Suba de nível na vida real.</h2>
+                        <p className="subheadline">Transforme hábitos chatos em conquistas viciantes. Ganhe XP e mantenha sua ofensiva diária.</p>
+                        <ul className="feature-list">
+                            <li>Cadastre hábitos e metas diárias no módulo Rotina</li>
+                            <li>Ganhe XP ao completar sua rotina e suba de nível</li>
+                            <li>Construa um streak (ofensiva) de dias consecutivos</li>
+                            <li>Dois tipos: Rotina (hábito recorrente) e Meta (objetivo com prazo em dias)</li>
+                            <li>Visualize seu progresso com contador de XP diário</li>
+                        </ul>
+                        <button onClick={() => setIsAuthModalOpen(true)} className="btn btn-primary">Começar a ganhar XP →</button>
                     </div>
-                  </div>
+                    <div className="feature-mockup-wrapper">
+                        <div className="mockup-container">
+                            <div className="mockup-header">
+                                <div className="mockup-dot"></div><div className="mockup-dot"></div><div className="mockup-dot"></div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ color: '#fff', fontWeight: 'bold' }}>Nível 12</span>
+                                <span style={{ color: 'var(--color-success)', fontWeight: 'bold' }}>1450 / 2000 XP</span>
+                            </div>
+                            <div className="mk-xp-bar"><div className="mk-xp-fill"></div></div>
+                            
+                            <div className="mk-habit">
+                                <div className="mk-habit-left">
+                                    <div className="mk-check done"></div>
+                                    <span style={{ color: '#fff', fontSize: '0.9rem' }}>Ler 10 páginas</span>
+                                </div>
+                                <span className="mk-badge">+50 XP</span>
+                            </div>
+                            <div className="mk-habit">
+                                <div className="mk-habit-left">
+                                    <div className="mk-check"></div>
+                                    <span style={{ color: '#fff', fontSize: '0.9rem' }}>Treino de Força</span>
+                                </div>
+                                <span className="mk-badge">+100 XP</span>
+                            </div>
+                            <div className="mk-habit">
+                                <div className="mk-habit-left">
+                                    <div className="mk-check done"></div>
+                                    <span style={{ color: '#fff', fontSize: '0.9rem' }}>Meditação (10m)</span>
+                                </div>
+                                <span className="mk-badge">+30 XP</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </Reveal>
 
-            {/* Feature 3: Identity */}
-            <Reveal className="h-full" delay={0.3}>
-              <div className="h-full bg-gradient-to-br from-white/5 to-white/[0.02] p-10 rounded-[2rem] border border-white/10 backdrop-blur-md relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative z-10 flex flex-col h-full">
-                  <div className="w-14 h-14 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-6 border border-purple-500/30">
-                    <Brain className="w-7 h-7 text-purple-400" />
-                  </div>
-                  <h3 className="text-2xl font-display font-bold text-white mb-4">Identidade</h3>
-                  <p className="text-slate-400">Mapeie seu perfil psicológico e adapte o sistema à forma como seu cérebro funciona.</p>
+                {/* Feature 2: Projetos */}
+                <div className="feature-row reverse animate">
+                    <div className="feature-content">
+                        <span className="feature-tag">PROJETOS</span>
+                        <h2 className="section-headline">Domine o caos. Execute como um profissional.</h2>
+                        <p className="subheadline">Organize tudo em Lista, Kanban ou Calendário. O poder que profissionais exigem, com a simplicidade que você precisa.</p>
+                        <ul className="feature-list">
+                            <li>Crie até 7 projetos com nome e cor personalizados</li>
+                            <li>Três visões por projeto: Lista, Kanban e Calendário</li>
+                            <li>Gerencie tarefas com prioridade, categoria, duração e recorrência</li>
+                            <li>Separe projetos pessoais dos profissionais com facilidade</li>
+                            <li>Navegação semanal integrada para manter o foco no presente</li>
+                        </ul>
+                        <button onClick={() => setIsAuthModalOpen(true)} className="btn btn-primary">Organizar meus projetos →</button>
+                    </div>
+                    <div className="feature-mockup-wrapper">
+                        <div className="mockup-container">
+                            <div className="mockup-header">
+                                <div className="mockup-dot"></div><div className="mockup-dot"></div><div className="mockup-dot"></div>
+                            </div>
+                            <div className="mk-kanban">
+                                <div className="mk-col">
+                                    <div className="mk-col-title">A Fazer</div>
+                                    <div className="mk-card c1"><div className="mk-line"></div><div className="mk-line short"></div></div>
+                                    <div className="mk-card c1"><div className="mk-line"></div></div>
+                                </div>
+                                <div className="mk-col">
+                                    <div className="mk-col-title">Em Progresso</div>
+                                    <div className="mk-card c2"><div className="mk-line"></div><div className="mk-line short"></div></div>
+                                </div>
+                                <div className="mk-col">
+                                    <div className="mk-col-title">Concluído</div>
+                                    <div className="mk-card c3"><div className="mk-line"></div></div>
+                                    <div className="mk-card c3"><div className="mk-line short"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </Reveal>
 
-            {/* Feature 4: Focus Mode */}
-            <Reveal className="md:col-span-2 h-full" delay={0.4}>
-              <div className="h-full bg-gradient-to-br from-blue-900/40 to-purple-900/40 p-10 rounded-[2rem] border border-blue-500/20 backdrop-blur-md relative overflow-hidden group">
-                <div className="absolute right-0 bottom-0 w-64 h-64 bg-blue-500/30 rounded-full blur-[80px] group-hover:scale-110 transition-transform duration-700" />
-                <div className="relative z-10 flex flex-col h-full justify-center">
-                  <h3 className="text-4xl font-display font-bold text-white mb-4">Modo Foco Absoluto</h3>
-                  <p className="text-xl text-blue-200 max-w-lg">Bloqueie distrações e entre em estado de flow com nosso timer integrado e sons binaurais.</p>
+                {/* Feature 3: Visão de Vida */}
+                <div className="feature-row animate">
+                    <div className="feature-content">
+                        <span className="feature-tag">VISÃO DE VIDA</span>
+                        <h2 className="section-headline">O mapa do tesouro para o seu futuro.</h2>
+                        <p className="subheadline">Crie um roadmap visual e emocional do seu futuro. Saiba exatamente por que você está acordando cedo hoje.</p>
+                        <ul className="feature-list">
+                            <li>Crie sua linha do tempo de vida com marcos de longo prazo</li>
+                            <li>Adicione fotos inspiradoras e datas-alvo para cada marco</li>
+                            <li>Acompanhe o status: Pendente, Em Andamento ou Concluído</li>
+                            <li>Conecte sua execução diária ao seu propósito maior</li>
+                            <li>Visualize toda a sua jornada a partir do presente</li>
+                        </ul>
+                        <button onClick={() => setIsAuthModalOpen(true)} className="btn btn-primary">Criar minha Visão de Vida →</button>
+                    </div>
+                    <div className="feature-mockup-wrapper">
+                        <div className="mockup-container">
+                            <div className="mockup-header">
+                                <div className="mockup-dot"></div><div className="mockup-dot"></div><div className="mockup-dot"></div>
+                            </div>
+                            <div className="mk-roadmap">
+                                <div className="mk-timeline"><div className="mk-timeline-fill"></div></div>
+                                <div className="mk-nodes">
+                                    <div className="mk-node">
+                                        <div className="mk-circle done"></div>
+                                        <span className="mk-node-text">2024</span>
+                                    </div>
+                                    <div className="mk-node">
+                                        <div className="mk-circle done"></div>
+                                        <span className="mk-node-text">Hoje</span>
+                                    </div>
+                                    <div className="mk-node">
+                                        <div className="mk-circle"></div>
+                                        <span className="mk-node-text">2026</span>
+                                    </div>
+                                    <div className="mk-node">
+                                        <div className="mk-circle"></div>
+                                        <span className="mk-node-text">2030</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style={{ marginTop: '20px', background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px', display: 'flex', gap: '12px' }}>
+                                <div style={{ width: '60px', height: '60px', background: 'rgba(99,102,241,0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>🏔️</div>
+                                <div>
+                                    <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '4px' }}>Independência Financeira</div>
+                                    <div style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>Alvo: Dezembro 2030</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </Reveal>
-          </div>
-        </section>
 
-        {/* Aha Moment */}
-        <section className="py-32 px-6 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#06080F] via-blue-900/10 to-[#06080F]" />
-          <div className="max-w-4xl mx-auto text-center relative z-10">
-            <Reveal>
-              <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-8">
-                Não mude você. <span className="text-blue-400">Mude o sistema.</span>
-              </h2>
-              <p className="text-xl text-slate-400 mb-12 leading-relaxed">
-                O MetaTask é o único aplicativo que se adapta ao seu cronotipo e perfil de energia. Se você é produtivo à noite, suas missões mais difíceis serão agendadas para a noite.
-              </p>
-              <div className="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md inline-block text-left">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
-                    <span className="text-2xl">🦉</span>
-                  </div>
-                  <div>
-                    <div className="text-white font-bold text-lg">Perfil Coruja</div>
-                    <div className="text-purple-400 text-sm">Pico de energia: 20h - 02h</div>
-                  </div>
+                {/* Feature 4: Identidade */}
+                <div className="feature-row reverse animate" id="identidade">
+                    <div className="feature-content">
+                        <span className="feature-tag">IDENTIDADE</span>
+                        <h2 className="section-headline">Conheça o jogador antes de jogar o jogo.</h2>
+                        <p className="subheadline">Ferramentas profundas de autoconhecimento: Necrológio, Temperamentos e as 12 Camadas da Personalidade.</p>
+                        
+                        <div style={{ marginTop: '24px' }}>
+                            <div style={{ marginBottom: '16px' }}>
+                                <h4 style={{ color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>📜 O Necrológio (Memento Mori)</h4>
+                                <p className="small-text" style={{ marginTop: '4px' }}>Escreva como você quer ser lembrado. Confronte sua mortalidade para dar urgência e sentido ao seu presente. Com histórico de versões para acompanhar sua evolução.</p>
+                            </div>
+                            <div style={{ marginBottom: '16px' }}>
+                                <h4 style={{ color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>🔥 Os 4 Temperamentos</h4>
+                                <p className="small-text" style={{ marginTop: '4px' }}>Entenda sua natureza base — Colérico, Sanguíneo, Fleumático ou Melancólico — e aprenda como você realmente reage ao mundo.</p>
+                            </div>
+                            <div style={{ marginBottom: '24px' }}>
+                                <h4 style={{ color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>🧠 As 12 Camadas da Personalidade</h4>
+                                <p className="small-text" style={{ marginTop: '4px' }}>Descubra em qual estágio de maturidade humana você está — da infância até a vida espiritual — e o que precisa fazer para alcançar a próxima camada.</p>
+                            </div>
+                        </div>
+                        <button onClick={() => setIsAuthModalOpen(true)} className="btn btn-primary">Explorar minha Identidade →</button>
+                    </div>
+                    <div className="feature-mockup-wrapper">
+                        <div className="mockup-container" style={{ paddingBottom: '0', background: 'transparent', border: 'none', boxShadow: 'none' }}>
+                            <div className="mk-stack">
+                                <div className="mk-stack-card">
+                                    <div className="mk-icon-box">🧠</div>
+                                    <div>
+                                        <div style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>12 Camadas</div>
+                                        <div style={{ color: 'var(--color-text-muted)', fontSize: '0.7rem' }}>Camada 4: História Pessoal</div>
+                                    </div>
+                                </div>
+                                <div className="mk-stack-card">
+                                    <div className="mk-icon-box">🔥</div>
+                                    <div>
+                                        <div style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>Temperamento</div>
+                                        <div style={{ color: 'var(--color-text-muted)', fontSize: '0.7rem' }}>Colérico-Melancólico</div>
+                                    </div>
+                                </div>
+                                <div className="mk-stack-card">
+                                    <div className="mk-icon-box">📜</div>
+                                    <div>
+                                        <div style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>Necrológio</div>
+                                        <div style={{ color: 'var(--color-text-muted)', fontSize: '0.7rem' }}>Memento Mori. Atualizado há 2 dias.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-slate-300 bg-black/30 px-4 py-3 rounded-xl">
-                    <Clock className="w-5 h-5 text-slate-500" />
-                    <span>09:00 - Tarefas Administrativas (Baixa Energia)</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-white bg-blue-500/20 border border-blue-500/30 px-4 py-3 rounded-xl">
-                    <Zap className="w-5 h-5 text-blue-400" />
-                    <span className="font-bold">21:00 - Deep Work (Alta Energia)</span>
-                  </div>
+
+                {/* Feature 5: Insights */}
+                <div className="feature-row animate" id="estatisticas">
+                    <div className="feature-content">
+                        <span className="feature-tag">ESTATÍSTICAS</span>
+                        <h2 className="section-headline">Seus resultados não mentem.</h2>
+                        <p className="subheadline">Acompanhe seu tempo de foco, dias mais produtivos e evolução contínua através de gráficos detalhados.</p>
+                        <ul className="feature-list">
+                            <li>Visualize onde você está investindo seu tempo</li>
+                            <li>Gráfico de ritmo diário (minutos focados por dia)</li>
+                            <li>Filtros: Últimos 7 dias ou Este Mês</li>
+                            <li>Dados reais para decisões inteligentes sobre sua rotina</li>
+                        </ul>
+                        <button onClick={() => setIsAuthModalOpen(true)} className="btn btn-primary">Ver minhas estatísticas →</button>
+                    </div>
+                    <div className="feature-mockup-wrapper">
+                        <div className="mockup-container">
+                            <div className="mockup-header">
+                                <div className="mockup-dot"></div><div className="mockup-dot"></div><div className="mockup-dot"></div>
+                            </div>
+                            <div className="mk-grid">
+                                <div className="mk-stat">
+                                    <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>⏱️ Tempo de Foco</div>
+                                    <div className="mk-stat-val">12h 45m</div>
+                                </div>
+                                <div className="mk-stat">
+                                    <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>⚡ Ofensiva (Streak)</div>
+                                    <div className="mk-stat-val" style={{ color: 'var(--color-warning)' }}>14 Dias</div>
+                                </div>
+                                <div className="mk-stat">
+                                    <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>✅ Tarefas</div>
+                                    <div className="mk-stat-val">42</div>
+                                </div>
+                                <div className="mk-stat">
+                                    <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>📅 Melhor Dia</div>
+                                    <div className="mk-stat-val">Terça</div>
+                                </div>
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '8px' }}>Ritmo Diário (Minutos)</div>
+                            <div className="mk-chart">
+                                <div className="mk-bar" style={{ height: '40%' }}></div>
+                                <div className="mk-bar" style={{ height: '70%' }}></div>
+                                <div className="mk-bar" style={{ height: '50%' }}></div>
+                                <div className="mk-bar" style={{ height: '90%', background: 'var(--color-primary)' }}></div>
+                                <div className="mk-bar" style={{ height: '30%' }}></div>
+                                <div className="mk-bar" style={{ height: '60%' }}></div>
+                                <div className="mk-bar" style={{ height: '80%' }}></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </Reveal>
-          </div>
-        </section>
 
-        {/* FAQ */}
-        <section className="py-32 px-6 max-w-3xl mx-auto">
-          <Reveal>
-            <h2 className="text-3xl md:text-5xl font-display font-bold text-white text-center mb-16">Perguntas Frequentes</h2>
-          </Reveal>
-          <div className="space-y-4">
-            {[
-              { q: "Já tentei de tudo. Por que isso seria diferente?", a: "Porque não somos uma lista de tarefas. Somos um sistema de accountability. A gamificação atua na dopamina, transformando obrigação em recompensa." },
-              { q: "Não tenho tempo para configurar.", a: "O setup leva 3 minutos. Nossa interface é desenhada para fricção zero. Você adiciona uma meta em 2 segundos." },
-              { q: "E se eu falhar um dia?", a: "O sistema prevê falhas. Temos o 'Dia de Descanso' e mecânicas de recuperação de streak para você não desanimar." }
-            ].map((item, i) => (
-              <Reveal key={i} delay={i * 0.1}>
-                <details className="group bg-white/5 border border-white/10 rounded-2xl [&_summary::-webkit-details-marker]:hidden">
-                  <summary className="flex items-center justify-between p-6 cursor-pointer font-bold text-lg text-white">
-                    {item.q}
-                    <ChevronDown className="w-5 h-5 text-slate-400 transition-transform group-open:-rotate-180" />
-                  </summary>
-                  <div className="px-6 pb-6 text-slate-400 leading-relaxed">
-                    {item.a}
-                  </div>
-                </details>
-              </Reveal>
-            ))}
-          </div>
-        </section>
+            </section>
 
-        {/* Final CTA */}
-        <section className="py-32 px-6 relative">
-          <Reveal>
-            <div className="max-w-5xl mx-auto bg-gradient-to-br from-blue-900 to-purple-900 rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden border border-white/10 shadow-[0_0_100px_rgba(59,130,246,0.2)]">
-              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay" />
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-blue-500/20 to-transparent blur-[100px]" />
-              
-              <div className="relative z-10">
-                <h2 className="text-4xl md:text-6xl font-display font-bold text-white mb-8">Pronto para assumir o controle?</h2>
-                <p className="text-blue-200 text-xl md:text-2xl mb-12 max-w-2xl mx-auto font-light">
-                  Junte-se aos realizadores que transformaram suas rotinas. O investimento é menor que um café por semana.
-                </p>
-                <Button 
-                  size="lg" 
-                  className="text-lg h-16 px-12 bg-white text-black hover:bg-slate-200 rounded-2xl shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all hover:scale-105"
-                  onClick={() => openAuthModal()}
-                >
-                  Acessar Plataforma
-                </Button>
-                <p className="mt-6 text-sm text-blue-300/70">Garantia incondicional de 7 dias.</p>
-              </div>
-            </div>
-          </Reveal>
-        </section>
-      </main>
+            {/* SEÇÃO: FAQ */}
+            <section className="section section-alt" id="faq">
+                <div className="container faq-container animate">
+                    <div className="text-center">
+                        <h2 className="section-headline">Perguntas Frequentes</h2>
+                        <p className="subheadline">Tudo o que você precisa saber sobre o MetaTask.</p>
+                    </div>
 
-      {/* Footer */}
-      <footer className="py-12 text-center text-slate-500 text-sm border-t border-white/10 relative z-10 bg-[#06080F]">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-display font-bold text-lg text-white">MetaTask</span>
-          </div>
-          <p>© 2026 MetaTask. Todos os direitos reservados.</p>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-white transition-colors">Termos</a>
-            <a href="#" className="hover:text-white transition-colors">Privacidade</a>
-            <a href="#" className="hover:text-white transition-colors">Contato</a>
-          </div>
+                    <div className="faq-list" style={{ marginTop: '40px' }}>
+                        
+                        {[
+                            {
+                                q: "Qual a diferença entre Tarefas e Rotina no MetaTask?",
+                                a: "As Tarefas são ações pontuais organizadas dentro de Projetos (como \"Enviar relatório\" ou \"Comprar passagem\"). Já a Rotina é onde a gamificação acontece: são seus hábitos e metas diárias. Ao completar sua Rotina você acumula XP, sobe de nível e constrói seu streak."
+                            },
+                            {
+                                q: "O que é a Visão de Vida?",
+                                a: "É o seu mapa do tesouro pessoal. Uma ferramenta visual onde você define marcos de longo prazo, adiciona fotos inspiradoras e estabelece datas-alvo. Ela serve para te lembrar todos os dias do porquê você está executando suas tarefas e rotinas."
+                            },
+                            {
+                                q: "O que são as ferramentas de Identidade?",
+                                a: "O MetaTask acredita que produtividade sem autoconhecimento é vazia. Nosso módulo de Identidade inclui três ferramentas: o Necrológio (prática estóica de Memento Mori), a descoberta dos 4 Temperamentos base e o mapeamento das 12 Camadas da Personalidade."
+                            },
+                            {
+                                q: "Como funciona a gamificação com XP?",
+                                a: "Você ganha XP ao ser consistente. Ao marcar seus hábitos e metas diárias na Rotina como concluídos, seu personagem sobe de nível e você constrói um streak de dias seguidos. É a dopamina dos videogames aplicada ao seu crescimento real."
+                            },
+                            {
+                                q: "Existe limite de projetos?",
+                                a: "No plano atual você pode criar até 7 projetos simultâneos, cada um com suas próprias visões em Lista, Kanban e Calendário."
+                            },
+                            {
+                                q: "Como funciona o período de teste?",
+                                a: "Você tem 7 dias inteiros para usar 100% das ferramentas do MetaTask de forma totalmente gratuita. Se não gostar, cancele com um clique antes do fim do período — nada será cobrado, sem burocracia."
+                            },
+                            {
+                                q: "O MetaTask serve para trabalho ou vida pessoal?",
+                                a: "Para ambos! O módulo de Projetos com Kanban é robusto para demandas profissionais, enquanto Rotina, Visão de Vida e Identidade garantem que sua vida pessoal e saúde mental evoluam em paralelo."
+                            }
+                        ].map((item, index) => (
+                            <div className={`faq-item ${activeFaq === index ? 'active' : ''}`} key={index} style={{ borderColor: activeFaq === index ? 'var(--color-primary)' : 'var(--color-border)' }}>
+                                <button className="faq-question" onClick={() => toggleFaq(index)}>
+                                    {item.q}
+                                    <span className="faq-icon">+</span>
+                                </button>
+                                <div className="faq-answer">
+                                    <p>{item.a}</p>
+                                </div>
+                            </div>
+                        ))}
+
+                    </div>
+                </div>
+            </section>
+
+            {/* SEÇÃO: CTA FINAL */}
+            <section className="container animate">
+                <div className="cta-final">
+                    <h2>Pronto para iniciar sua jornada épica?</h2>
+                    <p>Pare de adiar a vida que você planejou. Teste o sistema completo do MetaTask gratuitamente por 7 dias.</p>
+                    <button onClick={() => setIsAuthModalOpen(true)} className="btn btn-white">Desbloquear meu acesso grátis agora</button>
+                    <p className="small-text" style={{ marginTop: '16px', color: 'rgba(255,255,255,0.7)' }}>7 dias grátis • Sem cartão de crédito • Cancele quando quiser</p>
+                </div>
+            </section>
+
+            {/* FOOTER */}
+            <footer>
+                <div className="container">
+                    <div className="footer-logo">MetaTask</div>
+                    <p className="footer-tagline">O seu sistema operacional pessoal.</p>
+                    <div className="footer-links">
+                        <a href="#">Termos de Uso</a>
+                        <a href="#">Política de Privacidade</a>
+                        <a href="#">Suporte</a>
+                    </div>
+                    <p className="copyright">© 2025 MetaTask. Todos os direitos reservados.</p>
+                </div>
+            </footer>
+
+            <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
         </div>
-      </footer>
-    </div>
-  );
+    );
 }
