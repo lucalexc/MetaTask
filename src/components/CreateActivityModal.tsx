@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Target, RefreshCw, Loader2 } from 'lucide-react';
+import { X, Target, RefreshCw, Loader2, Clock, Calendar, Repeat } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { supabase } from '@/src/lib/supabase';
 import { toast } from 'sonner';
@@ -305,22 +305,27 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
             {/* Conditional Fields */}
             <div className="space-y-6">
               {type === 'routine' ? (
-                <div className="flex flex-row items-end gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[13px] font-bold text-[#202020]">Horário</label>
+                <div className="space-y-4">
+                  {/* Time Setting Section */}
+                  <div className="flex items-center justify-between p-3 bg-gray-50/50 rounded-lg border border-gray-100">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <Clock className="w-4 h-4 text-gray-400" />
+                      <span>Horário</span>
+                    </div>
                     <input
                       type="text"
                       value={time}
                       onChange={handleTimeChange}
                       placeholder="00:00"
                       maxLength={5}
-                      className="w-32 bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                      className="w-24 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-base md:text-[14px]"
                     />
                   </div>
                   
-                  <div className="space-y-2 flex-1">
-                    <label className="text-[13px] font-bold text-[#202020]">Dias da Semana</label>
-                    <div className="flex items-center gap-1.5">
+                  {/* Weekdays Section */}
+                  <div className="space-y-2">
+                    <label className="text-[13px] font-bold text-[#202020] block">Dias da Semana</label>
+                    <div className="flex justify-between w-full mt-2">
                       {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, index) => {
                         const isActive = selectedDays.includes(index);
                         return (
@@ -334,10 +339,10 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                               }
                             }}
                             className={cn(
-                              "w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-colors",
+                              "h-9 w-9 md:h-10 md:w-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200",
                               isActive 
-                                ? "bg-blue-600 text-white" 
-                                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                ? "bg-blue-600 text-white shadow-sm shadow-blue-200" 
+                                : "bg-white border border-gray-100 text-slate-500 hover:bg-gray-50"
                             )}
                           >
                             {day}
@@ -349,39 +354,51 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[13px] font-bold text-[#202020]">Duração (Dias)</label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={duration}
-                        onChange={(e) => setDuration(e.target.value)}
-                        placeholder="Ex: 30"
-                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
-                      />
+                  {/* Duration Setting */}
+                  <div className="flex items-center justify-between p-3 bg-gray-50/50 rounded-lg border border-gray-100">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <Calendar className="w-4 h-4 text-gray-400" />
+                      <span>Duração (Dias)</span>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[13px] font-bold text-[#202020]">Horário</label>
-                      <input
-                        type="text"
-                        value={time}
-                        onChange={handleTimeChange}
-                        placeholder="00:00"
-                        maxLength={5}
-                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
-                      />
-                    </div>
+                    <input
+                      type="number"
+                      min="1"
+                      value={duration}
+                      onChange={(e) => setDuration(e.target.value)}
+                      placeholder="Ex: 30"
+                      className="w-24 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-base md:text-[14px]"
+                    />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[13px] font-bold text-[#202020]">Repetições/Dia</label>
+
+                  {/* Time Setting */}
+                  <div className="flex items-center justify-between p-3 bg-gray-50/50 rounded-lg border border-gray-100">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <Clock className="w-4 h-4 text-gray-400" />
+                      <span>Horário</span>
+                    </div>
+                    <input
+                      type="text"
+                      value={time}
+                      onChange={handleTimeChange}
+                      placeholder="00:00"
+                      maxLength={5}
+                      className="w-24 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-base md:text-[14px]"
+                    />
+                  </div>
+
+                  {/* Repetitions Setting */}
+                  <div className="flex items-center justify-between p-3 bg-gray-50/50 rounded-lg border border-gray-100">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <Repeat className="w-4 h-4 text-gray-400" />
+                      <span>Repetições/Dia</span>
+                    </div>
                     <input
                       type="number"
                       min="1"
                       value={repetitions}
                       onChange={(e) => setRepetitions(e.target.value)}
                       placeholder="Ex: 1"
-                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
+                      className="w-24 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-base md:text-[14px]"
                     />
                   </div>
                 </div>
