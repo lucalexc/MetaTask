@@ -231,7 +231,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overscroll-none h-[100dvh]">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overscroll-none h-[100dvh]">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -292,13 +292,13 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
 
             {/* Description */}
             <div className="space-y-2">
-              <label className="text-[13px] font-bold text-[#202020]">Descrição (Opcional)</label>
+              <label className="text-[13px] font-bold text-[#202020] ml-1">Descrição (Opcional)</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Detalhes sobre a atividade..."
                 rows={2}
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200 resize-none"
+                className="w-full bg-gray-50/30 border border-gray-100 rounded-xl px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all duration-200 resize-none"
               />
             </div>
 
@@ -423,14 +423,14 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
               <button
                 onClick={onClose}
                 disabled={isLoading}
-                className="px-4 py-2 rounded-lg text-[13px] text-[#808080] hover:text-[#202020] hover:bg-gray-200 transition-colors ease-out duration-200 font-medium disabled:opacity-50"
+                className="px-4 py-2 rounded-xl text-[13px] text-[#808080] hover:text-[#202020] hover:bg-gray-200 transition-colors ease-out duration-200 font-medium disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSave}
                 disabled={isLoading || !name.trim()}
-                className="px-5 py-2 rounded-lg text-[13px] text-white font-bold bg-[#1f60c2] hover:bg-[#1a50a3] transition-all ease-out duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 rounded-xl text-[13px] text-white font-bold bg-[#1f60c2] hover:bg-[#1a50a3] transition-all ease-out duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-blue-100"
               >
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                 {isLoading ? 'Salvando...' : 'Salvar'}

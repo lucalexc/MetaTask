@@ -594,44 +594,41 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
             <input 
               type="text" 
               placeholder="Qual é a sua próxima tarefa?" 
-              className="w-full text-base md:text-[26px] leading-[35px] font-bold text-[#202020] placeholder-[#808080] focus:outline-none"
+              className="w-full text-base md:text-[24px] leading-tight font-bold text-[#202020] placeholder-[#808080] focus:outline-none bg-transparent"
               value={title}
               onChange={e => setTitle(e.target.value)}
               autoFocus
             />
             <textarea 
               placeholder="Descrição da tarefa..." 
-              className="w-full text-base md:text-[13px] leading-[18px] text-[#202020] placeholder-[#808080] focus:outline-none resize-none min-h-[60px]"
+              className="w-full text-base md:text-[14px] leading-relaxed text-gray-600 placeholder-[#808080] focus:outline-none bg-transparent resize-none min-h-[80px]"
               value={description}
               onChange={e => setDescription(e.target.value)}
             />
             
-            {/* Quick Actions Bar */}
-            <div className="flex flex-wrap items-center gap-2 mt-2 relative">
-              {/* Date Button & Popover */}
+            {/* Native Rows Section */}
+            <div className="space-y-2 mt-4">
+              {/* Date Row */}
               <div className="relative">
                 <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
                   <PopoverTrigger asChild>
                     <button 
-                      onClick={() => {
-                        setIsTimePickerOpen(false);
-                        setIsRecurrencePickerOpen(false);
-                      }}
-                      className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-colors ease-out duration-200",
-                        isDatePickerOpen ? "border-[#1f60c2] text-[#1f60c2] bg-[#dceaff]" : "border-gray-200 text-[#808080] hover:bg-gray-50"
-                      )}
+                      className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group"
                     >
-                      <CalendarIcon className={cn("w-4 h-4", isDatePickerOpen ? "text-[#1f60c2]" : "text-[#808080]")} />
-                      {isSameDay(taskDate, new Date()) ? 'Hoje' : format(taskDate, 'dd/MM')}
+                      <div className="flex items-center gap-3">
+                        <CalendarIcon className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                        <span className="text-sm font-medium text-gray-600">Data</span>
+                      </div>
+                      <span className="text-sm font-semibold text-blue-600">
+                        {isSameDay(taskDate, new Date()) ? 'Hoje' : format(taskDate, 'dd/MM')}
+                      </span>
                     </button>
                   </PopoverTrigger>
                   <PopoverContent 
-                    side="left" 
-                    align="start" 
-                    sideOffset={16} 
-                    avoidCollisions={true}
-                    className="w-72 p-0 bg-white rounded-xl shadow-xl border border-gray-200 z-[100] overflow-hidden"
+                    side="bottom" 
+                    align="end" 
+                    sideOffset={8} 
+                    className="w-72 p-0 bg-white rounded-xl shadow-xl border border-gray-200 z-[110] overflow-hidden"
                   >
                     <div className="p-2 space-y-1 border-b border-gray-100">
                       <button onClick={() => { setTaskDate(addDays(new Date(), 1)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Sun className="w-4 h-4 text-orange-500" /> Amanhã</button>
@@ -669,54 +666,49 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                 </Popover>
               </div>
 
-              {/* Time Input */}
-              <div className="relative flex items-center">
-                <div className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-all ease-out duration-200 focus-within:ring-4 focus-within:ring-[#dceaff] focus-within:border-[#1f60c2]",
-                  time ? "border-[#1f60c2] text-[#1f60c2] bg-[#dceaff]" : "border-gray-200 text-[#808080] bg-white hover:bg-gray-50"
-                )}>
-                  <Clock className={cn("w-4 h-4", time ? "text-[#1f60c2]" : "text-[#808080]")} />
-                  <input
-                    type="text"
-                    placeholder="00:00"
-                    maxLength={5}
-                    value={time}
-                    onChange={handleTimeChange}
-                    className="w-11 bg-transparent focus:outline-none text-left justify-start placeholder-[#808080] text-[#202020] text-base md:text-[13px]"
-                  />
+              {/* Time Row */}
+              <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
+                <div className="flex items-center gap-3">
+                  <Clock className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                  <span className="text-sm font-medium text-gray-600">Horário</span>
                 </div>
+                <input
+                  type="text"
+                  placeholder="00:00"
+                  maxLength={5}
+                  value={time}
+                  onChange={handleTimeChange}
+                  className="w-20 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-sm"
+                />
               </div>
 
-              {/* Recurrence Button & Popover */}
+              {/* Recurrence Row */}
               <div className="relative">
                 <Popover open={isRecurrencePickerOpen} onOpenChange={setIsRecurrencePickerOpen}>
                   <PopoverTrigger asChild>
                     <button 
-                      onClick={() => {
-                        setIsDatePickerOpen(false);
-                        setIsTimePickerOpen(false);
-                      }}
-                      className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-colors ease-out duration-200",
-                        isRecurrencePickerOpen || recurrenceType !== 'none' ? "border-[#1f60c2] text-[#1f60c2] bg-[#dceaff]" : "border-gray-200 text-[#808080] hover:bg-gray-50"
-                      )}
+                      className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group"
                     >
-                      <Repeat className={cn("w-4 h-4", isRecurrencePickerOpen || recurrenceType !== 'none' ? "text-[#1f60c2]" : "text-[#808080]")} />
-                      {recurrenceType === 'daily' ? 'Todo dia' : 
-                       recurrenceType === 'weekly' ? `Toda semana (${format(taskDate, 'EEEE', { locale: ptBR })})` : 
-                       recurrenceType === 'weekdays' ? 'Todo dia útil' :
-                       recurrenceType === 'monthly' ? `Todo mês (dia ${format(taskDate, 'd')})` :
-                       recurrenceType === 'yearly' ? `Todo ano (${format(taskDate, 'd \'de\' MMMM', { locale: ptBR })})` :
-                       recurrenceType === 'custom' ? 'Personalizado' :
-                       'Repetir'}
+                      <div className="flex items-center gap-3">
+                        <Repeat className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                        <span className="text-sm font-medium text-gray-600">Repetir</span>
+                      </div>
+                      <span className="text-sm font-semibold text-blue-600">
+                        {recurrenceType === 'daily' ? 'Todo dia' : 
+                         recurrenceType === 'weekly' ? `Toda semana` : 
+                         recurrenceType === 'weekdays' ? 'Dias úteis' :
+                         recurrenceType === 'monthly' ? `Todo mês` :
+                         recurrenceType === 'yearly' ? `Todo ano` :
+                         recurrenceType === 'custom' ? 'Personalizado' :
+                         'Não repetir'}
+                      </span>
                     </button>
                   </PopoverTrigger>
                   <PopoverContent 
                     side="bottom" 
-                    align="start" 
+                    align="end" 
                     sideOffset={8} 
-                    avoidCollisions={true}
-                    className="w-64 p-1 bg-white rounded-xl shadow-xl border border-gray-200 z-[100] flex flex-col gap-0.5 max-h-72 overflow-y-auto"
+                    className="w-64 p-1 bg-white rounded-xl shadow-xl border border-gray-200 z-[110] flex flex-col gap-0.5 max-h-72 overflow-y-auto"
                   >
                     <button onClick={() => { setRecurrenceType('daily'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'daily' && "bg-[#dceaff] text-[#1f60c2]")}>Todo dia</button>
                     <button onClick={() => { setRecurrenceType('weekly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'weekly' && "bg-[#dceaff] text-[#1f60c2]")}>Toda semana ({format(taskDate, 'EEEE', { locale: ptBR })})</button>
@@ -730,112 +722,127 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                 </Popover>
               </div>
 
-              <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger className="w-auto h-9 border-gray-200 bg-transparent hover:bg-gray-50 focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] border rounded-lg px-3 transition-all ease-out duration-200">
-                  <div className="flex items-center gap-1.5 text-[13px] font-medium text-[#808080]">
-                    <Flag className={cn("w-4 h-4", priority === 'P1' ? "text-red-500" : priority === 'P2' ? "text-orange-500" : priority === 'P3' ? "text-[#1f60c2]" : "text-[#808080]")} fill={priority !== 'P4' ? "currentColor" : "none"} />
-                    {priority}
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="z-[110]">
-                  <SelectItem value="P1"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-red-500" fill="currentColor"/> Urgente</div></SelectItem>
-                  <SelectItem value="P2"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-orange-500" fill="currentColor"/> Alta</div></SelectItem>
-                  <SelectItem value="P3"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#1f60c2]" fill="currentColor"/> Média</div></SelectItem>
-                  <SelectItem value="P4"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#808080]" fill="none"/> Baixa</div></SelectItem>
-                </SelectContent>
-              </Select>
-
-              {projects.length > 0 && (
-                <Select value={projectId} onValueChange={setProjectId}>
-                  <SelectTrigger className="w-auto h-9 border-gray-200 bg-transparent hover:bg-gray-50 focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] border rounded-lg px-3 transition-all ease-out duration-200">
-                    <div className="flex items-center gap-1.5 text-[13px] font-medium text-[#808080]">
-                      <Target className="w-4 h-4 text-[#808080]" />
-                      {projectId === 'none' ? 'Projeto' : projects.find(p => p.id === projectId)?.name}
-                    </div>
+              {/* Priority Row */}
+              <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
+                <div className="flex items-center gap-3">
+                  <Flag className={cn("w-4 h-4 group-hover:scale-110 transition-transform", priority === 'P1' ? "text-red-500" : priority === 'P2' ? "text-orange-500" : priority === 'P3' ? "text-blue-500" : "text-gray-400")} fill={priority !== 'P4' ? "currentColor" : "none"} />
+                  <span className="text-sm font-medium text-gray-600">Prioridade</span>
+                </div>
+                <Select value={priority} onValueChange={setPriority}>
+                  <SelectTrigger className="w-auto h-auto border-none bg-transparent p-0 focus:ring-0 shadow-none">
+                    <span className={cn(
+                      "text-sm font-semibold",
+                      priority === 'P1' ? "text-red-600" : priority === 'P2' ? "text-orange-600" : priority === 'P3' ? "text-blue-600" : "text-gray-500"
+                    )}>
+                      {priority === 'P1' ? 'Urgente' : priority === 'P2' ? 'Alta' : priority === 'P3' ? 'Média' : 'Baixa'}
+                    </span>
                   </SelectTrigger>
-                  <SelectContent side="bottom" avoidCollisions={false} className="z-[110] top-full mt-1 lg:mt-2 max-h-56 overflow-y-auto custom-scrollbar bg-white border border-slate-200 shadow-lg rounded-md">
-                    <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100 data-[state=checked]:bg-blue-50 data-[state=checked]:text-blue-600 data-[state=checked]:font-medium">Nenhum projeto</SelectItem>
-                    {projects.map(p => (
-                      <SelectItem hideCheck key={p.id} value={p.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100 data-[state=checked]:bg-blue-50 data-[state=checked]:text-blue-600 data-[state=checked]:font-medium">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-                          {p.name}
-                        </div>
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="z-[110]">
+                    <SelectItem value="P1"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-red-500" fill="currentColor"/> Urgente</div></SelectItem>
+                    <SelectItem value="P2"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-orange-500" fill="currentColor"/> Alta</div></SelectItem>
+                    <SelectItem value="P3"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#1f60c2]" fill="currentColor"/> Média</div></SelectItem>
+                    <SelectItem value="P4"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#808080]" fill="none"/> Baixa</div></SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Project Row */}
+              {projects.length > 0 && (
+                <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
+                  <div className="flex items-center gap-3">
+                    <Target className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                    <span className="text-sm font-medium text-gray-600">Projeto</span>
+                  </div>
+                  <Select value={projectId} onValueChange={setProjectId}>
+                    <SelectTrigger className="w-auto h-auto border-none bg-transparent p-0 focus:ring-0 shadow-none">
+                      <span className="text-sm font-semibold text-blue-600">
+                        {projectId === 'none' ? 'Nenhum' : projects.find(p => p.id === projectId)?.name}
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent side="bottom" align="end" className="z-[110] max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-xl">
+                      <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">Nenhum projeto</SelectItem>
+                      {projects.map(p => (
+                        <SelectItem hideCheck key={p.id} value={p.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                            {p.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               )}
 
-              <div className="flex items-center gap-1">
+              {/* Category Row */}
+              <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 rounded-full border-2 border-gray-300 group-hover:border-blue-400 transition-colors" />
+                  <span className="text-sm font-medium text-gray-600">Categoria</span>
+                </div>
                 <Select value={categoryId} onValueChange={setCategoryId}>
-                  <SelectTrigger className="w-auto h-9 border-gray-200 bg-transparent hover:bg-gray-50 focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] border rounded-lg px-3 transition-all ease-out duration-200">
-                    <div className="flex items-center gap-1.5 text-[13px] font-medium text-slate-700">
-                      {categoryId === 'none' ? (
-                        'Categoria'
-                      ) : (
-                        <span>
-                          {categories?.find((c: Category) => c.id === categoryId)?.name}
-                        </span>
-                      )}
-                    </div>
+                  <SelectTrigger className="w-auto h-auto border-none bg-transparent p-0 focus:ring-0 shadow-none">
+                    <span className="text-sm font-semibold text-blue-600">
+                      {categoryId === 'none' ? 'Nenhuma' : categories?.find((c: Category) => c.id === categoryId)?.name}
+                    </span>
                   </SelectTrigger>
-                  <SelectContent side="bottom" avoidCollisions={false} className="z-[110] top-full mt-1 lg:mt-2 max-h-56 overflow-y-auto custom-scrollbar bg-white border border-slate-200 shadow-lg rounded-md">
-                    <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100 data-[state=checked]:bg-blue-50 data-[state=checked]:text-blue-600 data-[state=checked]:font-medium">Nenhuma categoria</SelectItem>
+                  <SelectContent side="bottom" align="end" className="z-[110] max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-xl">
+                    <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">Nenhuma categoria</SelectItem>
                     {categories?.map((c: Category) => (
-                      <SelectItem hideCheck key={c.id} value={c.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100 data-[state=checked]:bg-blue-50 data-[state=checked]:text-blue-600 data-[state=checked]:font-medium">
-                        <div className="flex items-center gap-2">
-                          <span>{c.name}</span>
-                        </div>
+                      <SelectItem hideCheck key={c.id} value={c.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">
+                        {c.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="flex items-center h-9 rounded-md border border-slate-200 bg-white text-[13px] font-medium text-slate-700 transition-colors ease-out duration-200 focus-within:ring-4 focus-within:ring-[#dceaff] focus-within:border-[#1f60c2] overflow-hidden">
-                <div className="pl-2.5 pr-1 flex items-center justify-center text-slate-400">
-                  <Timer className="w-4 h-4" />
+              {/* Duration Row */}
+              <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
+                <div className="flex items-center gap-3">
+                  <Timer className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                  <span className="text-sm font-medium text-gray-600">Duração</span>
                 </div>
-                <button 
-                  onClick={() => {
-                    const newDuration = Math.max(0, duration - 5);
-                    setDuration(newDuration);
-                    setDurationInput(formatDurationInput(newDuration));
-                  }}
-                  className="h-full px-2 hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors flex items-center justify-center"
-                >
-                  <Minus className="w-3.5 h-3.5" />
-                </button>
-                <input 
-                  type="text" 
-                  value={durationInput} 
-                  onChange={e => setDurationInput(e.target.value)} 
-                  onBlur={() => {
-                    const parsed = parseDurationInput(durationInput);
-                    setDuration(parsed);
-                    setDurationInput(formatDurationInput(parsed));
-                  }}
-                  className="w-14 bg-transparent focus:outline-none text-center text-slate-700 placeholder-slate-400 text-base md:text-[13px]" 
-                  placeholder="30m" 
-                />
-                <button 
-                  onClick={() => {
-                    const newDuration = duration + 5;
-                    setDuration(newDuration);
-                    setDurationInput(formatDurationInput(newDuration));
-                  }}
-                  className="h-full px-2 hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors flex items-center justify-center"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button 
+                    onClick={() => {
+                      const newDuration = Math.max(0, duration - 5);
+                      setDuration(newDuration);
+                      setDurationInput(formatDurationInput(newDuration));
+                    }}
+                    className="p-1 hover:bg-gray-200 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <input 
+                    type="text" 
+                    value={durationInput} 
+                    onChange={e => setDurationInput(e.target.value)} 
+                    onBlur={() => {
+                      const parsed = parseDurationInput(durationInput);
+                      setDuration(parsed);
+                      setDurationInput(formatDurationInput(parsed));
+                    }}
+                    className="w-12 bg-transparent focus:outline-none text-center font-semibold text-blue-600 text-sm" 
+                    placeholder="30m" 
+                  />
+                  <button 
+                    onClick={() => {
+                      const newDuration = duration + 5;
+                      setDuration(newDuration);
+                      setDurationInput(formatDurationInput(newDuration));
+                    }}
+                    className="p-1 hover:bg-gray-200 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
-            <p className="text-[11px] text-[#808080] ml-1">Isso ativará o temporizador de foco da tarefa.</p>
           </div>
 
-          <div className="p-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
-            <button onClick={onClose} className="px-4 py-2 text-[13px] font-medium text-[#808080] hover:text-[#202020] hover:bg-gray-200 rounded-lg transition-colors ease-out duration-200">Cancelar</button>
+          <div className="p-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/50 rounded-b-xl">
+            <button onClick={onClose} className="px-4 py-2 text-[13px] font-medium text-[#808080] hover:text-[#202020] hover:bg-gray-200 rounded-xl transition-colors ease-out duration-200">Cancelar</button>
             <button 
               disabled={isSaveDisabled}
               onClick={() => {
@@ -862,7 +869,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                 setIsDatePickerOpen(false); setIsTimePickerOpen(false); setIsRecurrencePickerOpen(false);
                 onClose();
               }}
-              className="px-4 py-2 text-[13px] font-bold bg-[#1f60c2] text-white hover:bg-[#1a50a3] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all ease-out duration-200 shadow-sm"
+              className="px-6 py-2 text-[13px] font-bold bg-[#1f60c2] text-white hover:bg-[#1a50a3] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all ease-out duration-200 shadow-md shadow-blue-100"
             >
               Salvar Tarefa
             </button>

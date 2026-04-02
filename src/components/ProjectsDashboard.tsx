@@ -303,74 +303,86 @@ function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (na
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overscroll-none h-[100dvh]">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overscroll-none h-[100dvh]">
       <motion.div
-        initial={{ opacity: 0, scale: 0.98, y: 10 }}
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.98, y: 10 }}
-        className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden border border-gray-200 max-h-[90dvh] flex flex-col"
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100 max-h-[90dvh] flex flex-col"
       >
         <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
-          <h3 className="font-bold text-[16px] text-[#202020]">Novo Projeto</h3>
-          <button onClick={onClose} className="text-[#808080] hover:text-[#202020] p-1 rounded-md hover:bg-gray-100 transition-colors ease-out duration-200">
-            <X className="w-4 h-4" />
+          <h3 className="font-bold text-lg text-[#202020]">Novo Projeto</h3>
+          <button onClick={onClose} className="text-[#808080] hover:text-[#202020] p-2 rounded-full hover:bg-gray-100 transition-all">
+            <X className="w-5 h-5" />
           </button>
         </div>
         
-        <div className="p-5 space-y-5 overflow-y-auto">
-          <div>
-            <label className="block text-[11px] uppercase tracking-wider font-bold text-[#808080] mb-1.5">Nome do Projeto</label>
+        <div className="p-5 space-y-4 overflow-y-auto custom-scrollbar">
+          {/* Project Name Row */}
+          <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
+            <div className="flex items-center gap-3">
+              <Folder className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+              <span className="text-sm font-medium text-gray-600">Nome</span>
+            </div>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Ex: Trabalho, Pessoal..."
-              className="w-full px-3 py-2 text-base md:text-[13px] leading-[18px] text-[#202020] placeholder-[#808080] border border-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] font-medium transition-all ease-out duration-200"
+              placeholder="Ex: Trabalho"
+              className="w-32 bg-transparent text-right text-sm font-semibold text-blue-600 placeholder-blue-300 focus:ring-0 border-none outline-none"
               autoFocus
             />
           </div>
 
-          <div>
-            <label className="block text-[11px] uppercase tracking-wider font-bold text-[#808080] mb-1.5">Descrição</label>
+          {/* Description */}
+          <div className="space-y-2">
+            <label className="block text-[11px] uppercase tracking-wider font-bold text-[#808080] ml-1">Descrição (Opcional)</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Opcional..."
-              rows={2}
-              className="w-full px-3 py-2 text-base md:text-[13px] leading-[18px] text-[#202020] placeholder-[#808080] border border-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] resize-none transition-all ease-out duration-200"
+              placeholder="Sobre o que é este projeto?"
+              rows={3}
+              className="w-full px-4 py-3 text-sm text-[#202020] placeholder-gray-400 bg-gray-50/30 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500/30 resize-none transition-all"
             />
           </div>
 
-          <div>
-            <label className="block text-[11px] uppercase tracking-wider font-bold text-[#808080] mb-2.5">Cor do Projeto</label>
-            <div className="flex flex-wrap gap-2.5">
+          {/* Color Selection Row */}
+          <div className="p-3 bg-gray-50/50 border border-gray-100 rounded-xl">
+            <label className="block text-[11px] uppercase tracking-wider font-bold text-[#808080] mb-3 ml-1">Cor do Projeto</label>
+            <div className="flex flex-wrap gap-2.5 justify-center">
               {PRESET_COLORS.map((c) => (
                 <button
                   key={c}
                   onClick={() => setColor(c)}
                   className={cn(
-                    "w-6 h-6 rounded-full transition-all ease-out duration-200 relative group",
-                    color === c ? "ring-2 ring-offset-2 ring-gray-400 scale-110" : "hover:scale-110"
+                    "w-7 h-7 rounded-full transition-all ease-out duration-200 relative",
+                    color === c ? "ring-2 ring-offset-2 ring-blue-400 scale-110 shadow-lg" : "hover:scale-110 opacity-80 hover:opacity-100"
                   )}
                   style={{ backgroundColor: c }}
                   type="button"
-                />
+                >
+                  {color === c && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 bg-white rounded-full shadow-sm" />
+                    </div>
+                  )}
+                </button>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="px-5 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-2">
+        <div className="px-5 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-3 py-1.5 text-[13px] font-bold text-[#808080] hover:bg-gray-200 rounded-md transition-colors ease-out duration-200"
+            className="px-4 py-2 text-sm font-bold text-gray-500 hover:bg-gray-200 rounded-xl transition-all"
           >
             Cancelar
           </button>
           <button
             onClick={() => onSave(name, description, color)}
             disabled={!name.trim()}
-            className="px-4 py-1.5 bg-[#202020] text-white text-[13px] font-bold rounded-md hover:bg-black transition-colors ease-out duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-200"
           >
             Criar Projeto
           </button>

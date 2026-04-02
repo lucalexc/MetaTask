@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings, Plus, Edit2, Trash2, X, Clock, ArrowLeft, Check, Loader2 } from 'lucide-react';
+import { Settings, Plus, Edit2, Trash2, X, Clock, ArrowLeft, Check, Loader2, Calendar } from 'lucide-react';
 import { startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/src/lib/utils';
 import { Button } from '@/src/components/ui/button';
@@ -131,49 +131,55 @@ const RoutineManagerModal = ({
   const isSaveDisabled = !name.trim() || daysOfWeek.length === 0 || activities.length === 0;
 
   return (
-    <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overscroll-none h-[100dvh]">
+    <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 overscroll-none h-[100dvh]">
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
         className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90dvh]"
       >
         <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
           <h3 className="font-bold text-lg text-slate-800">
             {editingRoutine ? 'Editar Bloco de Rotina' : 'Novo Bloco de Rotina'}
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-all">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 flex flex-col gap-8 overflow-y-auto">
-          {/* Routine Name */}
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nome da Rotina</label>
+        <div className="p-6 flex flex-col overflow-y-auto custom-scrollbar">
+          {/* Routine Name Row */}
+          <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl mb-4 hover:bg-gray-100/50 transition-colors group">
+            <div className="flex items-center gap-3">
+              <Edit2 className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+              <span className="text-sm font-medium text-gray-600">Nome da Rotina</span>
+            </div>
             <input 
               type="text" 
-              placeholder="Ex: Rotina Matinal, Faxina de Sábado..." 
-              className="w-full text-base font-medium text-slate-900 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+              placeholder="Ex: Rotina Matinal" 
+              className="w-48 bg-transparent text-right text-sm font-semibold text-blue-600 placeholder-blue-300 focus:ring-0 border-none outline-none"
               value={name}
               onChange={e => setName(e.target.value)}
               autoFocus
             />
           </div>
 
-          {/* Days of Week */}
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Dias da Semana</label>
-            <div className="flex justify-between gap-2">
+          {/* Days of Week Row */}
+          <div className="flex flex-col p-3 bg-gray-50/50 border border-gray-100 rounded-xl mb-6">
+            <div className="flex items-center gap-3 mb-3">
+              <Calendar className="w-4 h-4 text-gray-400" />
+              <span className="text-sm font-medium text-gray-600">Dias da Semana</span>
+            </div>
+            <div className="flex justify-between gap-1">
               {DAYS.map(day => (
                 <button
                   key={day.id}
                   onClick={() => toggleDay(day.id)}
                   className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all",
+                    "w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-bold transition-all",
                     daysOfWeek.includes(day.id)
                       ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                      : "bg-slate-100 text-slate-400 hover:bg-slate-200"
+                      : "bg-white border border-gray-100 text-slate-400 hover:bg-slate-50"
                   )}
                 >
                   {day.label}
@@ -183,45 +189,48 @@ const RoutineManagerModal = ({
           </div>
 
           {/* Activity Builder */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Atividades</label>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-gray-400" />
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Atividades</span>
+              </div>
               <button 
                 onClick={addActivity}
-                className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-lg transition-colors"
               >
-                <Plus className="w-3 h-3" /> Adicionar Atividade
+                <Plus className="w-3 h-3" /> Adicionar
               </button>
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-2">
               {activities.map((activity, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 group">
+                <div key={index} className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-xl group hover:border-blue-100 transition-all">
                   <input 
                     type="text" 
                     placeholder="00:00"
                     maxLength={5}
-                    className="bg-transparent text-base md:text-sm font-bold text-slate-700 w-20 focus:outline-none"
+                    className="bg-gray-50 px-2 py-1 rounded-lg text-sm font-bold text-blue-600 w-16 focus:outline-none focus:ring-1 focus:ring-blue-200 text-center"
                     value={activity.time}
                     onChange={e => updateActivity(index, 'time', e.target.value)}
                   />
                   <input 
                     type="text" 
                     placeholder="Nome da atividade"
-                    className="flex-1 bg-transparent text-base md:text-sm font-medium text-slate-900 focus:outline-none"
+                    className="flex-1 bg-transparent text-sm font-medium text-slate-700 focus:outline-none"
                     value={activity.title}
                     onChange={e => updateActivity(index, 'title', e.target.value)}
                   />
                   <button 
                     onClick={() => removeActivity(index)}
-                    className="text-slate-300 hover:text-red-500 transition-colors"
+                    className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               ))}
               {activities.length === 0 && (
-                <div className="text-center py-6 border-2 border-dashed border-slate-100 rounded-xl">
+                <div className="text-center py-8 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/30">
                   <p className="text-sm text-slate-400">Nenhuma atividade adicionada.</p>
                 </div>
               )}
@@ -229,8 +238,8 @@ const RoutineManagerModal = ({
           </div>
         </div>
 
-        <div className="p-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50 sticky bottom-0">
-          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">
+        <div className="p-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/30 sticky bottom-0">
+          <button onClick={onClose} className="px-6 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-all">
             Cancelar
           </button>
           <button 
@@ -239,9 +248,9 @@ const RoutineManagerModal = ({
               if (isSaveDisabled) return;
               await onSave({ name, days_of_week: daysOfWeek }, activities);
             }}
-            className="px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm"
+            className="px-6 py-2.5 text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all shadow-lg shadow-blue-200"
           >
-            {editingRoutine ? 'Atualizar Rotina' : 'Criar Rotina'}
+            {editingRoutine ? 'Salvar Alterações' : 'Criar Rotina'}
           </button>
         </div>
       </motion.div>
