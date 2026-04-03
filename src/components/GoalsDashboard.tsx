@@ -360,23 +360,6 @@ export default function GoalsDashboard({ isCreateModalOpen, setIsCreateModalOpen
   return (
     <main className="flex-1 flex flex-col overflow-hidden bg-slate-50">
       <div className="max-w-4xl mx-auto w-full pt-6 md:pt-10 px-4 md:px-8 flex-1 overflow-y-auto pb-12">
-        <header className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-display font-extrabold text-slate-900 tracking-tight">
-              Metas Ativas
-            </h1>
-            <p className="text-sm text-slate-500 mt-1">Acompanhe seus hábitos e metas diárias.</p>
-          </div>
-          
-          {/* We keep this button here too, or just rely on the sidebar. The prompt says: "Header: Título "Metas Ativas" e um botão primário [+ Nova Meta]." */}
-          <Button 
-            onClick={() => setIsCreateModalOpen(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm rounded-xl h-10 px-4"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nova Meta
-          </Button>
-        </header>
 
         <div className="space-y-4">
           {isLoading ? (

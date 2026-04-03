@@ -184,15 +184,6 @@ export default function ProjectsDashboard({
 
   return (
     <div className="w-full flex flex-col bg-[#FCFAF8]">
-      <header className="px-4 md:px-8 py-4 md:py-6 border-b border-gray-200 flex justify-between items-center shrink-0">
-        <div className="flex items-center gap-3">
-          <h1 className="text-[26px] leading-[35px] font-bold text-[#202020] tracking-tight">Meus Projetos</h1>
-          <span className="px-2.5 py-1 rounded-full bg-gray-100 text-[11px] font-bold text-[#808080] border border-gray-200 uppercase tracking-wider">
-            Projetos: {projects.length} / 7
-          </span>
-        </div>
-      </header>
-
       <div className="flex-1 p-4 md:p-8 pb-24 md:pb-8">
         <div className="max-w-5xl mx-auto">
           {projects.length === 0 ? (
