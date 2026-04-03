@@ -485,14 +485,14 @@ const parseDurationInput = (text: string): number => {
   return totalMinutes;
 };
 
-const FieldPill = React.forwardRef(({ icon, label, value, valueDisplay, onClick, accent = false, ...props }: any, ref: any) => (
-  <button
-    type="button"
+const FieldPill = React.forwardRef(({ icon, label, value, valueDisplay, onClick, accent = false, as: Component = "button", ...props }: any, ref: any) => (
+  <Component
+    type={Component === "button" ? "button" : undefined}
     onClick={onClick}
     ref={ref}
     {...props}
     className="flex flex-col gap-0.5 p-2.5 bg-gray-50 border-[1.5px] border-gray-100
-               rounded-xl hover:border-violet-300 transition-colors text-left"
+               rounded-xl hover:border-violet-300 transition-colors text-left w-full"
   >
     <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
       {icon} {label}
@@ -502,7 +502,7 @@ const FieldPill = React.forwardRef(({ icon, label, value, valueDisplay, onClick,
     }`}>
       {valueDisplay || value || 'Nenhum'}
     </span>
-  </button>
+  </Component>
 ));
 FieldPill.displayName = 'FieldPill';
 
@@ -1030,8 +1030,9 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                   </p>
                   <div className="grid grid-cols-3 gap-2">
                     <Select value={priority} onValueChange={setPriority}>
-                      <SelectTrigger asChild>
+                      <SelectTrigger className="h-auto p-0 border-none bg-transparent focus:ring-0 shadow-none [&>svg]:hidden w-full text-left">
                         <FieldPill
+                          as="div"
                           icon="🚩" label="Prioridade"
                           value={priority !== 'P4' ? priority : null}
                           valueDisplay={
@@ -1054,8 +1055,9 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                     </Select>
 
                     <Select value={projectId} onValueChange={setProjectId}>
-                      <SelectTrigger asChild>
+                      <SelectTrigger className="h-auto p-0 border-none bg-transparent focus:ring-0 shadow-none [&>svg]:hidden w-full text-left">
                         <FieldPill
+                          as="div"
                           icon="⊙" label="Projeto"
                           value={projectId !== 'none' ? projects.find(p => p.id === projectId)?.name : null}
                         />
@@ -1074,8 +1076,9 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                     </Select>
 
                     <Select value={categoryId} onValueChange={setCategoryId}>
-                      <SelectTrigger asChild>
+                      <SelectTrigger className="h-auto p-0 border-none bg-transparent focus:ring-0 shadow-none [&>svg]:hidden w-full text-left">
                         <FieldPill
+                          as="div"
                           icon="○" label="Categoria"
                           value={categoryId !== 'none' ? categories?.find((c: Category) => c.id === categoryId)?.name : null}
                         />
