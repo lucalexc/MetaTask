@@ -538,7 +538,7 @@ export default function IdentityDashboard() {
   const renderNecrologio = () => (
     <div className="flex h-full gap-8 relative">
       {/* Main Editor */}
-      <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white rounded-xl border border-[rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <div className="p-6 border-b border-slate-50 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">

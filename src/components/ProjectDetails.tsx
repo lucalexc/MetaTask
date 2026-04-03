@@ -148,7 +148,7 @@ export default function ProjectDetails({
 
           {/* Right Column: Metadata (60%) */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-xl border border-[rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
               <div className="p-6 space-y-6">
                 <div className="flex items-center gap-2 mb-2">
                   <h2 className="text-[11px] font-bold text-[#808080] uppercase tracking-wider">Detalhes do Projeto</h2>
@@ -226,7 +226,7 @@ export default function ProjectDetails({
             </div>
 
             {/* Stats Card */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <div className="bg-white rounded-xl border border-[rgba(0,0,0,0.06)] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
               <h2 className="text-[11px] font-bold text-[#808080] uppercase tracking-wider mb-4">Resumo do Projeto</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">

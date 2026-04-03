@@ -677,7 +677,7 @@ export default function RoutinesDashboard({
                 routines.map(routine => (
                   <div 
                     key={routine.id}
-                    className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all group"
+                    className="p-6 bg-white border border-[rgba(0,0,0,0.06)] rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-all group"
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div>

@@ -221,7 +221,7 @@ export default function ProjectsDashboard({
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     onClick={() => navigate(`/app/projects/${project.id}`)}
-                    className="group relative bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 hover:shadow-md transition-all ease-out duration-200 cursor-pointer overflow-hidden"
+                    className="group relative bg-white border border-[rgba(0,0,0,0.06)] rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-all ease-out duration-200 cursor-pointer overflow-hidden"
                   >
                     {/* Colored sidebar */}
                     <div 
