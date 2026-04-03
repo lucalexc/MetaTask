@@ -148,7 +148,7 @@ const TaskCard: React.FC<{
         draggable={true}
         onDragStart={(e) => onDragStart && onDragStart(e, task)}
         className={cn(
-          "flex flex-col gap-3 p-4 bg-white border border-border rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:shadow-md hover:border-border-strong transition-all ease-out duration-200 group",
+          "flex flex-col gap-3 p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:shadow-md hover:border-gray-300 transition-all ease-out duration-200 group",
           isDragging && "opacity-50 border-dashed"
         )}
       >
@@ -159,8 +159,8 @@ const TaskCard: React.FC<{
             className={cn(
               "mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0",
               task.status === 'completed' 
-                ? "bg-accent-green border-accent-green text-white" 
-                : "border-border hover:border-primary"
+                ? "bg-emerald-500 border-emerald-500 text-white" 
+                : "border-gray-300 hover:border-gray-400"
             )}
           >
             {task.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -168,8 +168,8 @@ const TaskCard: React.FC<{
           
           <div className="flex-1 min-w-0">
             <h4 className={cn(
-              "text-[14px] leading-[22px] font-bold text-text-primary line-clamp-2 transition-all ease-out duration-200",
-              task.status === 'completed' && "text-text-muted line-through"
+              "text-[14px] leading-[22px] font-bold text-[#202020] line-clamp-2 transition-all ease-out duration-200",
+              task.status === 'completed' && "text-[#808080] line-through"
             )}>
               {task.title}
             </h4>
@@ -186,30 +186,30 @@ const TaskCard: React.FC<{
                 </span>
               )}
               {task.category_id && categories?.find(c => c.id === task.category_id) && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-bg-surface-alt text-text-secondary border-border shrink-0">
+                <span className="text-[10px] px-1.5 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-slate-50 text-slate-700 border-slate-200 shrink-0">
                   <span className="truncate max-w-[80px]">{categories?.find(c => c.id === task.category_id)?.name}</span>
                 </span>
               )}
               {isOverdue && (
-                <span className="text-xs px-2 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-danger-light text-danger border-danger/20 shrink-0">
+                <span className="text-xs px-2 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-red-50 text-red-600 border-red-100 shrink-0">
                   ATRASADA
                 </span>
               )}
               {(task.time || (task.recurrence && task.recurrence !== 'none') || isOverdue) && (
-                <div className={cn("flex items-center gap-2 text-[13px] shrink-0", isOverdue ? "text-danger" : "text-text-muted")}>
+                <div className={cn("flex items-center gap-2 text-[13px] shrink-0", isOverdue ? "text-red-500" : "text-[#808080]")}>
                   {task.due_date && isOverdue && (
                     <span className="flex items-center gap-1">
                       {format(parseISO(task.due_date), "dd/MM")}
                     </span>
                   )}
                   {task.time && (
-                    <span className="flex items-center gap-1 hover:text-text-primary transition-colors ease-out duration-200" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenTimeModal(task); }}>
+                    <span className="flex items-center gap-1 hover:text-[#202020] transition-colors ease-out duration-200" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenTimeModal(task); }}>
                       <Clock className="w-3 h-3" />
                       {task.time}
                     </span>
                   )}
                   {task.recurrence && task.recurrence !== 'none' && (
-                    <span className="flex items-center gap-1 hover:text-text-primary transition-colors ease-out duration-200" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenRecurrenceModal(task); }}>
+                    <span className="flex items-center gap-1 hover:text-[#202020] transition-colors ease-out duration-200" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenRecurrenceModal(task); }}>
                       <Repeat className="w-3 h-3" />
                       {task.recurrence === 'daily' ? 'Diário' : 
                        task.recurrence === 'weekly' ? 'Semanal' : 
@@ -227,7 +227,7 @@ const TaskCard: React.FC<{
               e.preventDefault();
               onDelete(task.id);
             }}
-            className="p-2 text-text-muted hover:text-danger hover:bg-danger-light rounded-lg transition-all ease-out duration-200 shrink-0 opacity-100 md:opacity-0 group-hover:opacity-100"
+            className="p-2 text-[#808080] hover:text-red-600 hover:bg-red-50 rounded-lg transition-all ease-out duration-200 shrink-0 opacity-100 md:opacity-0 group-hover:opacity-100"
             title="Excluir tarefa"
           >
             <Trash2 className="w-4 h-4" />
@@ -235,37 +235,37 @@ const TaskCard: React.FC<{
         </div>
 
         {/* Bottom line: Timer pill + History icon */}
-        <div className="flex justify-between items-center mt-2 pt-3 border-t border-border flex-wrap gap-2">
+        <div className="flex justify-between items-center mt-2 pt-3 border-t border-gray-100 flex-wrap gap-2">
           <div className="flex items-center gap-2 flex-wrap">
             {/* Priority Flag */}
             <div 
               onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
-              className="flex items-center justify-center p-1.5 rounded-lg bg-bg-surface-alt border border-border shrink-0" 
+              className="flex items-center justify-center p-1.5 rounded-lg bg-gray-50 border border-gray-100 shrink-0" 
               title={`Prioridade ${task.priority || 'P4'}`}
             >
               <Flag className={cn("w-3.5 h-3.5", 
-                task.priority === 'P1' ? "text-danger" : 
-                task.priority === 'P2' ? "text-accent-amber" : 
-                task.priority === 'P3' ? "text-primary" : 
-                "text-text-muted"
+                task.priority === 'P1' ? "text-red-500" : 
+                task.priority === 'P2' ? "text-orange-500" : 
+                task.priority === 'P3' ? "text-[#1f60c2]" : 
+                "text-[#808080]"
               )} fill={task.priority && task.priority !== 'P4' ? "currentColor" : "none"} />
             </div>
             
             {(task.estimated_time || currentElapsed > 0 || task.is_running) && (
-              <div className="flex items-center gap-2 bg-bg-surface-alt px-2 py-1 rounded-lg border border-border shrink-0">
+              <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100 shrink-0">
                 <button 
                   onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggleTimer(task); }}
-                  className="hover:bg-white p-1 rounded transition-colors ease-out duration-200 shrink-0"
+                  className="hover:bg-gray-200 p-1 rounded transition-colors ease-out duration-200 shrink-0"
                 >
                   {task.is_running ? (
-                    <Pause className="w-3.5 h-3.5 text-accent-amber" />
+                    <Pause className="w-3.5 h-3.5 text-amber-500" />
                   ) : (
-                    <Play className="w-3.5 h-3.5 text-text-muted hover:text-primary" />
+                    <Play className="w-3.5 h-3.5 text-slate-400 hover:text-[#1f60c2]" />
                   )}
                 </button>
                 <span className={cn(
                   "text-xs font-mono font-medium truncate max-w-[100px] sm:max-w-none",
-                  isOvertime ? "text-danger" : "text-text-secondary"
+                  isOvertime ? "text-red-600" : "text-slate-500"
                 )}>
                   {formatTime(currentElapsed)}
                   {task.estimated_time ? ` / ${task.estimated_time}:00` : ''}
@@ -277,7 +277,7 @@ const TaskCard: React.FC<{
           {(task.estimated_time || currentElapsed > 0 || task.is_running) && (
             <button 
               onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenHistory(task); }}
-              className="hover:bg-bg-surface-alt p-1.5 rounded-lg transition-colors ease-out duration-200 text-text-muted hover:text-text-primary shrink-0"
+              className="hover:bg-gray-100 p-1.5 rounded-lg transition-colors ease-out duration-200 text-slate-400 hover:text-[#202020] shrink-0"
               title="Ver Histórico"
             >
               <Clock className="w-3.5 h-3.5" />
@@ -294,10 +294,10 @@ const TaskCard: React.FC<{
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       onClick={() => onEdit(task)}
-      className="group flex items-start gap-3 p-4 rounded-xl bg-white border border-border hover:border-primary/30 hover:shadow-md transition-all duration-200 cursor-pointer mb-2 relative"
+      className="flex flex-col md:flex-row md:items-center gap-3 py-3 px-2 border-b border-gray-100 last:border-0 group hover:bg-gray-50/50 active:bg-gray-100 transition-colors duration-200 cursor-pointer relative"
     >
       {/* Drag Handle (Desktop only) */}
-      <div className="hidden md:block opacity-0 group-hover:opacity-100 cursor-grab text-text-muted transition-opacity ease-out duration-200 shrink-0 mt-0.5">
+      <div className="hidden md:block opacity-0 group-hover:opacity-100 cursor-grab text-gray-300 transition-opacity ease-out duration-200 shrink-0">
         <GripVertical className="w-4 h-4" />
       </div>
       
@@ -306,10 +306,10 @@ const TaskCard: React.FC<{
         <button 
           onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(task.id, task.status); }}
           className={cn(
-            "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors shrink-0",
+            "w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0",
             task.status === 'completed' 
-              ? "bg-accent-green border-accent-green text-white" 
-              : "border-border group-hover:border-primary"
+              ? "bg-emerald-500 border-emerald-500 text-white" 
+              : "border-gray-300 hover:border-gray-400"
           )}
         >
           {task.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -317,8 +317,8 @@ const TaskCard: React.FC<{
         
         <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center gap-2">
           <h4 className={cn(
-            "text-[14px] leading-[22px] font-medium text-text-primary truncate transition-all ease-out duration-200",
-            task.status === 'completed' && "text-text-muted line-through"
+            "text-[14px] leading-[22px] font-bold text-[#202020] truncate transition-all ease-out duration-200",
+            task.status === 'completed' && "text-[#808080] line-through"
           )}>
             {task.title}
           </h4>
@@ -335,31 +335,31 @@ const TaskCard: React.FC<{
               </span>
             )}
             {task.category_id && categories?.find(c => c.id === task.category_id) && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-bg-surface-alt text-text-secondary border-border shrink-0">
+              <span className="text-[10px] px-1.5 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-slate-50 text-slate-700 border-slate-200 shrink-0">
                 <span className="truncate max-w-[80px] md:max-w-none">{categories?.find(c => c.id === task.category_id)?.name}</span>
               </span>
             )}
             {isOverdue && (
-              <span className="text-xs px-2 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-danger-light text-danger border-danger/20 shrink-0">
+              <span className="text-xs px-2 py-0.5 rounded-md border font-medium flex items-center gap-1 bg-red-50 text-red-600 border-red-100 shrink-0">
                 ATRASADA
               </span>
             )}
             
             {(task.time || (task.recurrence && task.recurrence !== 'none') || isOverdue) && (
-              <div className={cn("flex items-center gap-2 text-[13px] shrink-0", isOverdue ? "text-danger" : "text-text-muted")}>
+              <div className={cn("flex items-center gap-2 text-[13px] shrink-0", isOverdue ? "text-red-500" : "text-[#808080]")}>
                 {task.due_date && isOverdue && (
                   <span className="flex items-center gap-1">
                     {format(parseISO(task.due_date), "dd/MM")}
                   </span>
                 )}
                 {task.time && (
-                  <span className="flex items-center gap-1 cursor-pointer hover:text-text-primary transition-colors ease-out duration-200" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenTimeModal(task); }}>
+                  <span className="flex items-center gap-1 cursor-pointer hover:text-[#202020] transition-colors ease-out duration-200" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenTimeModal(task); }}>
                     <Clock className="w-3 h-3" />
                     {task.time}
                   </span>
                 )}
                 {task.recurrence && task.recurrence !== 'none' && (
-                  <span className="flex items-center gap-1 cursor-pointer hover:text-text-primary transition-colors ease-out duration-200" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenRecurrenceModal(task); }}>
+                  <span className="flex items-center gap-1 cursor-pointer hover:text-[#202020] transition-colors ease-out duration-200" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenRecurrenceModal(task); }}>
                     <Repeat className="w-3 h-3" />
                     {task.recurrence === 'daily' ? 'Diário' : 
                      task.recurrence === 'weekly' ? 'Semanal' : 
@@ -378,42 +378,42 @@ const TaskCard: React.FC<{
           {/* Priority Flag */}
           <div 
             onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
-            className="flex items-center justify-center p-1.5 rounded-lg bg-bg-surface-alt border border-border shrink-0" 
+            className="flex items-center justify-center p-1.5 rounded-lg bg-gray-50 border border-gray-100 shrink-0" 
             title={`Prioridade ${task.priority || 'P4'}`}
           >
             <Flag className={cn("w-3.5 h-3.5", 
-              task.priority === 'P1' ? "text-danger" : 
-              task.priority === 'P2' ? "text-accent-amber" : 
-              task.priority === 'P3' ? "text-primary" : 
-              "text-text-muted"
+              task.priority === 'P1' ? "text-red-500" : 
+              task.priority === 'P2' ? "text-orange-500" : 
+              task.priority === 'P3' ? "text-[#1f60c2]" : 
+              "text-[#808080]"
             )} fill={task.priority && task.priority !== 'P4' ? "currentColor" : "none"} />
           </div>
 
           {(task.estimated_time || currentElapsed > 0 || task.is_running) && (
-            <div className="flex items-center gap-2 bg-bg-surface-alt px-2 py-1 rounded-lg border border-border shrink-0">
+            <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100 shrink-0">
               <button 
                 onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggleTimer(task); }}
-                className="hover:bg-white p-1 rounded transition-colors ease-out duration-200 shrink-0"
+                className="hover:bg-gray-200 p-1 rounded transition-colors ease-out duration-200 shrink-0"
               >
                 {task.is_running ? (
-                  <Pause className="w-3.5 h-3.5 text-accent-amber" />
+                  <Pause className="w-3.5 h-3.5 text-amber-500" />
                 ) : (
-                  <Play className="w-3.5 h-3.5 text-text-muted hover:text-primary" />
+                  <Play className="w-3.5 h-3.5 text-slate-400 hover:text-[#1f60c2]" />
                 )}
               </button>
               <span className={cn(
                 "text-xs font-mono font-medium truncate max-w-[100px] sm:max-w-none",
-                isOvertime ? "text-danger" : "text-text-secondary"
+                isOvertime ? "text-red-600" : "text-slate-500"
               )}>
                 {formatTime(currentElapsed)}
                 {task.estimated_time ? ` / ${task.estimated_time}:00` : ''}
               </span>
               <button 
                 onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOpenHistory(task); }}
-                className="hover:bg-white p-1 rounded transition-colors ease-out duration-200 shrink-0"
+                className="hover:bg-gray-200 p-1 rounded transition-colors ease-out duration-200 shrink-0"
                 title="Ver Histórico"
               >
-                <Clock className="w-3.5 h-3.5 text-text-muted hover:text-text-primary" />
+                <Clock className="w-3.5 h-3.5 text-slate-400 hover:text-[#202020]" />
               </button>
             </div>
           )}
@@ -425,7 +425,7 @@ const TaskCard: React.FC<{
             e.preventDefault();
             onDelete(task.id);
           }}
-          className="p-2 text-text-muted hover:text-danger hover:bg-danger-light rounded-lg transition-all ease-out duration-200 opacity-100 md:opacity-0 group-hover:opacity-100 shrink-0"
+          className="p-2 text-[#808080] hover:text-red-600 hover:bg-red-50 rounded-lg transition-all ease-out duration-200 opacity-100 md:opacity-0 group-hover:opacity-100 shrink-0"
           title="Excluir tarefa"
         >
           <Trash2 className="w-4 h-4" />

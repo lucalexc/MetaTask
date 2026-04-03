@@ -92,7 +92,13 @@ export default function MyRoutinePage({
         </div>
 
         <div className="flex items-center justify-between border-b border-gray-200 pb-6 px-4 md:px-0">
-          <div className="flex items-center gap-4 ml-auto">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <h1 className="text-[26px] leading-[35px] font-bold text-[#202020] tracking-tight">Minha Rotina</h1>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
             <div className="flex flex-col items-end">
               <div className="flex items-center gap-2">
                 <span className="text-[14px] font-bold text-[#202020]">{completedActivities}/{totalActivities}</span>

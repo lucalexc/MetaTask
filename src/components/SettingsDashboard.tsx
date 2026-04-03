@@ -114,6 +114,12 @@ export default function SettingsDashboard() {
   return (
     <div className="w-full bg-white">
       <div className="max-w-2xl mx-auto mt-6 md:mt-10 px-4 md:px-6 pb-20">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Configurações</h1>
+          <p className="text-sm text-gray-500 mt-1">Gerencie sua conta e preferências.</p>
+        </div>
+
         {/* Section 1: Perfil do Usuário */}
         <section className="border-b border-gray-200 pb-8 mb-8">
           <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Perfil</h2>

@@ -137,7 +137,15 @@ export default function InsightsDashboard() {
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-end gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <BarChart2 className="w-6 h-6 text-blue-600" />
+              Meus Insights
+            </h1>
+            <p className="text-gray-500 mt-1">Acompanhe seu ritmo, foco e energia</p>
+          </div>
+          
           <select 
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value as 'week' | 'month')}
