@@ -117,9 +117,20 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
       return;
     }
 
-    if (!time || time.length !== 5) {
-      toast.error('O horário é obrigatório');
-      return;
+    if (type === 'routine') {
+      if (!time) {
+        toast.error('Selecione um horário para a atividade');
+        return;
+      }
+      if (selectedDays.length === 0) {
+        toast.error('Selecione pelo menos um dia da semana');
+        return;
+      }
+    } else {
+      if (!time || time.length !== 5) {
+        toast.error('O horário é obrigatório');
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -251,109 +262,155 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
           </div>
 
           {/* Body */}
-          <div className="p-6 space-y-6 overflow-y-auto max-h-[70vh] scrollbar-none">
+          <div className="p-6 pt-4 space-y-4 overflow-y-auto max-h-[70vh] scrollbar-none">
             {/* Type Selector */}
-            <div className="flex gap-3">
+            <div className="flex bg-gray-100 rounded-lg p-1 gap-0.5 mb-3">
               <button
+                className={`flex-1 h-8 rounded-md text-sm font-medium flex items-center justify-center gap-1.5 transition-all
+                  ${type === 'routine'
+                    ? 'bg-white text-violet-600 font-semibold shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                  }`}
                 onClick={() => setType('routine')}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border text-[13px] font-medium transition-all ease-out duration-200",
-                  type === 'routine'
-                    ? "bg-[#dceaff] border-[#1f60c2] text-[#1f60c2]"
-                    : "border-gray-200 text-[#808080] hover:bg-gray-50"
-                )}
               >
-                <RefreshCw className="w-4 h-4" /> Rotina
+                <RefreshCw size={13} /> Rotina
               </button>
               <button
+                className={`flex-1 h-8 rounded-md text-sm font-medium flex items-center justify-center gap-1.5 transition-all
+                  ${type === 'goal'
+                    ? 'bg-white text-violet-600 font-semibold shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                  }`}
                 onClick={() => setType('goal')}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border text-[13px] font-medium transition-all ease-out duration-200",
-                  type === 'goal'
-                    ? "bg-[#dceaff] border-[#1f60c2] text-[#1f60c2]"
-                    : "border-gray-200 text-[#808080] hover:bg-gray-50"
-                )}
               >
-                <Target className="w-4 h-4" /> Meta
+                <Target size={13} /> Meta
               </button>
             </div>
 
             {/* Name */}
-            <div className="space-y-2">
-              <label className="text-[13px] font-bold text-[#202020]">Nome da Atividade</label>
+            <div>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ex: Ler 10 páginas, Meditar..."
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
-              />
-            </div>
-
-            {/* Description */}
-            <div className="space-y-2">
-              <label className="text-[13px] font-bold text-[#202020] ml-1">Descrição (Opcional)</label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Detalhes sobre a atividade..."
-                rows={2}
-                className="w-full bg-gray-50/30 border border-gray-100 rounded-xl px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all duration-200 resize-none"
+                placeholder="Ex: Meditação, Ler 20 páginas..."
+                className="w-full h-11 border-[1.5px] border-gray-200 rounded-xl px-3.5 text-[15px] font-medium
+                           placeholder:text-gray-300 placeholder:font-normal
+                           focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/8"
               />
             </div>
 
             {/* Conditional Fields */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               {type === 'routine' ? (
                 <div className="space-y-4">
-                  {/* Time Setting Section */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50/50 rounded-lg border border-gray-100">
-                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                      <Clock className="w-4 h-4 text-gray-400" />
-                      <span>Horário</span>
+                  {/* Horário + Descrição */}
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {/* Horário */}
+                    <div>
+                      <label className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 block mb-1.5">
+                        Horário
+                      </label>
+                      <div className="relative">
+                        <Clock size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="time"
+                          value={time || ''}
+                          onChange={e => {
+                            const newTime = e.target.value;
+                            setTime(newTime);
+                            if (newTime.length >= 2) {
+                              const hours = parseInt(newTime.slice(0, 2));
+                              if (hours >= 0 && hours < 12) setPeriod('Manhã');
+                              else if (hours >= 12 && hours < 18) setPeriod('Tarde');
+                              else if (hours >= 18 && hours <= 23) setPeriod('Noite');
+                            }
+                          }}
+                          placeholder="--:--"
+                          className="w-full h-[38px] border-[1.5px] border-gray-200 rounded-lg pl-8 pr-3
+                                     text-sm font-semibold text-violet-600
+                                     focus:outline-none focus:border-violet-500"
+                        />
+                      </div>
                     </div>
-                    <input
-                      type="text"
-                      value={time}
-                      onChange={handleTimeChange}
-                      placeholder="00:00"
-                      maxLength={5}
-                      className="w-24 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-base md:text-[14px]"
-                    />
+
+                    {/* Descrição */}
+                    <div>
+                      <label className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 block mb-1.5">
+                        Descrição <span className="normal-case font-normal tracking-normal text-gray-300">(opcional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={description}
+                        onChange={e => setDescription(e.target.value)}
+                        placeholder="Detalhes..."
+                        className="w-full h-[38px] border-[1.5px] border-gray-200 rounded-lg px-3
+                                   text-sm text-gray-600 placeholder:text-gray-300
+                                   focus:outline-none focus:border-violet-500"
+                      />
+                    </div>
                   </div>
                   
                   {/* Weekdays Section */}
-                  <div className="space-y-2">
-                    <label className="text-[13px] font-bold text-[#202020] block">Dias da Semana</label>
-                    <div className="flex justify-between w-full mt-2">
-                      {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, index) => {
-                        const isActive = selectedDays.includes(index);
-                        return (
-                          <button
-                            key={index}
-                            onClick={() => {
-                              if (isActive) {
-                                setSelectedDays(selectedDays.filter(d => d !== index));
-                              } else {
-                                setSelectedDays([...selectedDays, index].sort());
-                              }
-                            }}
-                            className={cn(
-                              "h-9 w-9 md:h-10 md:w-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200",
-                              isActive 
-                                ? "bg-blue-600 text-white shadow-sm shadow-blue-200" 
-                                : "bg-white border border-gray-100 text-slate-500 hover:bg-gray-50"
-                            )}
-                          >
-                            {day}
-                          </button>
-                        );
-                      })}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                        Dias da Semana
+                      </label>
+                      <span className="text-xs font-semibold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full">
+                        {selectedDays.length === 7 ? 'Todos os dias'
+                          : selectedDays.length === 0 ? 'Nenhum dia'
+                          : `${selectedDays.length} ${selectedDays.length === 1 ? 'dia' : 'dias'}`}
+                      </span>
+                    </div>
+
+                    <div className="flex gap-1.5">
+                      {[
+                        { key: 0, abbr: 'Do', full: 'Domingo' },
+                        { key: 1, abbr: 'Se', full: 'Segunda' },
+                        { key: 2, abbr: 'Te', full: 'Terça'   },
+                        { key: 3, abbr: 'Qa', full: 'Quarta'  },
+                        { key: 4, abbr: 'Qi', full: 'Quinta'  },
+                        { key: 5, abbr: 'Sx', full: 'Sexta'   },
+                        { key: 6, abbr: 'Sa', full: 'Sábado'  },
+                      ].map(day => (
+                        <button
+                          key={day.key}
+                          type="button"
+                          title={day.full}
+                          onClick={() => {
+                            if (selectedDays.includes(day.key)) {
+                              setSelectedDays(selectedDays.filter(d => d !== day.key));
+                            } else {
+                              setSelectedDays([...selectedDays, day.key].sort());
+                            }
+                          }}
+                          className={`flex-1 h-9 rounded-lg text-[11px] font-bold border-[1.5px] transition-all
+                            ${selectedDays.includes(day.key)
+                              ? 'bg-violet-50 border-violet-500 text-violet-600'
+                              : 'bg-gray-50 border-gray-200 text-gray-400 hover:border-violet-300 hover:text-violet-500'
+                            }`}
+                        >
+                          {day.abbr}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* Description for Goal */}
+                  <div className="space-y-2">
+                    <label className="text-[13px] font-bold text-[#202020] ml-1">Descrição (Opcional)</label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Detalhes sobre a atividade..."
+                      rows={2}
+                      className="w-full bg-gray-50/30 border border-gray-100 rounded-xl px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all duration-200 resize-none"
+                    />
+                  </div>
+
                   {/* Duration Setting */}
                   <div className="flex items-center justify-between p-3 bg-gray-50/50 rounded-lg border border-gray-100">
                     <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -407,31 +464,28 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between rounded-b-xl">
-            <div>
-              {activityToEdit && (
-                <button
-                  onClick={() => setIsDeleteModalOpen(true)}
-                  disabled={isLoading}
-                  className="text-[13px] text-red-500 hover:text-red-600 font-medium transition-colors ease-out duration-200 disabled:opacity-50"
-                >
-                  {type === 'routine' ? 'Excluir Rotina' : 'Excluir Meta'}
-                </button>
-              )}
-            </div>
-            <div className="flex gap-3">
+          <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 mt-3 bg-gray-50 rounded-b-xl">
+            {activityToEdit ? (
               <button
-                onClick={onClose}
+                onClick={() => setIsDeleteModalOpen(true)}
                 disabled={isLoading}
-                className="px-4 py-2 rounded-xl text-[13px] text-[#808080] hover:text-[#202020] hover:bg-gray-200 transition-colors ease-out duration-200 font-medium disabled:opacity-50"
+                className="text-xs text-red-500 hover:text-red-600 font-medium transition-colors ease-out duration-200 disabled:opacity-50"
               >
+                Excluir
+              </button>
+            ) : (
+              <span className="text-xs text-gray-400 flex items-center gap-1">
+                ⚡ <span className="text-violet-500 font-semibold">+{type === 'routine' ? '10' : '50'} XP</span> por conclusão
+              </span>
+            )}
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={onClose} disabled={isLoading}
+                className="px-4 h-9 rounded-lg text-sm text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-50">
                 Cancelar
               </button>
-              <button
-                onClick={handleSave}
-                disabled={isLoading || !name.trim()}
-                className="px-5 py-2.5 rounded-lg text-[13px] text-white font-semibold bg-[#7C3AED] hover:bg-[#6D28D9] transition-all ease-out duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-              >
+              <button type="button" onClick={handleSave} disabled={isLoading || !name.trim()}
+                className="px-5 h-9 rounded-lg text-sm font-semibold bg-violet-600 text-white
+                           hover:bg-violet-700 transition-colors disabled:opacity-50 flex items-center gap-2 shadow-sm">
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                 {isLoading ? 'Salvando...' : 'Salvar'}
               </button>
