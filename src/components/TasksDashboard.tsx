@@ -148,7 +148,7 @@ const TaskCard: React.FC<{
         draggable={true}
         onDragStart={(e) => onDragStart && onDragStart(e, task)}
         className={cn(
-          "flex flex-col gap-3 p-4 bg-white border border-[rgba(0,0,0,0.06)] rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] cursor-grab active:cursor-grabbing hover:shadow-md transition-all ease-out duration-200 group",
+          "flex flex-col gap-3 p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:shadow-md hover:border-gray-300 transition-all ease-out duration-200 group",
           isDragging && "opacity-50 border-dashed"
         )}
       >
@@ -485,6 +485,52 @@ const parseDurationInput = (text: string): number => {
   return totalMinutes;
 };
 
+const FieldPill = React.forwardRef(({ icon, label, value, valueDisplay, onClick, accent = false, ...props }: any, ref: any) => (
+  <button
+    type="button"
+    onClick={onClick}
+    ref={ref}
+    {...props}
+    className="flex flex-col gap-0.5 p-2.5 bg-gray-50 border-[1.5px] border-gray-100
+               rounded-xl hover:border-violet-300 transition-colors text-left"
+  >
+    <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+      {icon} {label}
+    </span>
+    <span className={`text-[13px] font-semibold truncate w-full ${
+      accent ? 'text-violet-600' : value ? 'text-gray-700' : 'text-gray-300'
+    }`}>
+      {valueDisplay || value || 'Nenhum'}
+    </span>
+  </button>
+));
+FieldPill.displayName = 'FieldPill';
+
+const Toggle = ({ checked, onChange, onChecked }: any) => (
+  <button
+    type="button"
+    role="switch"
+    aria-checked={checked}
+    onClick={() => {
+      const newVal = !checked;
+      onChange(newVal);
+      if (newVal && onChecked) onChecked();
+    }}
+    className={cn(
+      "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+      checked ? "bg-violet-600" : "bg-gray-200"
+    )}
+  >
+    <span
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+        checked ? "translate-x-4" : "translate-x-0"
+      )}
+    />
+  </button>
+);
+
 const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }: { isOpen: boolean; onClose: () => void; onSave: (task: any) => void; projects: {id: string, name: string, color: string}[]; categories: Category[]; taskToEdit?: Task | null }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -581,6 +627,31 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
 
   const isSaveDisabled = !title.trim();
 
+  const handleSubmit = () => {
+    if (isSaveDisabled) return;
+    onSave({ 
+      id: taskToEdit?.id, 
+      title, 
+      description, 
+      priority, 
+      estimated_time: duration || 30, 
+      time: time || undefined, 
+      recurrence: recurrenceType, 
+      date: taskDate, 
+      project_id: projectId === 'none' ? null : projectId, 
+      category_id: categoryId === 'none' ? null : categoryId,
+      recurrenceType,
+      customRecurrenceBase,
+      customRecurrenceInterval,
+      customRecurrenceUnit,
+      customRecurrenceEndType,
+      customRecurrenceEndDate
+    });
+    setTitle(''); setDescription(''); setTime(''); setRecurrenceType('none'); setPriority('P4'); setDuration(30); setDurationInput('30m'); setProjectId('none'); setCategoryId('none');
+    setIsDatePickerOpen(false); setIsTimePickerOpen(false); setIsRecurrencePickerOpen(false);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm overscroll-none h-[100dvh] overflow-y-auto">
       <div className="min-h-full flex items-center justify-center p-4">
@@ -590,15 +661,17 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
           exit={{ opacity: 0, scale: 0.95 }}
           className="bg-white border border-gray-200 rounded-xl w-full max-w-lg shadow-xl overflow-visible flex flex-col relative"
         >
-          <div className="p-6 flex flex-col gap-4">
-            <input 
-              type="text" 
-              placeholder="Qual é a sua próxima tarefa?" 
-              className="w-full text-base md:text-[24px] leading-tight font-bold text-[#202020] placeholder-[#808080] focus:outline-none bg-transparent"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              autoFocus
-            />
+          {taskToEdit ? (
+            <>
+              <div className="p-6 flex flex-col gap-4">
+                <input 
+                  type="text" 
+                  placeholder="Qual é a sua próxima tarefa?" 
+                  className="w-full text-base md:text-[24px] leading-tight font-bold text-[#202020] placeholder-[#808080] focus:outline-none bg-transparent"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  autoFocus
+                />
             <textarea 
               placeholder="Descrição da tarefa..." 
               className="w-full text-base md:text-[14px] leading-relaxed text-gray-600 placeholder-[#808080] focus:outline-none bg-transparent resize-none min-h-[80px]"
@@ -845,37 +918,276 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
             <button onClick={onClose} className="px-4 py-2 text-[13px] font-medium text-[#808080] hover:text-[#202020] hover:bg-gray-200 rounded-xl transition-colors ease-out duration-200">Cancelar</button>
             <button 
               disabled={isSaveDisabled}
-              onClick={() => {
-                if (isSaveDisabled) return;
-                onSave({ 
-                  id: taskToEdit?.id, 
-                  title, 
-                  description, 
-                  priority, 
-                  estimated_time: duration || 30, 
-                  time: time || undefined, 
-                  recurrence: recurrenceType, 
-                  date: taskDate, 
-                  project_id: projectId === 'none' ? null : projectId, 
-                  category_id: categoryId === 'none' ? null : categoryId,
-                  recurrenceType,
-                  customRecurrenceBase,
-                  customRecurrenceInterval,
-                  customRecurrenceUnit,
-                  customRecurrenceEndType,
-                  customRecurrenceEndDate
-                });
-                setTitle(''); setDescription(''); setTime(''); setRecurrenceType('none'); setPriority('P4'); setDuration(30); setDurationInput('30m'); setProjectId('none'); setCategoryId('none');
-                setIsDatePickerOpen(false); setIsTimePickerOpen(false); setIsRecurrencePickerOpen(false);
-                onClose();
-              }}
+              onClick={handleSubmit}
               className="px-5 py-2.5 text-[13px] font-semibold bg-[#7C3AED] text-white hover:bg-[#6D28D9] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all ease-out duration-200 shadow-sm"
             >
               Salvar Tarefa
             </button>
           </div>
+            </>
+          ) : (
+            <>
+              <div className="p-5 flex flex-col gap-1">
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="Qual é a sua próxima tarefa?"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+                  className="w-full text-[18px] font-bold text-gray-900 placeholder:text-gray-300 placeholder:font-semibold border-none outline-none bg-transparent"
+                />
+                <input
+                  type="text"
+                  placeholder="Adicionar descrição..."
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  className="w-full text-[13px] text-gray-500 placeholder:text-gray-300 border-none outline-none bg-transparent mt-1"
+                />
+              </div>
+              <div className="h-px bg-gray-100 mx-0 my-0" />
+              <div className="flex flex-col gap-2.5 px-5 py-3">
+                {/* ── GRUPO 1: QUANDO ── */}
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-300 mb-1.5">
+                    Quando
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="flex flex-col gap-0.5 p-2.5 bg-violet-50 border-[1.5px] border-violet-200 rounded-xl hover:border-violet-400 transition-colors text-left"
+                        >
+                          <span className="text-[10px] font-semibold uppercase tracking-wide text-violet-400">
+                            📅 Data
+                          </span>
+                          <span className="text-[14px] font-bold text-violet-600">
+                            {isSameDay(taskDate, new Date()) ? 'Hoje' : format(taskDate, 'dd/MM')}
+                          </span>
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent 
+                        side="bottom" 
+                        align="start" 
+                        sideOffset={8} 
+                        className="w-72 p-0 bg-white rounded-xl shadow-xl border border-gray-200 z-[110] overflow-hidden"
+                      >
+                        <div className="p-2 space-y-1 border-b border-gray-100">
+                          <button onClick={() => { setTaskDate(addDays(new Date(), 1)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Sun className="w-4 h-4 text-orange-500" /> Amanhã</button>
+                          <button onClick={() => { setTaskDate(addDays(new Date(), 7)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><CalendarDays className="w-4 h-4 text-[#1f60c2]" /> Próxima semana</button>
+                          <button onClick={() => { setTaskDate(addDays(new Date(), 5)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Coffee className="w-4 h-4 text-purple-500" /> Próximo fim de semana</button>
+                          <button onClick={() => { setTaskDate(new Date()); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Ban className="w-4 h-4 text-[#808080]" /> Sem vencimento</button>
+                        </div>
+                        <div className="p-4">
+                          <div className="flex items-center justify-between mb-4">
+                            <span className="font-bold text-[14px] text-[#202020]">Março 2026</span>
+                            <div className="flex gap-1">
+                              <button className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors"><ChevronLeft className="w-4 h-4" /></button>
+                              <button className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors"><ChevronRight className="w-4 h-4" /></button>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-7 gap-1 text-center text-[11px] mb-2 text-[#808080] font-bold uppercase tracking-wider">
+                            <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
+                          </div>
+                          <div className="grid grid-cols-7 gap-1 text-center text-[13px]">
+                            {Array.from({length: 31}).map((_, i) => {
+                              const newDate = new Date(2026, 2, i + 1);
+                              return (
+                                <button 
+                                  key={i} 
+                                  onClick={() => { setTaskDate(newDate); setIsDatePickerOpen(false); }}
+                                  className={cn("w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors ease-out duration-200", isSameDay(newDate, taskDate) && "bg-[#1f60c2] text-white hover:bg-[#1a50a3]")}
+                                >
+                                  {i + 1}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+
+                    <div className="relative flex flex-col gap-0.5 p-2.5 bg-gray-50 border-[1.5px] border-gray-100 rounded-xl hover:border-violet-300 transition-colors text-left overflow-hidden">
+                      <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                        🕐 Horário
+                      </span>
+                      <input
+                        type="time"
+                        value={time || ''}
+                        onChange={e => setTime(e.target.value)}
+                        className={`w-full bg-transparent border-none p-0 text-[13px] font-semibold focus:ring-0 ${time ? 'text-gray-700' : 'opacity-0 absolute inset-0 w-full h-full cursor-pointer'}`}
+                      />
+                      {!time && <span className="text-[13px] font-semibold text-gray-300 pointer-events-none">Sem horário</span>}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── GRUPO 2: DETALHES ── */}
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-300 mb-1.5 mt-2">
+                    Detalhes
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Select value={priority} onValueChange={setPriority}>
+                      <SelectTrigger asChild>
+                        <FieldPill
+                          icon="🚩" label="Prioridade"
+                          value={priority !== 'P4' ? priority : null}
+                          valueDisplay={
+                            <div className="flex items-center gap-1">
+                              {priority === 'P1' && <Flag className="w-3 h-3 text-red-500" fill="currentColor" />}
+                              {priority === 'P2' && <Flag className="w-3 h-3 text-orange-500" fill="currentColor" />}
+                              {priority === 'P3' && <Flag className="w-3 h-3 text-blue-500" fill="currentColor" />}
+                              {priority === 'P4' && <Flag className="w-3 h-3 text-gray-400" fill="none" />}
+                              <span>{priority === 'P1' ? 'Urgente' : priority === 'P2' ? 'Alta' : priority === 'P3' ? 'Média' : 'Baixa'}</span>
+                            </div>
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent className="z-[110]">
+                        <SelectItem value="P1"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-red-500" fill="currentColor"/> Urgente</div></SelectItem>
+                        <SelectItem value="P2"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-orange-500" fill="currentColor"/> Alta</div></SelectItem>
+                        <SelectItem value="P3"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#1f60c2]" fill="currentColor"/> Média</div></SelectItem>
+                        <SelectItem value="P4"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#808080]" fill="none"/> Baixa</div></SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={projectId} onValueChange={setProjectId}>
+                      <SelectTrigger asChild>
+                        <FieldPill
+                          icon="⊙" label="Projeto"
+                          value={projectId !== 'none' ? projects.find(p => p.id === projectId)?.name : null}
+                        />
+                      </SelectTrigger>
+                      <SelectContent side="bottom" align="center" className="z-[110] max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-xl">
+                        <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">Nenhum projeto</SelectItem>
+                        {projects.map(p => (
+                          <SelectItem hideCheck key={p.id} value={p.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                              {p.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={categoryId} onValueChange={setCategoryId}>
+                      <SelectTrigger asChild>
+                        <FieldPill
+                          icon="○" label="Categoria"
+                          value={categoryId !== 'none' ? categories?.find((c: Category) => c.id === categoryId)?.name : null}
+                        />
+                      </SelectTrigger>
+                      <SelectContent side="bottom" align="end" className="z-[110] max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-xl">
+                        <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">Nenhuma categoria</SelectItem>
+                        {categories?.map((c: Category) => (
+                          <SelectItem hideCheck key={c.id} value={c.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* ── GRUPO 3: REPETIR + DURAÇÃO ── */}
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="flex items-center justify-between p-2.5 bg-gray-50 border-[1.5px] border-gray-100 rounded-xl relative">
+                    <span className="text-[13px] font-medium text-gray-600 flex items-center gap-2">
+                      🔁 Repetir
+                    </span>
+                    <Toggle
+                      checked={recurrenceType !== 'none'}
+                      onChange={(checked: boolean) => {
+                        if (!checked) {
+                          setRecurrenceType('none');
+                        } else {
+                          if (recurrenceType === 'none') {
+                            setRecurrenceType('daily');
+                          }
+                        }
+                      }}
+                      onChecked={() => setIsRecurrencePickerOpen(true)}
+                    />
+                    
+                    {/* Hidden popover trigger for recurrence */}
+                    <Popover open={isRecurrencePickerOpen} onOpenChange={setIsRecurrencePickerOpen}>
+                      <PopoverTrigger asChild>
+                        <div className="absolute inset-0 pointer-events-none" />
+                      </PopoverTrigger>
+                      <PopoverContent 
+                        side="bottom" 
+                        align="start" 
+                        sideOffset={8} 
+                        className="w-64 p-1 bg-white rounded-xl shadow-xl border border-gray-200 z-[110] flex flex-col gap-0.5 max-h-72 overflow-y-auto"
+                      >
+                        <button onClick={() => { setRecurrenceType('daily'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'daily' && "bg-[#dceaff] text-[#1f60c2]")}>Todo dia</button>
+                        <button onClick={() => { setRecurrenceType('weekly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'weekly' && "bg-[#dceaff] text-[#1f60c2]")}>Toda semana ({format(taskDate, 'EEEE', { locale: ptBR })})</button>
+                        <button onClick={() => { setRecurrenceType('weekdays'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'weekdays' && "bg-[#dceaff] text-[#1f60c2]")}>Todo dia útil (Seg - Sex)</button>
+                        <button onClick={() => { setRecurrenceType('monthly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'monthly' && "bg-[#dceaff] text-[#1f60c2]")}>Todo mês (dia {format(taskDate, 'd')})</button>
+                        <button onClick={() => { setRecurrenceType('yearly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'yearly' && "bg-[#dceaff] text-[#1f60c2]")}>Todo ano ({format(taskDate, 'd \'de\' MMMM', { locale: ptBR })})</button>
+                        <button onClick={() => { setIsRecurrencePickerOpen(false); setIsCustomRecurrenceModalOpen(true); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'custom' && "bg-[#dceaff] text-[#1f60c2]")}>Personalizar...</button>
+                        <div className="border-t border-slate-100 my-1" />
+                        <button onClick={() => { setRecurrenceType('none'); setIsRecurrencePickerOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-red-500 rounded-lg hover:bg-red-50 transition-colors ease-out duration-200 font-medium">Limpar</button>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2.5 bg-gray-50 border-[1.5px] border-gray-100 rounded-xl">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                      ⏱ Duração
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button type="button" onClick={() => {
+                        const newDuration = Math.max(0, duration - 15);
+                        setDuration(newDuration);
+                        setDurationInput(formatDurationInput(newDuration));
+                      }}
+                        className="w-[22px] h-[22px] rounded-full border-[1.5px] border-gray-200 text-gray-500 text-[13px] flex items-center justify-center hover:bg-gray-100 transition-colors">
+                        −
+                      </button>
+                      <span className="text-[13px] font-bold text-violet-600 w-8 text-center">
+                        {formatDurationInput(duration)}
+                      </span>
+                      <button type="button" onClick={() => {
+                        const newDuration = duration + 15;
+                        setDuration(newDuration);
+                        setDurationInput(formatDurationInput(newDuration));
+                      }}
+                        className="w-[22px] h-[22px] rounded-full border-[1.5px] border-gray-200 text-gray-500 text-[13px] flex items-center justify-center hover:bg-gray-100 transition-colors">
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100">
+                <span className="text-[12px] text-gray-400 flex items-center gap-1.5">
+                  Pressione
+                  <kbd className="bg-gray-100 border border-gray-200 rounded px-1.5 py-0.5 text-[11px] text-gray-500 font-mono">
+                    ↵
+                  </kbd>
+                  para salvar
+                </span>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={onClose}
+                    className="px-4 h-9 rounded-lg text-[13px] text-gray-500 hover:bg-gray-100 transition-colors">
+                    Cancelar
+                  </button>
+                  <button type="button" onClick={handleSubmit} disabled={isSaveDisabled}
+                    className="px-5 h-9 rounded-lg text-[13px] font-semibold bg-violet-600 text-white hover:bg-violet-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    Salvar Tarefa
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </motion.div>
       </div>
+
 
       {/* Custom Recurrence Modal */}
       <AnimatePresence>
@@ -2194,7 +2506,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white border border-[rgba(0,0,0,0.06)] rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden"
+              className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden"
             >
               {/* Calendar Navigation */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
