@@ -65,7 +65,7 @@ export default function RoadmapTimeline({
           <p className="mb-4">Nenhuma estação criada ainda.</p>
           <button 
             onClick={() => setIsCreateModalOpen?.(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#7C3AED] text-white rounded-lg font-semibold hover:bg-[#6D28D9] transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" />
             Adicionar primeira estação

@@ -319,12 +319,6 @@ export default function MissionsMapDashboard() {
 
   return (
     <div className="flex-1 flex flex-col h-full bg-slate-50 overflow-hidden relative">
-      {/* Header */}
-      <div className="px-4 md:px-8 py-4 md:py-6 bg-white border-b border-slate-200 shrink-0 z-10">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">A Jornada</h1>
-        <p className="text-sm text-slate-500 mt-1">Siga o caminho da disciplina. Um passo de cada vez.</p>
-      </div>
-
       {/* Toast Notification */}
       <AnimatePresence>
         {toastMessage && (

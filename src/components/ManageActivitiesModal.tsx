@@ -156,7 +156,7 @@ export default function ManageActivitiesModal({
             <div className="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
               <button
                 onClick={onClose}
-                className="px-8 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-lg shadow-blue-200"
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-[#7C3AED] hover:bg-[#6D28D9] rounded-lg transition-all shadow-sm"
               >
                 Concluir
               </button>

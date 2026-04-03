@@ -76,7 +76,7 @@ export default function TreasureModal({ isOpen, onClose, currentTitle, onSave }:
                 <button
                   type="submit"
                   disabled={!title.trim()}
-                  className="px-8 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-blue-200"
+                  className="px-5 py-2.5 text-sm font-semibold text-white bg-[#7C3AED] hover:bg-[#6D28D9] rounded-lg transition-all disabled:opacity-50 shadow-sm"
                 >
                   Salvar
                 </button>

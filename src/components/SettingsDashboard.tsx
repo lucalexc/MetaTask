@@ -184,7 +184,7 @@ export default function SettingsDashboard() {
                 <button
                   type="submit"
                   disabled={saveStatus === 'saving' || saveStatus === 'saved'}
-                  className="bg-[#DC4C3E] hover:bg-[#C53727] text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#DC4C3E] focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-sm font-semibold py-2.5 px-5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#7C3AED] focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
                 >
                   {saveStatus === 'saving' && <Loader2 className="w-4 h-4 animate-spin" />}
                   {saveStatus === 'saving' ? 'Salvando...' : saveStatus === 'saved' ? 'Salvo!' : 'Salvar Alterações'}

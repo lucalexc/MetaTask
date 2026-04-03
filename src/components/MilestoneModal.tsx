@@ -360,7 +360,7 @@ export default function MilestoneModal({
                         </div>
                         <div className="flex justify-end gap-2 pt-1">
                           <button type="button" onClick={() => setIsAddingDesire(false)} className="text-xs font-bold px-4 py-2 text-gray-500 hover:bg-gray-200 rounded-xl transition-all">Cancelar</button>
-                          <button type="submit" disabled={!newDesireTitle.trim()} className="text-xs font-bold px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-all shadow-md shadow-blue-100">Salvar Item</button>
+                          <button type="submit" disabled={!newDesireTitle.trim()} className="text-xs font-semibold px-5 py-2.5 bg-[#7C3AED] text-white rounded-lg hover:bg-[#6D28D9] disabled:opacity-50 transition-all shadow-sm">Salvar Item</button>
                         </div>
                       </form>
                     )}
@@ -401,7 +401,7 @@ export default function MilestoneModal({
                   type="submit"
                   form="milestone-form"
                   disabled={!title.trim() || !icon.trim()}
-                  className="px-8 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-blue-200"
+                  className="px-5 py-2.5 text-sm font-semibold text-white bg-[#7C3AED] hover:bg-[#6D28D9] rounded-lg transition-all disabled:opacity-50 shadow-sm"
                 >
                   Salvar Marco
                 </button>

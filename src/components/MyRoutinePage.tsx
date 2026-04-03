@@ -136,7 +136,7 @@ export default function MyRoutinePage({
           {activities?.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <p className="text-[13px] text-[#808080] mb-4">Sua rotina está vazia.</p>
-              <Button onClick={() => setIsCreateModalOpen(true)} className="bg-[#202020] text-white hover:bg-black transition-colors ease-out duration-200">
+              <Button onClick={() => setIsCreateModalOpen(true)} className="bg-[#7C3AED] text-white hover:bg-[#6D28D9] rounded-lg px-5 py-2.5 font-semibold transition-colors ease-out duration-200">
                 <Plus className="w-4 h-4 mr-2" /> Adicionar Atividade
               </Button>
             </div>

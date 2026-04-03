@@ -166,7 +166,7 @@ export default function Dashboard() {
       {['tasks', 'my-routine', 'projects', 'roadmap'].includes(activeTab) && (
         <button
           onClick={handleFabClick}
-          className="md:hidden fixed right-4 bottom-24 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-transform active:scale-95"
+          className="md:hidden fixed right-4 bottom-24 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#7C3AED] text-white shadow-lg hover:bg-[#6D28D9] transition-transform active:scale-95"
         >
           <Plus className="w-6 h-6" />
         </button>

@@ -204,7 +204,7 @@ export default function ProjectsDashboard({
               <p className="text-[13px] text-[#808080] mb-6">Crie seu primeiro projeto para organizar suas tarefas.</p>
               <button
                 onClick={() => setIsCreateModalOpen?.(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-[#202020] text-white text-[13px] font-bold rounded-lg hover:bg-black transition-colors ease-out duration-200"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#7C3AED] text-white text-[13px] font-semibold rounded-lg hover:bg-[#6D28D9] transition-colors ease-out duration-200"
               >
                 <Plus className="w-4 h-4" />
                 Criar Projeto
@@ -382,7 +382,7 @@ function NewProjectModal({ onClose, onSave }: { onClose: () => void; onSave: (na
           <button
             onClick={() => onSave(name, description, color)}
             disabled={!name.trim()}
-            className="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-200"
+            className="px-5 py-2.5 bg-[#7C3AED] text-white text-sm font-semibold rounded-lg hover:bg-[#6D28D9] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             Criar Projeto
           </button>

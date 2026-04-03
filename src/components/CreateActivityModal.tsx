@@ -430,7 +430,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
               <button
                 onClick={handleSave}
                 disabled={isLoading || !name.trim()}
-                className="px-6 py-2 rounded-xl text-[13px] text-white font-bold bg-[#1f60c2] hover:bg-[#1a50a3] transition-all ease-out duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-blue-100"
+                className="px-5 py-2.5 rounded-lg text-[13px] text-white font-semibold bg-[#7C3AED] hover:bg-[#6D28D9] transition-all ease-out duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                 {isLoading ? 'Salvando...' : 'Salvar'}

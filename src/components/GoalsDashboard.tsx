@@ -199,7 +199,7 @@ const NewGoalModal = ({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: (
                 onSave({ title, description: JSON.stringify({ totalDays: parseInt(totalDays) || 30, dailyGoal }) });
                 setTitle(''); setTotalDays('30'); setDailyGoal(1);
               }}
-              className="px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm"
+              className="px-5 py-2.5 text-sm font-semibold bg-[#7C3AED] text-white hover:bg-[#6D28D9] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm"
             >
               Criar Meta
             </button>
@@ -371,7 +371,7 @@ export default function GoalsDashboard({ isCreateModalOpen, setIsCreateModalOpen
           {/* We keep this button here too, or just rely on the sidebar. The prompt says: "Header: Título "Metas Ativas" e um botão primário [+ Nova Meta]." */}
           <Button 
             onClick={() => setIsCreateModalOpen(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm rounded-xl h-10 px-4"
+            className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white shadow-sm rounded-lg h-10 px-5 font-semibold"
           >
             <Plus className="w-4 h-4 mr-2" />
             Nova Meta

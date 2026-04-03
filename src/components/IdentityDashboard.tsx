@@ -552,7 +552,7 @@ export default function IdentityDashboard() {
           <button 
             onClick={handleSaveNecrologio}
             disabled={isSavingNecrologio || !necrologioText.trim() || !!selectedVersion}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#7C3AED] text-white rounded-lg text-sm font-semibold hover:bg-[#6D28D9] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="w-4 h-4" />
             {isSavingNecrologio ? 'Salvando...' : 'Salvar Versão'}
@@ -676,7 +676,7 @@ export default function IdentityDashboard() {
           </div>
           <button 
             onClick={() => setTestStatus('running')}
-            className="group flex items-center gap-3 px-8 py-4 bg-orange-600 text-white rounded-2xl font-bold shadow-lg shadow-orange-600/20 hover:bg-orange-700 transition-all hover:scale-105"
+            className="group flex items-center gap-3 px-5 py-2.5 bg-[#7C3AED] text-white rounded-lg font-semibold shadow-sm hover:bg-[#6D28D9] transition-all hover:scale-105"
           >
             Iniciar Anamnese
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -816,7 +816,7 @@ export default function IdentityDashboard() {
           </div>
           <button 
             onClick={() => setLayerTestStatus('running')}
-            className="group flex items-center gap-3 px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all hover:scale-105"
+            className="group flex items-center gap-3 px-5 py-2.5 bg-[#7C3AED] text-white rounded-lg font-semibold shadow-sm hover:bg-[#6D28D9] transition-all hover:scale-105"
           >
             Iniciar Anamnese
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -917,7 +917,7 @@ export default function IdentityDashboard() {
           <div className="mt-8 flex flex-col items-center gap-4">
             <button 
               onClick={saveLayerDiagnosis}
-              className="group flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all hover:scale-105"
+              className="group flex items-center gap-2 px-5 py-2.5 bg-[#7C3AED] text-white rounded-lg font-semibold shadow-sm hover:bg-[#6D28D9] transition-all hover:scale-105"
             >
               <CheckCircle2 className="w-5 h-5" />
               Salvar Diagnóstico

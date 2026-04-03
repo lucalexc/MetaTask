@@ -2,10 +2,38 @@
 
 @theme {
   --font-sans: "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif";
+
+  --color-bg-base: #FCFAF8;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-surface-alt: #F8F6F3;
+  --color-bg-sidebar: #F4F1ED;
+
+  --color-border: #E8E3DC;
+  --color-border-strong: #D4CEC6;
+
+  --color-primary: #2B5EAA;
+  --color-primary-light: #EEF4FB;
+  --color-primary-dark: #1D3D7A;
+
+  --color-accent-amber: #F59E0B;
+  --color-accent-amber-light: #FEF3C7;
+
+  --color-accent-purple: #7C3AED;
+  --color-accent-purple-light: #EDE9FE;
+
+  --color-accent-green: #16A34A;
+  --color-accent-green-light: #DCFCE7;
+
+  --color-text-primary: #1A1A2E;
+  --color-text-secondary: #6B7280;
+  --color-text-muted: #9CA3AF;
+
+  --color-danger: #DC2626;
+  --color-danger-light: #FEE2E2;
 }
 
 body {
-  @apply bg-[#FCFAF8] text-[#202020];
+  @apply bg-bg-base text-text-primary;
 }
 
 * {
@@ -19,7 +47,7 @@ body {
 
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #e2e8f0 transparent;
+  scrollbar-color: var(--color-border) transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -32,6 +60,26 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #e2e8f0;
+  background-color: var(--color-border);
   border-radius: 20px;
 }
+
+/* Button Variants */
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-sm hover:bg-primary-dark active:scale-[0.98] transition-all duration-150 inline-flex items-center justify-center gap-2;
+  }
+  .btn-secondary {
+    @apply bg-white text-primary font-semibold text-sm px-5 py-2.5 rounded-xl border border-border hover:bg-primary-light hover:border-primary transition-all duration-150 inline-flex items-center justify-center gap-2;
+  }
+  .btn-ghost {
+    @apply text-text-secondary font-medium text-sm px-4 py-2 rounded-lg hover:bg-bg-surface-alt transition-colors duration-150 inline-flex items-center justify-center gap-2;
+  }
+  .btn-danger {
+    @apply text-danger font-medium text-sm px-4 py-2 rounded-lg hover:bg-danger-light transition-colors duration-150 inline-flex items-center justify-center gap-2;
+  }
+  .btn-accent-amber {
+    @apply bg-accent-amber text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-sm hover:bg-amber-600 active:scale-[0.98] transition-all duration-150 inline-flex items-center justify-center gap-2;
+  }
+}
+

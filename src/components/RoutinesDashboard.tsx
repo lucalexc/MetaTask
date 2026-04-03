@@ -248,7 +248,7 @@ const RoutineManagerModal = ({
               if (isSaveDisabled) return;
               await onSave({ name, days_of_week: daysOfWeek }, activities);
             }}
-            className="px-6 py-2.5 text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all shadow-lg shadow-blue-200"
+            className="px-5 py-2.5 text-sm font-semibold bg-[#7C3AED] text-white hover:bg-[#6D28D9] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all shadow-sm"
           >
             {editingRoutine ? 'Salvar Alterações' : 'Criar Rotina'}
           </button>
@@ -656,7 +656,7 @@ export default function RoutinesDashboard({
               </div>
               <Button 
                 onClick={() => { setEditingRoutine(null); setIsCreateModalOpen(true); }}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white rounded-lg px-5 font-semibold"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Bloco

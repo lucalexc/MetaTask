@@ -284,8 +284,42 @@ export default function LandingPage() {
                     </div>
                 </div>
 
-                {/* Feature 2: Projetos */}
+                {/* Feature: Foco Absoluto */}
                 <div className="feature-row reverse animate">
+                    <div className="feature-content">
+                        <span className="feature-tag">FOCO ABSOLUTO</span>
+                        <h2 className="section-headline">Bloqueie distrações e entre em estado de flow.</h2>
+                        <p className="subheadline">Timer integrado com sons binaurais cientificamente comprovados para aumentar a concentração.</p>
+                        <ul className="feature-list">
+                            <li>Timer Pomodoro personalizável (Foco, Pausa Curta, Pausa Longa)</li>
+                            <li>Sons binaurais integrados (Ondas Alpha, Beta e Gamma)</li>
+                            <li>Acompanhamento automático de sessões concluídas</li>
+                            <li>Sincronização com suas estatísticas de produtividade</li>
+                        </ul>
+                        <button onClick={() => setIsAuthModalOpen(true)} className="btn btn-primary">Entrar em Flow →</button>
+                    </div>
+                    <div className="feature-mockup-wrapper">
+                        <div className="mockup-container" style={{ textAlign: 'center', padding: '40px 20px' }}>
+                            <div style={{ fontSize: '4rem', fontWeight: 'bold', color: '#fff', fontFamily: 'monospace', lineHeight: 1, marginBottom: '20px' }}>25:00</div>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '30px' }}>
+                                <div style={{ background: 'var(--color-primary)', color: '#fff', padding: '8px 16px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold' }}>Foco</div>
+                                <div style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', padding: '8px 16px', borderRadius: '20px', fontSize: '0.8rem' }}>Pausa</div>
+                            </div>
+                            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '12px', textAlign: 'left' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                                    <span style={{ fontSize: '1.2rem' }}>🎧</span>
+                                    <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>Ondas Beta (Foco Intenso)</span>
+                                </div>
+                                <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.2)', borderRadius: '2px' }}>
+                                    <div style={{ width: '50%', height: '100%', background: 'var(--color-primary)', borderRadius: '2px' }}></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Feature 2: Projetos */}
+                <div className="feature-row animate">
                     <div className="feature-content">
                         <span className="feature-tag">PROJETOS</span>
                         <h2 className="section-headline">Domine o caos. Execute como um profissional.</h2>
@@ -325,7 +359,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Feature 3: Visão de Vida */}
-                <div className="feature-row animate">
+                <div className="feature-row reverse animate">
                     <div className="feature-content">
                         <span className="feature-tag">VISÃO DE VIDA</span>
                         <h2 className="section-headline">O mapa do tesouro para o seu futuro.</h2>
@@ -377,7 +411,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Feature 4: Identidade */}
-                <div className="feature-row reverse animate" id="identidade">
+                <div className="feature-row animate" id="identidade">
                     <div className="feature-content">
                         <span className="feature-tag">IDENTIDADE</span>
                         <h2 className="section-headline">Conheça o jogador antes de jogar o jogo.</h2>
@@ -429,7 +463,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Feature 5: Insights */}
-                <div className="feature-row animate" id="estatisticas">
+                <div className="feature-row reverse animate" id="estatisticas">
                     <div className="feature-content">
                         <span className="feature-tag">ESTATÍSTICAS</span>
                         <h2 className="section-headline">Seus resultados não mentem.</h2>

@@ -869,7 +869,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                 setIsDatePickerOpen(false); setIsTimePickerOpen(false); setIsRecurrencePickerOpen(false);
                 onClose();
               }}
-              className="px-6 py-2 text-[13px] font-bold bg-[#1f60c2] text-white hover:bg-[#1a50a3] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all ease-out duration-200 shadow-md shadow-blue-100"
+              className="px-5 py-2.5 text-[13px] font-semibold bg-[#7C3AED] text-white hover:bg-[#6D28D9] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all ease-out duration-200 shadow-sm"
             >
               Salvar Tarefa
             </button>
@@ -1012,7 +1012,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                     setRecurrenceType('custom');
                     setIsCustomRecurrenceModalOpen(false);
                   }}
-                  className="px-5 py-2 rounded-lg text-[13px] text-white font-bold bg-[#1f60c2] hover:bg-[#1a50a3] transition-all ease-out duration-200 flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-lg text-[13px] text-white font-semibold bg-[#7C3AED] hover:bg-[#6D28D9] transition-all ease-out duration-200 flex items-center gap-2"
                 >
                   Salvar
                 </button>
