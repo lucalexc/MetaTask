@@ -148,7 +148,7 @@ const TaskCard: React.FC<{
         draggable={true}
         onDragStart={(e) => onDragStart && onDragStart(e, task)}
         className={cn(
-          "flex flex-col gap-3 p-4 bg-white border border-[rgba(0,0,0,0.06)] rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] cursor-grab active:cursor-grabbing hover:shadow-md transition-all ease-out duration-200 group",
+          "flex flex-col gap-3 p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:shadow-md hover:border-gray-300 transition-all ease-out duration-200 group",
           isDragging && "opacity-50 border-dashed"
         )}
       >
@@ -2194,7 +2194,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white border border-[rgba(0,0,0,0.06)] rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden"
+              className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden"
             >
               {/* Calendar Navigation */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200">

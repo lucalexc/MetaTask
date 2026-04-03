@@ -188,7 +188,7 @@ export default function FocusDashboard() {
       </div>
 
       {/* Main Focus Area */}
-      <div className="w-full max-w-md bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] border border-[rgba(0,0,0,0.06)] p-8 relative overflow-hidden">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-sm border border-border p-8 relative overflow-hidden">
         
         {/* Progress Background */}
         <div 
@@ -266,7 +266,7 @@ export default function FocusDashboard() {
       </div>
 
       {/* Audio Controls */}
-      <div className="w-full max-w-md mt-6 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] border border-[rgba(0,0,0,0.06)] p-6">
+      <div className="w-full max-w-md mt-6 bg-white rounded-2xl shadow-sm border border-border p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Headphones className="w-5 h-5 text-primary" />

@@ -61,7 +61,7 @@ const GoalCard: React.FC<{ goal: Goal, onIncrement: (id: string) => void, onDele
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="bg-white border border-[rgba(0,0,0,0.06)] rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] flex items-center gap-4 group"
+      className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm flex items-center gap-4 group"
     >
       {/* Left: Info */}
       <div className="w-1/3 shrink-0">
