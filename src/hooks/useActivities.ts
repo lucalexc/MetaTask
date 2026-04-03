@@ -70,12 +70,25 @@ export function useActivities(date: Date = new Date()) {
 
       // Filter activities that are active today
       const todayActivities = (allActivities || []).filter((activity: Activity) => {
+        // Check if the activity's start_date is on or before the target date
+        const startDate = new Date(activity.created_at || activity.start_date);
+        startDate.setHours(0, 0, 0, 0);
+        const targetDate = new Date(date);
+        targetDate.setHours(0, 0, 0, 0);
+        
+        if (targetDate < startDate) {
+          return false;
+        }
+
         // Check if it's active on this day of the week
-        if (!activity.active_days || !activity.active_days[dayOfWeek]) return false;
+        if (activity.type === 'routine' && activity.selected_days && Array.isArray(activity.selected_days)) {
+          if (!activity.selected_days.includes(dayOfWeek)) return false;
+        } else if (activity.active_days && !activity.active_days[dayOfWeek]) {
+          return false;
+        }
 
         // If it's a goal, check if it's within the duration
         if (activity.type === 'goal' && activity.duration_days) {
-          const startDate = new Date(activity.start_date);
           const diffTime = Math.abs(date.getTime() - startDate.getTime());
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
           if (diffDays > activity.duration_days) return false;

@@ -152,7 +152,7 @@ export default function InsightsDashboard() {
           <>
             {/* Row 1: KPIs */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="border-none shadow-sm">
+              <Card className="border border-[rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] rounded-xl">
                 <CardContent className="p-6 flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
                     <Clock className="w-6 h-6 text-blue-600" />
@@ -164,7 +164,7 @@ export default function InsightsDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="border-none shadow-sm">
+              <Card className="border border-[rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] rounded-xl">
                 <CardContent className="p-6 flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
                     <CheckCircle className="w-6 h-6 text-emerald-600" />
@@ -176,7 +176,7 @@ export default function InsightsDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="border-none shadow-sm">
+              <Card className="border border-[rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] rounded-xl">
                 <CardContent className="p-6 flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center shrink-0">
                     <Calendar className="w-6 h-6 text-purple-600" />
@@ -188,7 +188,7 @@ export default function InsightsDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="border-none shadow-sm">
+              <Card className="border border-[rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] rounded-xl">
                 <CardContent className="p-6 flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center shrink-0">
                     <Zap className="w-6 h-6 text-orange-600" />
@@ -204,7 +204,7 @@ export default function InsightsDashboard() {
             {/* Row 2: 50/50 Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Tag Distribution */}
-              <Card className="border-none shadow-sm">
+              <Card className="border border-[rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] rounded-xl">
                 <CardHeader>
                   <CardTitle className="text-lg font-bold text-gray-800">Onde invisto meu tempo?</CardTitle>
                 </CardHeader>
@@ -255,7 +255,7 @@ export default function InsightsDashboard() {
               </Card>
 
               {/* Weekly Focus Time */}
-              <Card className="border-none shadow-sm">
+              <Card className="border border-[rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] rounded-xl">
                 <CardHeader>
                   <CardTitle className="text-lg font-bold text-gray-800">Ritmo Diário (Minutos Focados)</CardTitle>
                 </CardHeader>

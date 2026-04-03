@@ -59,10 +59,13 @@ export function useWeeklyRoutineStatus(weekStart: Date) {
           // Find routines active on this day
           const activeRoutinesOnDay = (routines || []).filter(routine => {
             // Check if routine was created before or on this day
-            const createdDate = new Date(routine.created_at);
+            const createdDate = new Date(routine.created_at || routine.start_date);
             if (isBefore(endOfDay(currentDay), startOfDay(createdDate))) return false;
             
             // Check if active on this day of week
+            if (routine.selected_days && Array.isArray(routine.selected_days)) {
+              return routine.selected_days.includes(dayOfWeek);
+            }
             return routine.active_days && routine.active_days[dayOfWeek];
           });
 

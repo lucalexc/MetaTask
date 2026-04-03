@@ -44,12 +44,7 @@ export default function MyRoutinePage({
     return failedDays.has(startOfDay(date).toISOString());
   };
 
-  const filteredActivities = (activities || []).filter(activity => {
-    if (activity.type === 'routine' && activity.selected_days && Array.isArray(activity.selected_days)) {
-      return activity.selected_days.includes(selectedDate.getDay());
-    }
-    return true; // Goals or old routines without selected_days
-  });
+  const filteredActivities = activities || [];
 
   const totalActivities = filteredActivities.length || 0;
   const completedActivities = filteredActivities.filter(a => a.is_completed).length || 0;

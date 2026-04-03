@@ -516,7 +516,17 @@ export default function RoutinesDashboard({
 
   // Filter routines for today
   const todayDay = new Date().getDay();
-  const activeRoutinesToday = routines.filter(r => r.is_active && r.days_of_week?.includes(todayDay));
+  const activeRoutinesToday = routines.filter(r => {
+    if (!r.is_active || !r.days_of_week?.includes(todayDay)) return false;
+    
+    // Check if the routine's start_date is on or before today
+    const startDate = new Date(r.created_at || r.start_date);
+    startDate.setHours(0, 0, 0, 0);
+    const targetDate = new Date();
+    targetDate.setHours(0, 0, 0, 0);
+    
+    return targetDate >= startDate;
+  });
 
   // Group activities by period for today's view
   const allActivitiesToday = activeRoutinesToday.flatMap(r => 
