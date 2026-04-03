@@ -1008,18 +1008,29 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                       </PopoverContent>
                     </Popover>
 
-                    <div className="relative flex flex-col gap-0.5 p-2.5 bg-gray-50 border-[1.5px] border-gray-100 rounded-xl hover:border-violet-300 transition-colors text-left overflow-hidden">
-                      <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
-                        🕐 Horário
-                      </span>
-                      <input
-                        type="time"
-                        value={time || ''}
-                        onChange={e => setTime(e.target.value)}
-                        className={`w-full bg-transparent border-none p-0 text-[13px] font-semibold focus:ring-0 ${time ? 'text-gray-700' : 'opacity-0 absolute inset-0 w-full h-full cursor-pointer'}`}
-                      />
-                      {!time && <span className="text-[13px] font-semibold text-gray-300 pointer-events-none">Sem horário</span>}
-                    </div>
+                    <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="flex flex-col gap-0.5 p-2.5 bg-gray-50 border-[1.5px] border-gray-100 rounded-xl hover:border-violet-300 transition-colors text-left w-full"
+                        >
+                          <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                            🕐 Horário
+                          </span>
+                          <span className={`text-[13px] font-semibold ${time ? 'text-gray-700' : 'text-gray-300'}`}>
+                            {time || 'Sem horário'}
+                          </span>
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-3 z-[110]">
+                        <input
+                          type="time"
+                          value={time || ''}
+                          onChange={e => setTime(e.target.value)}
+                          className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-violet-500 outline-none"
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
 
@@ -1097,45 +1108,69 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
 
                 {/* ── GRUPO 3: REPETIR + DURAÇÃO ── */}
                 <div className="grid grid-cols-2 gap-2 mt-2">
-                  <div className="flex items-center justify-between p-2.5 bg-gray-50 border-[1.5px] border-gray-100 rounded-xl relative">
-                    <span className="text-[13px] font-medium text-gray-600 flex items-center gap-2">
-                      🔁 Repetir
-                    </span>
-                    <Toggle
-                      checked={recurrenceType !== 'none'}
-                      onChange={(checked: boolean) => {
-                        if (!checked) {
-                          setRecurrenceType('none');
-                        } else {
-                          if (recurrenceType === 'none') {
-                            setRecurrenceType('daily');
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center justify-between p-2.5 bg-gray-50 border-[1.5px] border-gray-100 rounded-xl relative">
+                      <span className="text-[13px] font-medium text-gray-600 flex items-center gap-2">
+                        🔁 Repetir
+                        {recurrenceType !== 'none' && recurrenceType !== 'custom' && (
+                          <span className="text-[11px] text-violet-600 font-semibold">
+                            · {recurrenceType === 'daily' ? 'Diariamente' : recurrenceType === 'weekly' ? 'Semanalmente' : recurrenceType === 'weekdays' ? 'Dias úteis' : recurrenceType === 'monthly' ? 'Mensalmente' : 'Anualmente'}
+                          </span>
+                        )}
+                      </span>
+                      <Toggle
+                        checked={recurrenceType !== 'none'}
+                        onChange={(checked: boolean) => {
+                          if (!checked) {
+                            setRecurrenceType('none');
+                            setIsRecurrencePickerOpen(false);
+                          } else {
+                            setIsRecurrencePickerOpen(true);
+                            if (recurrenceType === 'none') {
+                              setRecurrenceType('daily');
+                            }
                           }
-                        }
-                      }}
-                      onChecked={() => setIsRecurrencePickerOpen(true)}
-                    />
-                    
-                    {/* Hidden popover trigger for recurrence */}
-                    <Popover open={isRecurrencePickerOpen} onOpenChange={setIsRecurrencePickerOpen}>
-                      <PopoverTrigger asChild>
-                        <div className="absolute inset-0 pointer-events-none" />
-                      </PopoverTrigger>
-                      <PopoverContent 
-                        side="bottom" 
-                        align="start" 
-                        sideOffset={8} 
-                        className="w-64 p-1 bg-white rounded-xl shadow-xl border border-gray-200 z-[110] flex flex-col gap-0.5 max-h-72 overflow-y-auto"
-                      >
-                        <button onClick={() => { setRecurrenceType('daily'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'daily' && "bg-[#dceaff] text-[#1f60c2]")}>Todo dia</button>
-                        <button onClick={() => { setRecurrenceType('weekly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'weekly' && "bg-[#dceaff] text-[#1f60c2]")}>Toda semana ({format(taskDate, 'EEEE', { locale: ptBR })})</button>
-                        <button onClick={() => { setRecurrenceType('weekdays'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'weekdays' && "bg-[#dceaff] text-[#1f60c2]")}>Todo dia útil (Seg - Sex)</button>
-                        <button onClick={() => { setRecurrenceType('monthly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'monthly' && "bg-[#dceaff] text-[#1f60c2]")}>Todo mês (dia {format(taskDate, 'd')})</button>
-                        <button onClick={() => { setRecurrenceType('yearly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'yearly' && "bg-[#dceaff] text-[#1f60c2]")}>Todo ano ({format(taskDate, 'd \'de\' MMMM', { locale: ptBR })})</button>
-                        <button onClick={() => { setIsRecurrencePickerOpen(false); setIsCustomRecurrenceModalOpen(true); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'custom' && "bg-[#dceaff] text-[#1f60c2]")}>Personalizar...</button>
-                        <div className="border-t border-slate-100 my-1" />
-                        <button onClick={() => { setRecurrenceType('none'); setIsRecurrencePickerOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-red-500 rounded-lg hover:bg-red-50 transition-colors ease-out duration-200 font-medium">Limpar</button>
-                      </PopoverContent>
-                    </Popover>
+                        }}
+                      />
+                    </div>
+                    {recurrenceType !== 'none' && isRecurrencePickerOpen && (
+                      <div className="flex gap-1.5 mt-1 flex-wrap">
+                        {[
+                          { id: 'daily', label: 'Diariamente' },
+                          { id: 'weekly', label: 'Semanalmente' },
+                          { id: 'weekdays', label: 'Dias úteis' },
+                          { id: 'monthly', label: 'Mensalmente' }
+                        ].map(freq => (
+                          <button
+                            key={freq.id}
+                            type="button"
+                            onClick={() => { setRecurrenceType(freq.id as any); setIsRecurrencePickerOpen(false); }}
+                            className={`px-3 py-1 rounded-full text-[12px] font-semibold border-[1.5px] transition-colors
+                              ${recurrenceType === freq.id
+                                ? 'bg-violet-600 text-white border-violet-600'
+                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-violet-400'
+                              }`}
+                          >
+                            {freq.label}
+                          </button>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRecurrenceType('custom');
+                            setIsRecurrencePickerOpen(false);
+                            setIsCustomRecurrenceModalOpen(true);
+                          }}
+                          className={`px-3 py-1 rounded-full text-[12px] font-semibold border-[1.5px] transition-colors
+                            ${recurrenceType === 'custom'
+                              ? 'bg-violet-600 text-white border-violet-600'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-violet-400'
+                            }`}
+                        >
+                          Personalizado...
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between p-2.5 bg-gray-50 border-[1.5px] border-gray-100 rounded-xl">
