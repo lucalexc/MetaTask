@@ -195,8 +195,8 @@ export function useActivities(date: Date = new Date()) {
         queryClient.invalidateQueries({ queryKey: ['tasks'] }),
         queryClient.invalidateQueries({ queryKey: ['insights'] })
       ]);
-    } catch (err) {
-      console.error('Error toggling activity:', err);
+    } catch (err: any) {
+      console.error("Supabase Error:", err.message, err.details, err.hint);
       toast.error('Falha ao atualizar atividade. Verifique sua conexão.');
       // Revert optimistic update by refetching
       fetchActivities();

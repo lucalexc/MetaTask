@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, Plus, Inbox, Sword, RefreshCcw, Map, Fingerprint, Settings, Folder, Menu, X, BarChart2, Compass, Hexagon } from 'lucide-react';
+import { Target, Plus, Inbox, Sword, RefreshCcw, Map, Fingerprint, Settings, Folder, Menu, X, BarChart2, Compass, Hexagon, Pencil } from 'lucide-react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import TasksDashboard from '@/src/components/TasksDashboard';
 import ProjectsDashboard from '@/src/components/ProjectsDashboard';
@@ -8,6 +8,8 @@ import RoadmapPage from '@/src/pages/RoadmapPage';
 import IdentityDashboard from '@/src/components/IdentityDashboard';
 import SettingsDashboard from '@/src/components/SettingsDashboard';
 import InsightsDashboard from '@/src/components/InsightsDashboard';
+import ProfileModal, { AVATARS } from '@/src/components/ProfileModal';
+import { useAuth } from '@/src/lib/AuthContext';
 import { cn } from '@/src/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -26,6 +28,15 @@ export default function Dashboard() {
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [isMilestoneModalOpen, setIsMilestoneModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+
+  const { profile } = useAuth();
+
+  const displayName = profile?.name 
+    ? profile.name.split(' ').slice(0, 2).join(' ') 
+    : 'Usuário';
+
+  const userAvatar = AVATARS.find(a => a.id === profile?.avatar_id) || AVATARS[0];
 
   const handleFabClick = () => {
     if (activeTab === 'my-routine') setIsRoutineModalOpen(true);
@@ -52,15 +63,21 @@ export default function Dashboard() {
         </div>
 
         <div className="px-4 mb-6">
-          <div className="flex items-center gap-3 p-2 rounded-xl border border-[rgba(0,0,0,0.06)] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" className="w-full h-full object-cover" />
+          <button 
+            onClick={() => setProfileModalOpen(true)}
+            className="w-full flex items-center gap-3 p-2 rounded-xl border border-[rgba(0,0,0,0.06)] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] hover:bg-violet-50 hover:border-violet-200 transition-all group text-left relative"
+          >
+            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden text-xl shadow-inner shrink-0">
+              {userAvatar.emoji}
             </div>
-            <div className="flex flex-col">
-              <span className="text-[13px] font-bold text-[#202020]">Usuário</span>
+            <div className="flex flex-col overflow-hidden">
+              <span className="text-[13px] font-bold text-[#202020] truncate">{displayName}</span>
               <span className="text-[11px] text-[#808080]">Plano Pro</span>
             </div>
-          </div>
+            <div className="absolute right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Pencil className="w-3.5 h-3.5 text-violet-500" />
+            </div>
+          </button>
         </div>
 
         <div className="px-3 mb-4">
@@ -273,6 +290,10 @@ export default function Dashboard() {
           </>
         )}
       </AnimatePresence>
+      <ProfileModal 
+        isOpen={profileModalOpen} 
+        onClose={() => setProfileModalOpen(false)} 
+      />
     </div>
   );
 }
