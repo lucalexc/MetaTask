@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, Circle, Plus, Calendar as CalendarIcon, 
-  ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause, Trash2, Tag, Minus, Filter
+  ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause, Trash2, Tag, Minus, Filter, Settings2
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, addDays, startOfMonth, endOfMonth, getDay, addMonths, subMonths, parseISO, isBefore, startOfDay } from 'date-fns';
@@ -485,27 +485,6 @@ const parseDurationInput = (text: string): number => {
   return totalMinutes;
 };
 
-const FieldPill = React.forwardRef(({ icon, label, value, valueDisplay, onClick, accent = false, as: Component = "button", ...props }: any, ref: any) => (
-  <Component
-    type={Component === "button" ? "button" : undefined}
-    onClick={onClick}
-    ref={ref}
-    {...props}
-    className="flex flex-col gap-0.5 p-2.5 bg-gray-50 border-[1.5px] border-gray-100
-               rounded-xl hover:border-violet-300 transition-colors text-left w-full"
-  >
-    <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
-      {icon} {label}
-    </span>
-    <span className={`text-[13px] font-semibold truncate w-full ${
-      accent ? 'text-violet-600' : value ? 'text-gray-700' : 'text-gray-300'
-    }`}>
-      {valueDisplay || value || 'Nenhum'}
-    </span>
-  </Component>
-));
-FieldPill.displayName = 'FieldPill';
-
 const Toggle = ({ checked, onChange, onChecked }: any) => (
   <button
     type="button"
@@ -745,10 +724,11 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                 <input
                   type="text"
                   placeholder="00:00"
+                  inputMode="numeric"
                   maxLength={5}
                   value={time}
                   onChange={handleTimeChange}
-                  className="w-20 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-sm"
+                  className="w-20 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-sm cursor-pointer"
                 />
               </div>
 
@@ -793,118 +773,104 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
               </div>
 
               {/* Priority Row */}
-              <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <Flag className={cn("w-4 h-4 group-hover:scale-110 transition-transform", priority === 'P1' ? "text-red-500" : priority === 'P2' ? "text-orange-500" : priority === 'P3' ? "text-blue-500" : "text-gray-400")} fill={priority !== 'P4' ? "currentColor" : "none"} />
-                  <span className="text-sm font-medium text-gray-600">Prioridade</span>
-                </div>
-                <Select value={priority} onValueChange={setPriority}>
-                  <SelectTrigger className="w-auto h-auto border-none bg-transparent p-0 focus:ring-0 shadow-none">
-                    <span className={cn(
-                      "text-sm font-semibold",
-                      priority === 'P1' ? "text-red-600" : priority === 'P2' ? "text-orange-600" : priority === 'P3' ? "text-blue-600" : "text-gray-500"
-                    )}>
-                      {priority === 'P1' ? 'Urgente' : priority === 'P2' ? 'Alta' : priority === 'P3' ? 'Média' : 'Baixa'}
-                    </span>
-                  </SelectTrigger>
-                  <SelectContent className="z-[110]">
-                    <SelectItem value="P1"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-red-500" fill="currentColor"/> Urgente</div></SelectItem>
-                    <SelectItem value="P2"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-orange-500" fill="currentColor"/> Alta</div></SelectItem>
-                    <SelectItem value="P3"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#1f60c2]" fill="currentColor"/> Média</div></SelectItem>
-                    <SelectItem value="P4"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#808080]" fill="none"/> Baixa</div></SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Select value={priority} onValueChange={setPriority}>
+                <SelectTrigger className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group [&>svg]:hidden">
+                  <div className="flex items-center gap-3">
+                    <Flag className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                    <span className="text-sm font-medium text-gray-600">Prioridade</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-blue-600">
+                    {priority === 'P1' && <Flag className="w-3 h-3 text-red-500" fill="currentColor" />}
+                    {priority === 'P2' && <Flag className="w-3 h-3 text-orange-500" fill="currentColor" />}
+                    {priority === 'P3' && <Flag className="w-3 h-3 text-blue-500" fill="currentColor" />}
+                    {priority === 'P4' && <Flag className="w-3 h-3 text-gray-400" fill="none" />}
+                    <span>{priority === 'P1' ? 'Urgente' : priority === 'P2' ? 'Alta' : priority === 'P3' ? 'Média' : 'Baixa'}</span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="z-[110]">
+                  <SelectItem value="P1"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-red-500" fill="currentColor"/> Urgente</div></SelectItem>
+                  <SelectItem value="P2"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-orange-500" fill="currentColor"/> Alta</div></SelectItem>
+                  <SelectItem value="P3"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#1f60c2]" fill="currentColor"/> Média</div></SelectItem>
+                  <SelectItem value="P4"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#808080]" fill="none"/> Baixa</div></SelectItem>
+                </SelectContent>
+              </Select>
 
               {/* Project Row */}
               {projects.length > 0 && (
-                <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
-                  <div className="flex items-center gap-3">
-                    <Target className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                    <span className="text-sm font-medium text-gray-600">Projeto</span>
-                  </div>
-                  <Select value={projectId} onValueChange={setProjectId}>
-                    <SelectTrigger className="w-auto h-auto border-none bg-transparent p-0 focus:ring-0 shadow-none">
-                      <span className="text-sm font-semibold text-blue-600">
-                        {projectId === 'none' ? 'Nenhum' : projects.find(p => p.id === projectId)?.name}
-                      </span>
-                    </SelectTrigger>
-                    <SelectContent side="bottom" align="end" className="z-[110] max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-xl">
-                      <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">Nenhum projeto</SelectItem>
-                      {projects.map(p => (
-                        <SelectItem hideCheck key={p.id} value={p.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-                            {p.name}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* Category Row */}
-              <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-full border-2 border-gray-300 group-hover:border-blue-400 transition-colors" />
-                  <span className="text-sm font-medium text-gray-600">Categoria</span>
-                </div>
-                <Select value={categoryId} onValueChange={setCategoryId}>
-                  <SelectTrigger className="w-auto h-auto border-none bg-transparent p-0 focus:ring-0 shadow-none">
+                <Select value={projectId} onValueChange={setProjectId}>
+                  <SelectTrigger className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group [&>svg]:hidden">
+                    <div className="flex items-center gap-3">
+                      <Target className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                      <span className="text-sm font-medium text-gray-600">Projeto</span>
+                    </div>
                     <span className="text-sm font-semibold text-blue-600">
-                      {categoryId === 'none' ? 'Nenhuma' : categories?.find((c: Category) => c.id === categoryId)?.name}
+                      {projectId === 'none' ? 'Nenhum' : projects.find(p => p.id === projectId)?.name}
                     </span>
                   </SelectTrigger>
                   <SelectContent side="bottom" align="end" className="z-[110] max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-xl">
-                    <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">Nenhuma categoria</SelectItem>
-                    {categories?.map((c: Category) => (
-                      <SelectItem hideCheck key={c.id} value={c.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">
-                        {c.name}
+                    <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">Nenhum projeto</SelectItem>
+                    {projects.map(p => (
+                      <SelectItem hideCheck key={p.id} value={p.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                          {p.name}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              )}
+
+              {/* Category Row */}
+              <Select value={categoryId} onValueChange={setCategoryId}>
+                <SelectTrigger className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group [&>svg]:hidden">
+                  <div className="flex items-center gap-3">
+                    <Settings2 className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                    <span className="text-sm font-medium text-gray-600">Categoria</span>
+                  </div>
+                  <span className="text-sm font-semibold text-blue-600">
+                    {categoryId === 'none' ? 'Nenhuma' : categories?.find((c: Category) => c.id === categoryId)?.name}
+                  </span>
+                </SelectTrigger>
+                <SelectContent side="bottom" align="end" className="z-[110] max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-xl">
+                  <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">Nenhuma categoria</SelectItem>
+                  {categories?.map((c: Category) => (
+                    <SelectItem hideCheck key={c.id} value={c.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
               {/* Duration Row */}
               <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
                 <div className="flex items-center gap-3">
-                  <Timer className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                  <Clock className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
                   <span className="text-sm font-medium text-gray-600">Duração</span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-3">
                   <button 
                     onClick={() => {
                       const newDuration = Math.max(0, duration - 5);
                       setDuration(newDuration);
                       setDurationInput(formatDurationInput(newDuration));
                     }}
-                    className="p-1 hover:bg-gray-200 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                    className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    <Minus className="w-3.5 h-3.5" />
+                    <Minus className="w-4 h-4" />
                   </button>
-                  <input 
-                    type="text" 
-                    value={durationInput} 
-                    onChange={e => setDurationInput(e.target.value)} 
-                    onBlur={() => {
-                      const parsed = parseDurationInput(durationInput);
-                      setDuration(parsed);
-                      setDurationInput(formatDurationInput(parsed));
-                    }}
-                    className="w-12 bg-transparent focus:outline-none text-center font-semibold text-blue-600 text-sm" 
-                    placeholder="30m" 
-                  />
+                  <span className="text-sm font-bold text-gray-700 min-w-[60px] text-center">
+                    {duration} min
+                  </span>
                   <button 
                     onClick={() => {
                       const newDuration = duration + 5;
                       setDuration(newDuration);
                       setDurationInput(formatDurationInput(newDuration));
                     }}
-                    className="p-1 hover:bg-gray-200 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                    className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -916,7 +882,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
             <button 
               disabled={isSaveDisabled}
               onClick={handleSubmit}
-              className="px-5 py-2.5 text-[13px] font-semibold bg-[#7C3AED] text-white hover:bg-[#6D28D9] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all ease-out duration-200 shadow-sm"
+              className="px-5 py-2.5 text-[13px] font-semibold bg-[#7C3AED] text-white hover:bg-[#6D28D9] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all ease-out duration-200 shadow-sm"
             >
               Salvar Tarefa
             </button>
@@ -943,212 +909,210 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                 />
               </div>
               <div className="h-px bg-gray-100 mx-0 my-0" />
-              <div className="flex flex-col gap-2.5 px-5 py-3">
+              <div className="flex flex-col gap-3 px-5 py-3">
                 {/* ── GRUPO 1: QUANDO ── */}
-                <div>
+                <div className="space-y-2">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-300 mb-1.5">
                     Quando
                   </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-                      <PopoverTrigger asChild>
-                        <button
-                          type="button"
-                          className="flex flex-col gap-0.5 p-2.5 bg-violet-50 border-[1.5px] border-violet-200 rounded-xl hover:border-violet-400 transition-colors text-left"
-                        >
-                          <span className="text-[10px] font-semibold uppercase tracking-wide text-violet-400">
-                            📅 Data
-                          </span>
-                          <span className="text-[14px] font-bold text-violet-600">
-                            {isSameDay(taskDate, new Date()) ? 'Hoje' : format(taskDate, 'dd/MM')}
-                          </span>
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent 
-                        side="bottom" 
-                        align="start" 
-                        sideOffset={8} 
-                        className="w-72 p-0 bg-white rounded-xl shadow-xl border border-gray-200 z-[110] overflow-hidden"
+                  
+                  {/* Date Row */}
+                  <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <button 
+                        className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group"
                       >
-                        <div className="p-2 space-y-1 border-b border-gray-100">
-                          <button onClick={() => { setTaskDate(addDays(new Date(), 1)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Sun className="w-4 h-4 text-orange-500" /> Amanhã</button>
-                          <button onClick={() => { setTaskDate(addDays(new Date(), 7)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><CalendarDays className="w-4 h-4 text-[#1f60c2]" /> Próxima semana</button>
-                          <button onClick={() => { setTaskDate(addDays(new Date(), 5)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Coffee className="w-4 h-4 text-purple-500" /> Próximo fim de semana</button>
-                          <button onClick={() => { setTaskDate(new Date()); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Ban className="w-4 h-4 text-[#808080]" /> Sem vencimento</button>
+                        <div className="flex items-center gap-3">
+                          <CalendarIcon className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                          <span className="text-sm font-medium text-gray-600">Data</span>
                         </div>
-                        <div className="p-4">
-                          <div className="flex items-center justify-between mb-4">
-                            <span className="font-bold text-[14px] text-[#202020]">Março 2026</span>
-                            <div className="flex gap-1">
-                              <button className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors"><ChevronLeft className="w-4 h-4" /></button>
-                              <button className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors"><ChevronRight className="w-4 h-4" /></button>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-7 gap-1 text-center text-[11px] mb-2 text-[#808080] font-bold uppercase tracking-wider">
-                            <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
-                          </div>
-                          <div className="grid grid-cols-7 gap-1 text-center text-[13px]">
-                            {Array.from({length: 31}).map((_, i) => {
-                              const newDate = new Date(2026, 2, i + 1);
-                              return (
-                                <button 
-                                  key={i} 
-                                  onClick={() => { setTaskDate(newDate); setIsDatePickerOpen(false); }}
-                                  className={cn("w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors ease-out duration-200", isSameDay(newDate, taskDate) && "bg-[#1f60c2] text-white hover:bg-[#1a50a3]")}
-                                >
-                                  {i + 1}
-                                </button>
-                              );
-                            })}
+                        <span className="text-sm font-semibold text-blue-600">
+                          {isSameDay(taskDate, new Date()) ? 'Hoje' : format(taskDate, 'dd/MM')}
+                        </span>
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent 
+                      side="bottom" 
+                      align="end" 
+                      sideOffset={8} 
+                      className="w-72 p-0 bg-white rounded-xl shadow-xl border border-gray-200 z-[110] overflow-hidden"
+                    >
+                      <div className="p-2 space-y-1 border-b border-gray-100">
+                        <button onClick={() => { setTaskDate(addDays(new Date(), 1)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Sun className="w-4 h-4 text-orange-500" /> Amanhã</button>
+                        <button onClick={() => { setTaskDate(addDays(new Date(), 7)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><CalendarDays className="w-4 h-4 text-[#1f60c2]" /> Próxima semana</button>
+                        <button onClick={() => { setTaskDate(addDays(new Date(), 5)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Coffee className="w-4 h-4 text-purple-500" /> Próximo fim de semana</button>
+                        <button onClick={() => { setTaskDate(new Date()); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Ban className="w-4 h-4 text-[#808080]" /> Sem vencimento</button>
+                      </div>
+                      <div className="p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="font-bold text-[14px] text-[#202020]">Março 2026</span>
+                          <div className="flex gap-1">
+                            <button className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors"><ChevronLeft className="w-4 h-4" /></button>
+                            <button className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors"><ChevronRight className="w-4 h-4" /></button>
                           </div>
                         </div>
-                      </PopoverContent>
-                    </Popover>
+                        <div className="grid grid-cols-7 gap-1 text-center text-[11px] mb-2 text-[#808080] font-bold uppercase tracking-wider">
+                          <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
+                        </div>
+                        <div className="grid grid-cols-7 gap-1 text-center text-[13px]">
+                          {Array.from({length: 31}).map((_, i) => {
+                            const newDate = new Date(2026, 2, i + 1);
+                            return (
+                              <button 
+                                key={i} 
+                                onClick={() => { setTaskDate(newDate); setIsDatePickerOpen(false); }}
+                                className={cn("w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors ease-out duration-200", isSameDay(newDate, taskDate) && "bg-[#1f60c2] text-white hover:bg-[#1a50a3]")}
+                              >
+                                {i + 1}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
 
-                    <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
-                      <PopoverTrigger asChild>
-                        <button
-                          type="button"
-                          className="flex flex-col gap-0.5 p-2.5 bg-gray-50 border-[1.5px] border-gray-100 rounded-xl hover:border-violet-300 transition-colors text-left w-full"
-                        >
-                          <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
-                            🕐 Horário
-                          </span>
-                          <span className={`text-[13px] font-semibold ${time ? 'text-gray-700' : 'text-gray-300'}`}>
-                            {time || 'Sem horário'}
-                          </span>
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-3 z-[110]">
-                        <input
-                          type="text"
-                          value={time || ''}
-                          onChange={handleTimeChange}
-                          inputMode="numeric"
-                          maxLength={5}
-                          placeholder="00:00"
-                          className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-violet-500 outline-none"
-                        />
-                      </PopoverContent>
-                    </Popover>
+                  {/* Time Row */}
+                  <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                      <span className="text-sm font-medium text-gray-600">Horário</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="00:00"
+                      inputMode="numeric"
+                      maxLength={5}
+                      value={time}
+                      onChange={handleTimeChange}
+                      className="w-20 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-sm cursor-pointer"
+                    />
                   </div>
                 </div>
 
                 {/* ── GRUPO 2: DETALHES ── */}
-                <div>
+                <div className="space-y-2">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-300 mb-1.5 mt-2">
                     Detalhes
                   </p>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Select value={priority} onValueChange={setPriority}>
-                      <SelectTrigger className="h-auto p-0 border-none bg-transparent focus:ring-0 shadow-none [&>svg]:hidden w-full text-left">
-                        <FieldPill
-                          as="div"
-                          icon="🚩" label="Prioridade"
-                          value={priority !== 'P4' ? priority : null}
-                          valueDisplay={
-                            <div className="flex items-center gap-1">
-                              {priority === 'P1' && <Flag className="w-3 h-3 text-red-500" fill="currentColor" />}
-                              {priority === 'P2' && <Flag className="w-3 h-3 text-orange-500" fill="currentColor" />}
-                              {priority === 'P3' && <Flag className="w-3 h-3 text-blue-500" fill="currentColor" />}
-                              {priority === 'P4' && <Flag className="w-3 h-3 text-gray-400" fill="none" />}
-                              <span>{priority === 'P1' ? 'Urgente' : priority === 'P2' ? 'Alta' : priority === 'P3' ? 'Média' : 'Baixa'}</span>
-                            </div>
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent className="z-[110]">
-                        <SelectItem value="P1"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-red-500" fill="currentColor"/> Urgente</div></SelectItem>
-                        <SelectItem value="P2"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-orange-500" fill="currentColor"/> Alta</div></SelectItem>
-                        <SelectItem value="P3"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#1f60c2]" fill="currentColor"/> Média</div></SelectItem>
-                        <SelectItem value="P4"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#808080]" fill="none"/> Baixa</div></SelectItem>
-                      </SelectContent>
-                    </Select>
+                  
+                  {/* Priority Row */}
+                  <Select value={priority} onValueChange={setPriority}>
+                    <SelectTrigger className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group [&>svg]:hidden">
+                      <div className="flex items-center gap-3">
+                        <Flag className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                        <span className="text-sm font-medium text-gray-600">Prioridade</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm font-semibold text-blue-600">
+                        {priority === 'P1' && <Flag className="w-3 h-3 text-red-500" fill="currentColor" />}
+                        {priority === 'P2' && <Flag className="w-3 h-3 text-orange-500" fill="currentColor" />}
+                        {priority === 'P3' && <Flag className="w-3 h-3 text-blue-500" fill="currentColor" />}
+                        {priority === 'P4' && <Flag className="w-3 h-3 text-gray-400" fill="none" />}
+                        <span>{priority === 'P1' ? 'Urgente' : priority === 'P2' ? 'Alta' : priority === 'P3' ? 'Média' : 'Baixa'}</span>
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent className="z-[110]">
+                      <SelectItem value="P1"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-red-500" fill="currentColor"/> Urgente</div></SelectItem>
+                      <SelectItem value="P2"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-orange-500" fill="currentColor"/> Alta</div></SelectItem>
+                      <SelectItem value="P3"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#1f60c2]" fill="currentColor"/> Média</div></SelectItem>
+                      <SelectItem value="P4"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#808080]" fill="none"/> Baixa</div></SelectItem>
+                    </SelectContent>
+                  </Select>
 
-                    <Select value={projectId} onValueChange={setProjectId}>
-                      <SelectTrigger className="h-auto p-0 border-none bg-transparent focus:ring-0 shadow-none [&>svg]:hidden w-full text-left">
-                        <FieldPill
-                          as="div"
-                          icon="⊙" label="Projeto"
-                          value={projectId !== 'none' ? projects.find(p => p.id === projectId)?.name : null}
-                        />
-                      </SelectTrigger>
-                      <SelectContent side="bottom" align="center" className="z-[110] max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-xl">
-                        <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">Nenhum projeto</SelectItem>
-                        {projects.map(p => (
-                          <SelectItem hideCheck key={p.id} value={p.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-                              {p.name}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  {/* Project Row */}
+                  <Select value={projectId} onValueChange={setProjectId}>
+                    <SelectTrigger className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group [&>svg]:hidden">
+                      <div className="flex items-center gap-3">
+                        <Target className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                        <span className="text-sm font-medium text-gray-600">Projeto</span>
+                      </div>
+                      <span className="text-sm font-semibold text-blue-600">
+                        {projectId !== 'none' ? projects.find(p => p.id === projectId)?.name : 'Nenhum'}
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent side="bottom" align="end" className="z-[110] max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-xl">
+                      <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">Nenhum projeto</SelectItem>
+                      {projects.map(p => (
+                        <SelectItem hideCheck key={p.id} value={p.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                            {p.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
-                    <Select value={categoryId} onValueChange={setCategoryId}>
-                      <SelectTrigger className="h-auto p-0 border-none bg-transparent focus:ring-0 shadow-none [&>svg]:hidden w-full text-left">
-                        <FieldPill
-                          as="div"
-                          icon="○" label="Categoria"
-                          value={categoryId !== 'none' ? categories?.find((c: Category) => c.id === categoryId)?.name : null}
-                        />
-                      </SelectTrigger>
-                      <SelectContent side="bottom" align="end" className="z-[110] max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-xl">
-                        <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">Nenhuma categoria</SelectItem>
-                        {categories?.map((c: Category) => (
-                          <SelectItem hideCheck key={c.id} value={c.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {/* Category Row */}
+                  <Select value={categoryId} onValueChange={setCategoryId}>
+                    <SelectTrigger className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group [&>svg]:hidden">
+                      <div className="flex items-center gap-3">
+                        <Settings2 className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                        <span className="text-sm font-medium text-gray-600">Categoria</span>
+                      </div>
+                      <span className="text-sm font-semibold text-blue-600">
+                        {categoryId !== 'none' ? categories?.find((c: Category) => c.id === categoryId)?.name : 'Nenhuma'}
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent side="bottom" align="end" className="z-[110] max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-xl">
+                      <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">Nenhuma categoria</SelectItem>
+                      {categories?.map((c: Category) => (
+                        <SelectItem hideCheck key={c.id} value={c.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* ── GRUPO 3: REPETIR + DURAÇÃO ── */}
                 <div className="grid grid-cols-2 gap-2 mt-2">
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center justify-between p-2.5 bg-gray-50 border-[1.5px] border-gray-100 rounded-xl relative">
-                      <span className="text-[13px] font-medium text-gray-600 flex items-center gap-2">
-                        🔁 Repetir
-                        {recurrenceType !== 'none' && recurrenceType !== 'custom' && (
-                          <span className="text-[11px] text-violet-600 font-semibold">
-                            · {recurrenceType === 'daily' ? 'Diariamente' : recurrenceType === 'weekly' ? 'Semanalmente' : recurrenceType === 'weekdays' ? 'Dias úteis' : recurrenceType === 'monthly' ? 'Mensalmente' : 'Anualmente'}
+                  {/* Recurrence Row */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
+                      <div className="flex items-center gap-3">
+                        <Repeat className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                        <span className="text-sm font-medium text-gray-600">Repetir</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {recurrenceType !== 'none' && (
+                          <span className="text-xs font-semibold text-blue-600">
+                            {recurrenceType === 'daily' ? 'Diário' : recurrenceType === 'weekly' ? 'Semanal' : recurrenceType === 'weekdays' ? 'Dias úteis' : recurrenceType === 'monthly' ? 'Mensal' : 'Custom'}
                           </span>
                         )}
-                      </span>
-                      <Toggle
-                        checked={recurrenceType !== 'none'}
-                        onChange={(checked: boolean) => {
-                          if (!checked) {
-                            setRecurrenceType('none');
-                            setIsRecurrencePickerOpen(false);
-                          } else {
-                            setIsRecurrencePickerOpen(true);
-                            if (recurrenceType === 'none') {
-                              setRecurrenceType('daily');
+                        <Toggle
+                          checked={recurrenceType !== 'none'}
+                          onChange={(checked: boolean) => {
+                            if (!checked) {
+                              setRecurrenceType('none');
+                              setIsRecurrencePickerOpen(false);
+                            } else {
+                              setIsRecurrencePickerOpen(true);
+                              if (recurrenceType === 'none') {
+                                setRecurrenceType('daily');
+                              }
                             }
-                          }
-                        }}
-                      />
+                          }}
+                        />
+                      </div>
                     </div>
+                    
                     {recurrenceType !== 'none' && isRecurrencePickerOpen && (
-                      <div className="flex gap-1.5 mt-1 flex-wrap">
+                      <div className="flex gap-1.5 p-1 bg-gray-50/30 rounded-xl border border-gray-100/50 flex-wrap">
                         {[
-                          { id: 'daily', label: 'Diariamente' },
-                          { id: 'weekly', label: 'Semanalmente' },
-                          { id: 'weekdays', label: 'Dias úteis' },
-                          { id: 'monthly', label: 'Mensalmente' }
+                          { id: 'daily', label: 'Diário' },
+                          { id: 'weekly', label: 'Semanal' },
+                          { id: 'weekdays', label: 'Úteis' },
+                          { id: 'monthly', label: 'Mensal' }
                         ].map(freq => (
                           <button
                             key={freq.id}
                             type="button"
                             onClick={() => { setRecurrenceType(freq.id as any); setIsRecurrencePickerOpen(false); }}
-                            className={`px-3 py-1 rounded-full text-[12px] font-semibold border-[1.5px] transition-colors
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
                               ${recurrenceType === freq.id
-                                ? 'bg-violet-600 text-white border-violet-600'
-                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-violet-400'
+                                ? 'bg-blue-600 text-white shadow-sm'
+                                : 'text-gray-500 hover:bg-gray-100'
                               }`}
                           >
                             {freq.label}
@@ -1161,10 +1125,10 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                             setIsRecurrencePickerOpen(false);
                             setIsCustomRecurrenceModalOpen(true);
                           }}
-                          className={`px-3 py-1 rounded-full text-[12px] font-semibold border-[1.5px] transition-colors
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
                             ${recurrenceType === 'custom'
-                              ? 'bg-violet-600 text-white border-violet-600'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-violet-400'
+                              ? 'bg-blue-600 text-white shadow-sm'
+                              : 'text-gray-500 hover:bg-gray-100'
                             }`}
                         >
                           Personalizado...
@@ -1173,29 +1137,37 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-2.5 bg-gray-50 border-[1.5px] border-gray-100 rounded-xl">
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
-                      ⏱ Duração
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <button type="button" onClick={() => {
-                        const newDuration = Math.max(0, duration - 15);
-                        setDuration(newDuration);
-                        setDurationInput(formatDurationInput(newDuration));
-                      }}
-                        className="w-[22px] h-[22px] rounded-full border-[1.5px] border-gray-200 text-gray-500 text-[13px] flex items-center justify-center hover:bg-gray-100 transition-colors">
-                        −
+                  {/* Duration Row */}
+                  <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                      <span className="text-sm font-medium text-gray-600">Duração</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          const newDuration = Math.max(0, duration - 15);
+                          setDuration(newDuration);
+                          setDurationInput(formatDurationInput(newDuration));
+                        }}
+                        className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        <Minus className="w-4 h-4" />
                       </button>
-                      <span className="text-[13px] font-bold text-violet-600 w-8 text-center">
-                        {formatDurationInput(duration)}
+                      <span className="text-sm font-bold text-gray-700 min-w-[60px] text-center">
+                        {duration} min
                       </span>
-                      <button type="button" onClick={() => {
-                        const newDuration = duration + 15;
-                        setDuration(newDuration);
-                        setDurationInput(formatDurationInput(newDuration));
-                      }}
-                        className="w-[22px] h-[22px] rounded-full border-[1.5px] border-gray-200 text-gray-500 text-[13px] flex items-center justify-center hover:bg-gray-100 transition-colors">
-                        +
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          const newDuration = duration + 15;
+                          setDuration(newDuration);
+                          setDurationInput(formatDurationInput(newDuration));
+                        }}
+                        className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        <Plus className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
