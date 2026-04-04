@@ -586,30 +586,27 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
     
-    if (value.length > 4) {
-      value = value.slice(0, 4);
-    }
-
-    let formattedTime = value;
     if (value.length >= 3) {
-      formattedTime = `${value.slice(0, 2)}:${value.slice(2)}`;
+      const hours = value.slice(0, 2);
+      const minutes = value.slice(2, 4);
+      
+      // Validação de 24h
+      const validHours = Math.min(parseInt(hours, 10), 23).toString().padStart(2, '0');
+      
+      // Se já temos minutos, validamos também
+      let validMinutes = minutes;
+      if (minutes.length === 2) {
+        validMinutes = Math.min(parseInt(minutes, 10), 59).toString().padStart(2, '0');
+      }
+      
+      value = `${validHours}:${validMinutes}`;
+    } else if (value.length > 0) {
+      // Validação básica para as primeiras 2 horas
+      const hours = parseInt(value, 10);
+      if (hours > 23) value = '23';
     }
 
-    // Validate hours and minutes
-    if (formattedTime.length >= 2) {
-      const hours = parseInt(formattedTime.slice(0, 2));
-      if (hours > 23) {
-        formattedTime = `23${formattedTime.slice(2)}`;
-      }
-    }
-    if (formattedTime.length === 5) {
-      const minutes = parseInt(formattedTime.slice(3, 5));
-      if (minutes > 59) {
-        formattedTime = `${formattedTime.slice(0, 3)}59`;
-      }
-    }
-
-    setTime(formattedTime);
+    setTime(value.slice(0, 5));
   };
 
   useEffect(() => {
@@ -1024,9 +1021,12 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-3 z-[110]">
                         <input
-                          type="time"
+                          type="text"
                           value={time || ''}
-                          onChange={e => setTime(e.target.value)}
+                          onChange={handleTimeChange}
+                          inputMode="numeric"
+                          maxLength={5}
+                          placeholder="00:00"
                           className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-violet-500 outline-none"
                         />
                       </PopoverContent>
@@ -1387,30 +1387,27 @@ const TimeModal = ({ isOpen, onClose, task, onSave }: { isOpen: boolean; onClose
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
     
-    if (value.length > 4) {
-      value = value.slice(0, 4);
-    }
-
-    let formattedTime = value;
     if (value.length >= 3) {
-      formattedTime = `${value.slice(0, 2)}:${value.slice(2)}`;
+      const hours = value.slice(0, 2);
+      const minutes = value.slice(2, 4);
+      
+      // Validação de 24h
+      const validHours = Math.min(parseInt(hours, 10), 23).toString().padStart(2, '0');
+      
+      // Se já temos minutos, validamos também
+      let validMinutes = minutes;
+      if (minutes.length === 2) {
+        validMinutes = Math.min(parseInt(minutes, 10), 59).toString().padStart(2, '0');
+      }
+      
+      value = `${validHours}:${validMinutes}`;
+    } else if (value.length > 0) {
+      // Validação básica para as primeiras 2 horas
+      const hours = parseInt(value, 10);
+      if (hours > 23) value = '23';
     }
 
-    // Validate hours and minutes
-    if (formattedTime.length >= 2) {
-      const hours = parseInt(formattedTime.slice(0, 2));
-      if (hours > 23) {
-        formattedTime = `23${formattedTime.slice(2)}`;
-      }
-    }
-    if (formattedTime.length === 5) {
-      const minutes = parseInt(formattedTime.slice(3, 5));
-      if (minutes > 59) {
-        formattedTime = `${formattedTime.slice(0, 3)}59`;
-      }
-    }
-
-    setTime(formattedTime);
+    setTime(value.slice(0, 5));
   };
 
   if (!isOpen) return null;
@@ -1431,6 +1428,7 @@ const TimeModal = ({ isOpen, onClose, task, onSave }: { isOpen: boolean; onClose
           <input 
             type="text" 
             placeholder="00:00"
+            inputMode="numeric"
             maxLength={5}
             value={time}
             onChange={handleTimeChange}

@@ -73,29 +73,27 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
     
-    if (value.length > 4) {
-      value = value.slice(0, 4);
-    }
-
-    let formattedTime = value;
     if (value.length >= 3) {
-      formattedTime = `${value.slice(0, 2)}:${value.slice(2)}`;
+      const hours = value.slice(0, 2);
+      const minutes = value.slice(2, 4);
+      
+      // Validação de 24h
+      const validHours = Math.min(parseInt(hours, 10), 23).toString().padStart(2, '0');
+      
+      // Se já temos minutos, validamos também
+      let validMinutes = minutes;
+      if (minutes.length === 2) {
+        validMinutes = Math.min(parseInt(minutes, 10), 59).toString().padStart(2, '0');
+      }
+      
+      value = `${validHours}:${validMinutes}`;
+    } else if (value.length > 0) {
+      // Validação básica para as primeiras 2 horas
+      const hours = parseInt(value, 10);
+      if (hours > 23) value = '23';
     }
 
-    // Validate hours and minutes
-    if (formattedTime.length >= 2) {
-      const hours = parseInt(formattedTime.slice(0, 2));
-      if (hours > 23) {
-        formattedTime = `23${formattedTime.slice(2)}`;
-      }
-    }
-    if (formattedTime.length === 5) {
-      const minutes = parseInt(formattedTime.slice(3, 5));
-      if (minutes > 59) {
-        formattedTime = `${formattedTime.slice(0, 3)}59`;
-      }
-    }
-
+    const formattedTime = value.slice(0, 5);
     setTime(formattedTime);
 
     // Auto-select period
@@ -314,19 +312,12 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                       <div className="relative">
                         <Clock size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
-                          type="time"
+                          type="text"
                           value={time || ''}
-                          onChange={e => {
-                            const newTime = e.target.value;
-                            setTime(newTime);
-                            if (newTime.length >= 2) {
-                              const hours = parseInt(newTime.slice(0, 2));
-                              if (hours >= 0 && hours < 12) setPeriod('Manhã');
-                              else if (hours >= 12 && hours < 18) setPeriod('Tarde');
-                              else if (hours >= 18 && hours <= 23) setPeriod('Noite');
-                            }
-                          }}
-                          placeholder="--:--"
+                          onChange={handleTimeChange}
+                          inputMode="numeric"
+                          maxLength={5}
+                          placeholder="00:00"
                           className="w-full h-[38px] border-[1.5px] border-gray-200 rounded-lg pl-8 pr-3
                                      text-sm font-semibold text-violet-600
                                      focus:outline-none focus:border-violet-500"
@@ -438,6 +429,7 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                       value={time}
                       onChange={handleTimeChange}
                       placeholder="00:00"
+                      inputMode="numeric"
                       maxLength={5}
                       className="w-24 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-base md:text-[14px]"
                     />
