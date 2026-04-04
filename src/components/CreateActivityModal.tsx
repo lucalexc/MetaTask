@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Target, RefreshCw, Loader2, Clock, Calendar, Repeat, Settings2, Minus, Plus } from 'lucide-react';
+import { X, Target, RefreshCw, Loader2, Clock, Calendar, Repeat } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { supabase } from '@/src/lib/supabase';
 import { toast } from 'sonner';
@@ -286,81 +286,89 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
             </div>
 
             {/* Name */}
-            <div className="mb-2">
+            <div>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ex: Meditação, Ler 20 páginas..."
-                className="w-full h-12 border border-gray-200 rounded-xl px-4 text-base font-semibold
+                className="w-full h-11 border-[1.5px] border-gray-200 rounded-xl px-3.5 text-[15px] font-medium
                            placeholder:text-gray-300 placeholder:font-normal
-                           focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all"
+                           focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/8"
               />
             </div>
 
             {/* Conditional Fields */}
-            <div className="space-y-2">
+            <div className="space-y-4">
               {type === 'routine' ? (
-                <>
-                  {/* Time Row */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
-                    <div className="flex items-center gap-3">
-                      <Clock className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                      <span className="text-sm font-medium text-gray-600">Horário</span>
+                <div className="space-y-4">
+                  {/* Horário + Descrição */}
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {/* Horário */}
+                    <div>
+                      <label className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 block mb-1.5">
+                        Horário
+                      </label>
+                      <div className="relative">
+                        <Clock size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="text"
+                          value={time || ''}
+                          onChange={handleTimeChange}
+                          inputMode="numeric"
+                          maxLength={5}
+                          placeholder="00:00"
+                          className="w-full h-[38px] border-[1.5px] border-gray-200 rounded-lg pl-8 pr-3
+                                     text-sm font-semibold text-violet-600
+                                     focus:outline-none focus:border-violet-500"
+                        />
+                      </div>
                     </div>
-                    <input
-                      type="text"
-                      value={time || ''}
-                      onChange={handleTimeChange}
-                      inputMode="numeric"
-                      maxLength={5}
-                      placeholder="00:00"
-                      className="w-20 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-sm cursor-pointer"
-                    />
-                  </div>
 
-                  {/* Description Row */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
-                    <div className="flex items-center gap-3">
-                      <Settings2 className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                      <span className="text-sm font-medium text-gray-600">Descrição</span>
+                    {/* Descrição */}
+                    <div>
+                      <label className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 block mb-1.5">
+                        Descrição <span className="normal-case font-normal tracking-normal text-gray-300">(opcional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={description}
+                        onChange={e => setDescription(e.target.value)}
+                        placeholder="Detalhes..."
+                        className="w-full h-[38px] border-[1.5px] border-gray-200 rounded-lg px-3
+                                   text-sm text-gray-600 placeholder:text-gray-300
+                                   focus:outline-none focus:border-violet-500"
+                      />
                     </div>
-                    <input
-                      type="text"
-                      value={description}
-                      onChange={e => setDescription(e.target.value)}
-                      placeholder="Opcional"
-                      className="flex-1 bg-transparent text-right font-medium text-gray-700 focus:ring-0 border-none p-0 text-sm placeholder:text-gray-300"
-                    />
                   </div>
                   
                   {/* Weekdays Section */}
-                  <div className="p-3 bg-gray-50/50 border border-gray-100 rounded-xl">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm font-medium text-gray-600">Dias da Semana</span>
-                      </div>
-                      <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        {selectedDays.length === 7 ? 'Todos'
-                          : selectedDays.length === 0 ? 'Nenhum'
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                        Dias da Semana
+                      </label>
+                      <span className="text-xs font-semibold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full">
+                        {selectedDays.length === 7 ? 'Todos os dias'
+                          : selectedDays.length === 0 ? 'Nenhum dia'
                           : `${selectedDays.length} ${selectedDays.length === 1 ? 'dia' : 'dias'}`}
                       </span>
                     </div>
 
                     <div className="flex gap-1.5">
                       {[
-                        { key: 1, abbr: 'S' },
-                        { key: 2, abbr: 'T' },
-                        { key: 3, abbr: 'Q' },
-                        { key: 4, abbr: 'Q' },
-                        { key: 5, abbr: 'S' },
-                        { key: 6, abbr: 'S' },
-                        { key: 0, abbr: 'D' },
+                        { key: 0, abbr: 'Do', full: 'Domingo' },
+                        { key: 1, abbr: 'Se', full: 'Segunda' },
+                        { key: 2, abbr: 'Te', full: 'Terça'   },
+                        { key: 3, abbr: 'Qa', full: 'Quarta'  },
+                        { key: 4, abbr: 'Qi', full: 'Quinta'  },
+                        { key: 5, abbr: 'Sx', full: 'Sexta'   },
+                        { key: 6, abbr: 'Sa', full: 'Sábado'  },
                       ].map(day => (
                         <button
                           key={day.key}
                           type="button"
+                          title={day.full}
                           onClick={() => {
                             if (selectedDays.includes(day.key)) {
                               setSelectedDays(selectedDays.filter(d => d !== day.key));
@@ -368,10 +376,10 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                               setSelectedDays([...selectedDays, day.key].sort());
                             }
                           }}
-                          className={`flex-1 h-9 rounded-lg text-xs font-bold transition-all
+                          className={`flex-1 h-9 rounded-lg text-[11px] font-bold border-[1.5px] transition-all
                             ${selectedDays.includes(day.key)
-                              ? 'bg-blue-600 text-white shadow-sm shadow-blue-200'
-                              : 'bg-white border border-gray-100 text-gray-400 hover:border-blue-200 hover:text-blue-500'
+                              ? 'bg-violet-50 border-violet-500 text-violet-600'
+                              : 'bg-gray-50 border-gray-200 text-gray-400 hover:border-violet-300 hover:text-violet-500'
                             }`}
                         >
                           {day.abbr}
@@ -379,56 +387,42 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                       ))}
                     </div>
                   </div>
-                </>
+                </div>
               ) : (
-                <>
-                  {/* Description Row for Goal */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
-                    <div className="flex items-center gap-3">
-                      <Settings2 className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                      <span className="text-sm font-medium text-gray-600">Descrição</span>
-                    </div>
-                    <input
-                      type="text"
+                <div className="space-y-4">
+                  {/* Description for Goal */}
+                  <div className="space-y-2">
+                    <label className="text-[13px] font-bold text-[#202020] ml-1">Descrição (Opcional)</label>
+                    <textarea
                       value={description}
-                      onChange={e => setDescription(e.target.value)}
-                      placeholder="Opcional"
-                      className="flex-1 bg-transparent text-right font-medium text-gray-700 focus:ring-0 border-none p-0 text-sm placeholder:text-gray-300"
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Detalhes sobre a atividade..."
+                      rows={2}
+                      className="w-full bg-gray-50/30 border border-gray-100 rounded-xl px-3 py-2.5 text-base md:text-[13px] text-[#202020] placeholder-[#808080] focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all duration-200 resize-none"
                     />
                   </div>
 
-                  {/* Duration Row */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
-                    <div className="flex items-center gap-3">
-                      <Calendar className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                      <span className="text-sm font-medium text-gray-600">Duração</span>
+                  {/* Duration Setting */}
+                  <div className="flex items-center justify-between p-3 bg-gray-50/50 rounded-lg border border-gray-100">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <Calendar className="w-4 h-4 text-gray-400" />
+                      <span>Duração (Dias)</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <button 
-                        type="button" 
-                        onClick={() => setDuration(String(Math.max(1, parseInt(duration || '1') - 1)))}
-                        className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="text-sm font-bold text-gray-700 min-w-[60px] text-center">
-                        {duration || '1'} dias
-                      </span>
-                      <button 
-                        type="button" 
-                        onClick={() => setDuration(String(parseInt(duration || '1') + 1))}
-                        className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <input
+                      type="number"
+                      min="1"
+                      value={duration}
+                      onChange={(e) => setDuration(e.target.value)}
+                      placeholder="Ex: 30"
+                      className="w-24 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-base md:text-[14px]"
+                    />
                   </div>
 
-                  {/* Time Row */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
-                    <div className="flex items-center gap-3">
-                      <Clock className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                      <span className="text-sm font-medium text-gray-600">Horário</span>
+                  {/* Time Setting */}
+                  <div className="flex items-center justify-between p-3 bg-gray-50/50 rounded-lg border border-gray-100">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <Clock className="w-4 h-4 text-gray-400" />
+                      <span>Horário</span>
                     </div>
                     <input
                       type="text"
@@ -437,43 +431,32 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
                       placeholder="00:00"
                       inputMode="numeric"
                       maxLength={5}
-                      className="w-20 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-sm cursor-pointer"
+                      className="w-24 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-base md:text-[14px]"
                     />
                   </div>
 
-                  {/* Repetitions Row */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
-                    <div className="flex items-center gap-3">
-                      <Repeat className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                      <span className="text-sm font-medium text-gray-600">Repetições/Dia</span>
+                  {/* Repetitions Setting */}
+                  <div className="flex items-center justify-between p-3 bg-gray-50/50 rounded-lg border border-gray-100">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <Repeat className="w-4 h-4 text-gray-400" />
+                      <span>Repetições/Dia</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <button 
-                        type="button" 
-                        onClick={() => setRepetitions(String(Math.max(1, parseInt(repetitions || '1') - 1)))}
-                        className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="text-sm font-bold text-gray-700 min-w-[60px] text-center">
-                        {repetitions || '1'}x
-                      </span>
-                      <button 
-                        type="button" 
-                        onClick={() => setRepetitions(String(parseInt(repetitions || '1') + 1))}
-                        className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <input
+                      type="number"
+                      min="1"
+                      value={repetitions}
+                      onChange={(e) => setRepetitions(e.target.value)}
+                      placeholder="Ex: 1"
+                      className="w-24 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-base md:text-[14px]"
+                    />
                   </div>
-                </>
+                </div>
               )}
             </div>
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 mt-2 bg-gray-50/50">
+          <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 mt-3 bg-gray-50 rounded-b-xl">
             {activityToEdit ? (
               <button
                 onClick={() => setIsDeleteModalOpen(true)}
@@ -484,17 +467,17 @@ export default function CreateActivityModal({ isOpen, onClose, onSuccess, activi
               </button>
             ) : (
               <span className="text-xs text-gray-400 flex items-center gap-1">
-                ⚡ <span className="text-blue-600 font-bold">+{type === 'routine' ? '10' : '50'} XP</span>
+                ⚡ <span className="text-violet-500 font-semibold">+{type === 'routine' ? '10' : '50'} XP</span> por conclusão
               </span>
             )}
             <div className="flex items-center gap-2">
               <button type="button" onClick={onClose} disabled={isLoading}
-                className="px-4 h-10 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-50">
+                className="px-4 h-9 rounded-lg text-sm text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-50">
                 Cancelar
               </button>
               <button type="button" onClick={handleSave} disabled={isLoading || !name.trim()}
-                className="px-6 h-10 rounded-xl text-sm font-bold bg-blue-600 text-white
-                           hover:bg-blue-700 transition-all disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-blue-200 active:scale-95">
+                className="px-5 h-9 rounded-lg text-sm font-semibold bg-violet-600 text-white
+                           hover:bg-violet-700 transition-colors disabled:opacity-50 flex items-center gap-2 shadow-sm">
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                 {isLoading ? 'Salvando...' : 'Salvar'}
               </button>
