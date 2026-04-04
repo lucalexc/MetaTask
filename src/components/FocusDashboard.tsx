@@ -245,7 +245,7 @@ export default function FocusDashboard() {
                   : "bg-primary text-white hover:bg-primary-hover hover:scale-105"
               )}
             >
-              {isRunning ? <Pause className="w-6 h-6" fill="currentColor" /> : <Play className="w-6 h-6" fill="currentColor" className="ml-1" />}
+              {isRunning ? <Pause className="w-6 h-6" fill="currentColor" /> : <Play className="w-6 h-6 ml-1" fill="currentColor" />}
             </button>
             
             <button

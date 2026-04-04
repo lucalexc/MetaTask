@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
 import { startOfDay, endOfDay, format } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 export type ActivityType = 'routine' | 'goal';
 export type Period = 'morning' | 'afternoon' | 'night' | 'anytime';
@@ -30,9 +31,10 @@ export interface ActivityLog {
   id: string;
   activity_id: string;
   user_id: string;
-  completed_at: string;
+  completed_at: string; // Now used as YYYY-MM-DD to avoid timezone issues
   streak_count: number;
   xp_earned: number;
+  is_completed?: boolean;
 }
 
 export interface DailyActivity extends Activity {
@@ -56,8 +58,7 @@ export function useActivities(date: Date = new Date()) {
 
     try {
       const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const start = startOfDay(date).toISOString();
-      const end = endOfDay(date).toISOString();
+      const targetDateStr = format(date, 'yyyy-MM-dd');
 
       // 1. Fetch active activities for the user
       const { data: allActivities, error: activitiesError } = await supabase
@@ -97,21 +98,22 @@ export function useActivities(date: Date = new Date()) {
         return true;
       });
 
-      // 2. Fetch logs for today
+      // 2. Fetch logs for today using normalized date
       const { data: logs, error: logsError } = await supabase
         .from('activity_logs')
         .select('*')
         .eq('user_id', user.id)
-        .gte('completed_at', start)
-        .lte('completed_at', end);
+        .eq('completed_at', targetDateStr);
 
       if (logsError) throw logsError;
 
       // 3. Combine activities with logs
       const dailyActivities: DailyActivity[] = todayActivities.map((activity: any) => {
         const activityLogs = (logs || []).filter((log: ActivityLog) => log.activity_id === activity.id);
+        
+        // Check if any log has is_completed = true, or if we are just counting logs (legacy)
+        const isCompleted = activityLogs.some(log => log.is_completed !== false) && activityLogs.length >= activity.reps_per_day;
         const completedReps = activityLogs.length;
-        const isCompleted = completedReps >= activity.reps_per_day;
         
         // Get the latest streak from the most recent log, or 0
         const latestLog = activityLogs.sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())[0];
@@ -153,8 +155,7 @@ export function useActivities(date: Date = new Date()) {
     if (!user) return;
 
     const isCompleting = !activity.is_completed;
-    const start = startOfDay(date).toISOString();
-    const end = endOfDay(date).toISOString();
+    const targetDateStr = format(date, 'yyyy-MM-dd');
 
     // Optimistic update
     setActivities(prev => prev.map(a => 
@@ -169,44 +170,35 @@ export function useActivities(date: Date = new Date()) {
     ));
 
     try {
-      if (isCompleting) {
-        // Insert log
-        const { error } = await supabase
-          .from('activity_logs')
-          .insert([{
-            activity_id: activity.id,
-            user_id: user.id,
-            xp_earned: activity.xp_reward,
-            streak_count: activity.streak + 1,
-            completed_at: date.toISOString()
-          }]);
+      // NOTE: Ensure the 'activity_logs' table has RLS policies allowing INSERT and UPDATE 
+      // for the authenticated user (auth.uid() = user_id).
+      // Also assumes a unique constraint on (activity_id, user_id, completed_at) for upsert to work correctly.
+      
+      const { error } = await supabase
+        .from('activity_logs')
+        .upsert({
+          activity_id: activity.id,
+          user_id: user.id,
+          xp_earned: isCompleting ? activity.xp_reward : 0,
+          streak_count: isCompleting ? activity.streak + 1 : activity.streak,
+          completed_at: targetDateStr,
+          is_completed: isCompleting
+        }, {
+          onConflict: 'activity_id,user_id,completed_at'
+        });
 
-        if (error) throw error;
+      if (error) throw error;
 
-        // Invalidate queries for InsightsDashboard (if activities are ever added there)
-        await queryClient.invalidateQueries({ queryKey: ['activities'] });
-        await queryClient.invalidateQueries({ queryKey: ['tasks'] }); // In case they are related
-        await queryClient.invalidateQueries({ queryKey: ['insights'] });
-      } else {
-        // Delete log for today
-        const { error } = await supabase
-          .from('activity_logs')
-          .delete()
-          .eq('activity_id', activity.id)
-          .eq('user_id', user.id)
-          .gte('completed_at', start)
-          .lte('completed_at', end);
-
-        if (error) throw error;
-
-        // Invalidate queries for InsightsDashboard
-        await queryClient.invalidateQueries({ queryKey: ['activities'] });
-        await queryClient.invalidateQueries({ queryKey: ['tasks'] });
-        await queryClient.invalidateQueries({ queryKey: ['insights'] });
-      }
+      // Invalidate queries to keep UI in sync
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['activities'] }),
+        queryClient.invalidateQueries({ queryKey: ['tasks'] }),
+        queryClient.invalidateQueries({ queryKey: ['insights'] })
+      ]);
     } catch (err) {
       console.error('Error toggling activity:', err);
-      // Revert optimistic update
+      toast.error('Falha ao atualizar atividade. Verifique sua conexão.');
+      // Revert optimistic update by refetching
       fetchActivities();
     }
   };

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
-import { startOfDay, endOfDay, addDays, isBefore, formatISO } from 'date-fns';
+import { startOfDay, endOfDay, addDays, isBefore, format } from 'date-fns';
 import { Activity, ActivityLog } from './useActivities';
 
 export function useWeeklyRoutineStatus(weekStart: Date) {
@@ -23,8 +23,8 @@ export function useWeeklyRoutineStatus(weekStart: Date) {
         return; // No past days in this week
       }
 
-      const startStr = startOfDay(weekStart).toISOString();
-      const endStr = endOfDay(checkEnd).toISOString();
+      const startStr = format(weekStart, 'yyyy-MM-dd');
+      const endStr = format(checkEnd, 'yyyy-MM-dd');
 
       try {
         // Fetch all active routines
@@ -37,7 +37,7 @@ export function useWeeklyRoutineStatus(weekStart: Date) {
 
         if (routinesError) throw routinesError;
 
-        // Fetch all logs for the period
+        // Fetch all logs for the period using normalized date
         const { data: logs, error: logsError } = await supabase
           .from('activity_logs')
           .select('*')
@@ -53,8 +53,7 @@ export function useWeeklyRoutineStatus(weekStart: Date) {
         let currentDay = startOfDay(weekStart);
         while (!isBefore(checkEnd, currentDay)) {
           const dayOfWeek = currentDay.getDay();
-          const dayStartStr = startOfDay(currentDay).toISOString();
-          const dayEndStr = endOfDay(currentDay).toISOString();
+          const dayStr = format(currentDay, 'yyyy-MM-dd');
 
           // Find routines active on this day
           const activeRoutinesOnDay = (routines || []).filter(routine => {
@@ -75,11 +74,12 @@ export function useWeeklyRoutineStatus(weekStart: Date) {
             for (const routine of activeRoutinesOnDay) {
               const routineLogs = (logs || []).filter(log => 
                 log.activity_id === routine.id && 
-                log.completed_at >= dayStartStr && 
-                log.completed_at <= dayEndStr
+                log.completed_at === dayStr
               );
               
-              if (routineLogs.length < (routine.reps_per_day || 1)) {
+              const isCompleted = routineLogs.some(log => log.is_completed !== false) && routineLogs.length >= (routine.reps_per_day || 1);
+              
+              if (!isCompleted) {
                 allCompleted = false;
                 break;
               }
