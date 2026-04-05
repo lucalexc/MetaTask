@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, isSameDay, eachDayOfInterval, addDays } from 'date-fns';
 import { cn } from '@/src/lib/utils';
+import { DayStatus } from '@/src/hooks/useWeeklyRoutineStatus';
 
 interface WeeklyCalendarProps {
   selectedDate: Date;
@@ -10,8 +11,8 @@ interface WeeklyCalendarProps {
   weekDirection: number;
   handlePrevWeek: () => void;
   handleNextWeek: () => void;
-  // Optional function to determine if a day should be marked as "failed" (red)
-  isDayFailed?: (date: Date) => boolean;
+  // Optional function to determine the status of a day
+  getDayStatus?: (date: Date) => DayStatus | undefined;
 }
 
 export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
@@ -21,7 +22,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
   weekDirection,
   handlePrevWeek,
   handleNextWeek,
-  isDayFailed
+  getDayStatus
 }) => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -78,7 +79,8 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
               const label = dayLabels[index];
               const isSelected = isSameDay(day, selectedDate);
               const isToday = isSameDay(day, new Date());
-              const failed = isDayFailed ? isDayFailed(day) : false;
+              const status = getDayStatus ? getDayStatus(day) : undefined;
+              const isFuture = day > new Date() && !isToday;
               
               return (
                 <div key={day.toISOString()} className="flex flex-col items-center justify-center gap-1.5">
@@ -91,16 +93,20 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                       "flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-all ease-out duration-200",
                       isSelected 
                         ? "bg-[#1f60c2] text-white font-semibold shadow-md" 
-                        : failed
+                        : status === 'failed'
                           ? "bg-red-50 text-red-600 hover:bg-red-100"
-                          : "hover:bg-gray-100 text-[#202020]"
+                          : status === 'success'
+                            ? "bg-green-50 text-green-600 hover:bg-green-100"
+                            : "hover:bg-gray-100 text-[#202020]"
                     )}
                   >
                     <span className={cn(
                       "text-sm sm:text-base",
-                      isToday && !isSelected && !failed && "text-[#1f60c2] font-bold",
-                      failed && !isSelected && "text-red-600 font-bold",
-                      !isSelected && !isToday && !failed && "font-medium"
+                      isToday && !isSelected && status !== 'failed' && status !== 'success' && "text-[#1f60c2] font-bold",
+                      status === 'failed' && !isSelected && "text-red-600 font-bold",
+                      status === 'success' && !isSelected && "text-green-600 font-bold",
+                      !isSelected && !isToday && status !== 'failed' && status !== 'success' && "font-medium",
+                      !isSelected && !isToday && (status === 'neutral' || isFuture) && "text-gray-400"
                     )}>
                       {format(day, 'd')}
                     </span>

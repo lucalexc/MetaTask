@@ -24,7 +24,7 @@ export default function MyRoutinePage({
   const { activities, isLoading, error, toggleActivity, refresh } = useActivities(selectedDate);
   const [activityToEdit, setActivityToEdit] = useState<DailyActivity | null>(null);
   
-  const { failedDays } = useWeeklyRoutineStatus(currentWeekStart);
+  const { dayStatuses } = useWeeklyRoutineStatus(currentWeekStart);
 
   const handlePrevWeek = () => {
     setWeekDirection(-1);
@@ -40,8 +40,8 @@ export default function MyRoutinePage({
   const isFutureDate = isAfter(startOfDay(selectedDate), startOfDay(new Date()));
   const isLocked = isPastDate || isFutureDate;
 
-  const isDayFailed = (date: Date) => {
-    return failedDays.has(startOfDay(date).toISOString());
+  const getDayStatus = (date: Date) => {
+    return dayStatuses[startOfDay(date).toISOString()];
   };
 
   const filteredActivities = activities || [];
@@ -77,7 +77,7 @@ export default function MyRoutinePage({
             weekDirection={weekDirection}
             handlePrevWeek={handlePrevWeek}
             handleNextWeek={handleNextWeek}
-            isDayFailed={isDayFailed}
+            getDayStatus={getDayStatus}
           />
           <div className="mt-2 text-center sm:text-left px-4 md:px-0">
             <h2 className="text-sm text-gray-500 font-medium capitalize">

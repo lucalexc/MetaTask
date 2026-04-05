@@ -4,9 +4,11 @@ import { useAuth } from '../lib/AuthContext';
 import { startOfDay, endOfDay, addDays, isBefore, format } from 'date-fns';
 import { Activity, ActivityLog } from './useActivities';
 
+export type DayStatus = 'success' | 'failed' | 'neutral';
+
 export function useWeeklyRoutineStatus(weekStart: Date) {
   const { user } = useAuth();
-  const [failedDays, setFailedDays] = useState<Set<string>>(new Set());
+  const [dayStatuses, setDayStatuses] = useState<Record<string, DayStatus>>({});
 
   useEffect(() => {
     if (!user) return;
@@ -19,7 +21,7 @@ export function useWeeklyRoutineStatus(weekStart: Date) {
       const checkEnd = isBefore(weekEnd, today) ? weekEnd : addDays(today, -1);
       
       if (isBefore(checkEnd, weekStart)) {
-        setFailedDays(new Set());
+        setDayStatuses({});
         return; // No past days in this week
       }
 
@@ -47,13 +49,14 @@ export function useWeeklyRoutineStatus(weekStart: Date) {
 
         if (logsError) throw logsError;
 
-        const newFailedDays = new Set<string>();
+        const newStatuses: Record<string, DayStatus> = {};
 
         // Check each day from weekStart to checkEnd
         let currentDay = startOfDay(weekStart);
         while (!isBefore(checkEnd, currentDay)) {
           const dayOfWeek = currentDay.getDay();
           const dayStr = format(currentDay, 'yyyy-MM-dd');
+          const isoString = currentDay.toISOString();
 
           // Find routines active on this day
           const activeRoutinesOnDay = (routines || []).filter(routine => {
@@ -85,15 +88,15 @@ export function useWeeklyRoutineStatus(weekStart: Date) {
               }
             }
 
-            if (!allCompleted) {
-              newFailedDays.add(currentDay.toISOString());
-            }
+            newStatuses[isoString] = allCompleted ? 'success' : 'failed';
+          } else {
+            newStatuses[isoString] = 'neutral';
           }
 
           currentDay = addDays(currentDay, 1);
         }
 
-        setFailedDays(newFailedDays);
+        setDayStatuses(newStatuses);
       } catch (error) {
         console.error('Error fetching weekly routine status:', error);
       }
@@ -102,5 +105,5 @@ export function useWeeklyRoutineStatus(weekStart: Date) {
     fetchStatus();
   }, [user, weekStart.toISOString()]);
 
-  return { failedDays };
+  return { dayStatuses };
 }
