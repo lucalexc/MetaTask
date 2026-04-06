@@ -5,7 +5,7 @@ import {
   ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause, Trash2, Tag, Minus, Filter, Settings2
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
-import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, addDays, startOfMonth, endOfMonth, getDay, addMonths, subMonths, parseISO, isBefore, startOfDay, addWeeks, addYears } from 'date-fns';
+import { format, isSameDay, isSameMonth, startOfWeek, endOfWeek, eachDayOfInterval, addDays, startOfMonth, endOfMonth, getDay, addMonths, subMonths, parseISO, isBefore, startOfDay, addWeeks, addYears } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/src/components/ui/button';
 import { WeeklyCalendar } from './WeeklyCalendar';
@@ -528,8 +528,19 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
   const [customRecurrenceEndType, setCustomRecurrenceEndType] = useState<'never' | 'date'>('never');
   const [customRecurrenceEndDate, setCustomRecurrenceEndDate] = useState<Date | null>(null);
   const [taskDate, setTaskDate] = useState<Date>(new Date());
+  const [viewMonth, setViewMonth] = useState<Date>(new Date());
   const [projectId, setProjectId] = useState<string>('none');
   const [categoryId, setCategoryId] = useState<string>('none');
+
+  const handlePrevMonth = () => {
+    if (isBefore(startOfMonth(new Date()), startOfMonth(viewMonth))) {
+      setViewMonth(subMonths(viewMonth, 1));
+    }
+  };
+
+  const handleNextMonth = () => {
+    setViewMonth(addMonths(viewMonth, 1));
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -567,6 +578,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
           setCustomRecurrenceUnit('year');
         }
         setTaskDate(taskToEdit.due_date ? new Date(taskToEdit.due_date) : new Date());
+        setViewMonth(taskToEdit.due_date ? new Date(taskToEdit.due_date) : new Date());
         setProjectId(taskToEdit.project_id || 'none');
         setCategoryId(taskToEdit.category_id || 'none');
       } else {
@@ -583,6 +595,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
         setCustomRecurrenceEndType('never');
         setCustomRecurrenceEndDate(null);
         setTaskDate(new Date());
+        setViewMonth(new Date());
         setProjectId('none');
         setCategoryId('none');
       }
@@ -713,32 +726,61 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                       <button onClick={() => { setTaskDate(addDays(new Date(), 5)); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Coffee className="w-4 h-4 text-purple-500" /> Próximo fim de semana</button>
                       <button onClick={() => { setTaskDate(new Date()); setIsDatePickerOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-[#202020] hover:bg-gray-100 rounded-lg text-left transition-colors ease-out duration-200"><Ban className="w-4 h-4 text-[#808080]" /> Sem vencimento</button>
                     </div>
-                    <div className="p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="font-bold text-[14px] text-[#202020]">Março 2026</span>
-                        <div className="flex gap-1">
-                          <button className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors"><ChevronLeft className="w-4 h-4" /></button>
-                          <button className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors"><ChevronRight className="w-4 h-4" /></button>
+                      <div className="p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="font-bold text-[14px] text-[#202020] capitalize">
+                            {format(viewMonth, 'MMMM yyyy', { locale: ptBR })}
+                          </span>
+                          <div className="flex gap-1">
+                            <button 
+                              onClick={handlePrevMonth}
+                              disabled={!isBefore(startOfMonth(new Date()), startOfMonth(viewMonth))}
+                              className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={handleNextMonth}
+                              className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors"
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-7 gap-1 text-center text-[11px] mb-2 text-[#808080] font-bold uppercase tracking-wider">
+                          <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
+                        </div>
+                        <div className="grid grid-cols-7 gap-1 text-center text-[13px]">
+                          {eachDayOfInterval({
+                            start: startOfWeek(startOfMonth(viewMonth)),
+                            end: endOfWeek(endOfMonth(viewMonth))
+                          }).map((day, i) => {
+                            const isCurrentMonth = isSameMonth(day, viewMonth);
+                            const isPast = isBefore(startOfDay(day), startOfDay(new Date()));
+                            return (
+                              <button 
+                                key={i} 
+                                onClick={() => { 
+                                  if (!isPast) {
+                                    setTaskDate(day); 
+                                    setIsDatePickerOpen(false); 
+                                  }
+                                }}
+                                disabled={isPast}
+                                className={cn(
+                                  "w-7 h-7 rounded-full flex items-center justify-center transition-colors ease-out duration-200",
+                                  !isCurrentMonth && "text-gray-300",
+                                  isSameDay(day, taskDate) && "bg-[#1f60c2] text-white hover:bg-[#1a50a3]",
+                                  !isSameDay(day, taskDate) && isCurrentMonth && "hover:bg-gray-100",
+                                  isPast && "opacity-50 cursor-not-allowed pointer-events-none"
+                                )}
+                              >
+                                {format(day, 'd')}
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
-                      <div className="grid grid-cols-7 gap-1 text-center text-[11px] mb-2 text-[#808080] font-bold uppercase tracking-wider">
-                        <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
-                      </div>
-                      <div className="grid grid-cols-7 gap-1 text-center text-[13px]">
-                        {Array.from({length: 31}).map((_, i) => {
-                          const newDate = new Date(2026, 2, i + 1);
-                          return (
-                            <button 
-                              key={i} 
-                              onClick={() => { setTaskDate(newDate); setIsDatePickerOpen(false); }}
-                              className={cn("w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors ease-out duration-200", isSameDay(newDate, taskDate) && "bg-[#1f60c2] text-white hover:bg-[#1a50a3]")}
-                            >
-                              {i + 1}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
                   </PopoverContent>
                 </Popover>
 
@@ -1046,25 +1088,54 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                       </div>
                       <div className="p-4">
                         <div className="flex items-center justify-between mb-4">
-                          <span className="font-bold text-[14px] text-[#202020]">Março 2026</span>
+                          <span className="font-bold text-[14px] text-[#202020] capitalize">
+                            {format(viewMonth, 'MMMM yyyy', { locale: ptBR })}
+                          </span>
                           <div className="flex gap-1">
-                            <button className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors"><ChevronLeft className="w-4 h-4" /></button>
-                            <button className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors"><ChevronRight className="w-4 h-4" /></button>
+                            <button 
+                              onClick={handlePrevMonth}
+                              disabled={!isBefore(startOfMonth(new Date()), startOfMonth(viewMonth))}
+                              className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={handleNextMonth}
+                              className="p-1 hover:bg-gray-100 rounded text-[#808080] hover:text-[#202020] transition-colors"
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
                           </div>
                         </div>
                         <div className="grid grid-cols-7 gap-1 text-center text-[11px] mb-2 text-[#808080] font-bold uppercase tracking-wider">
                           <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
                         </div>
                         <div className="grid grid-cols-7 gap-1 text-center text-[13px]">
-                          {Array.from({length: 31}).map((_, i) => {
-                            const newDate = new Date(2026, 2, i + 1);
+                          {eachDayOfInterval({
+                            start: startOfWeek(startOfMonth(viewMonth)),
+                            end: endOfWeek(endOfMonth(viewMonth))
+                          }).map((day, i) => {
+                            const isCurrentMonth = isSameMonth(day, viewMonth);
+                            const isPast = isBefore(startOfDay(day), startOfDay(new Date()));
                             return (
                               <button 
                                 key={i} 
-                                onClick={() => { setTaskDate(newDate); setIsDatePickerOpen(false); }}
-                                className={cn("w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors ease-out duration-200", isSameDay(newDate, taskDate) && "bg-[#1f60c2] text-white hover:bg-[#1a50a3]")}
+                                onClick={() => { 
+                                  if (!isPast) {
+                                    setTaskDate(day); 
+                                    setIsDatePickerOpen(false); 
+                                  }
+                                }}
+                                disabled={isPast}
+                                className={cn(
+                                  "w-7 h-7 rounded-full flex items-center justify-center transition-colors ease-out duration-200",
+                                  !isCurrentMonth && "text-gray-300",
+                                  isSameDay(day, taskDate) && "bg-[#1f60c2] text-white hover:bg-[#1a50a3]",
+                                  !isSameDay(day, taskDate) && isCurrentMonth && "hover:bg-gray-100",
+                                  isPast && "opacity-50 cursor-not-allowed pointer-events-none"
+                                )}
                               >
-                                {i + 1}
+                                {format(day, 'd')}
                               </button>
                             );
                           })}
