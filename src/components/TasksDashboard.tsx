@@ -5,7 +5,7 @@ import {
   ListTodo, Clock, Repeat, Target, X, Flag, Timer, Sun, CalendarDays, Coffee, Ban, ChevronLeft, ChevronRight, Kanban, GripVertical, Inbox, Loader2, Play, Pause, Trash2, Tag, Minus, Filter, Settings2
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
-import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, addDays, startOfMonth, endOfMonth, getDay, addMonths, subMonths, parseISO, isBefore, startOfDay } from 'date-fns';
+import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, addDays, startOfMonth, endOfMonth, getDay, addMonths, subMonths, parseISO, isBefore, startOfDay, addWeeks, addYears } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/src/components/ui/button';
 import { WeeklyCalendar } from './WeeklyCalendar';
@@ -496,8 +496,8 @@ const Toggle = ({ checked, onChange, onChecked }: any) => (
       if (newVal && onChecked) onChecked();
     }}
     className={cn(
-      "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-      checked ? "bg-violet-600" : "bg-gray-200"
+      "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#1f60c2] focus:ring-offset-2",
+      checked ? "bg-[#1f60c2]" : "bg-gray-200"
     )}
   >
     <span
@@ -517,13 +517,11 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
   const [description, setDescription] = useState('');
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
-  const [isRecurrencePickerOpen, setIsRecurrencePickerOpen] = useState(false);
   const [priority, setPriority] = useState('P4');
   const [duration, setDuration] = useState<number>(30);
   const [durationInput, setDurationInput] = useState<string>('30m');
   const [time, setTime] = useState('');
   const [recurrenceType, setRecurrenceType] = useState<'none' | 'daily' | 'weekly' | 'weekdays' | 'monthly' | 'yearly' | 'custom'>('none');
-  const [isCustomRecurrenceModalOpen, setIsCustomRecurrenceModalOpen] = useState(false);
   const [customRecurrenceBase, setCustomRecurrenceBase] = useState<'scheduled' | 'completion'>('scheduled');
   const [customRecurrenceInterval, setCustomRecurrenceInterval] = useState('1');
   const [customRecurrenceUnit, setCustomRecurrenceUnit] = useState<'day' | 'week' | 'month' | 'year'>('week');
@@ -544,6 +542,30 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
         setDurationInput(formatDurationInput(initialDuration));
         setTime(taskToEdit.time || '');
         setRecurrenceType((taskToEdit.recurrence as any) || 'none');
+        setCustomRecurrenceBase((taskToEdit.custom_recurrence_base as any) || 'scheduled');
+        setCustomRecurrenceInterval(taskToEdit.custom_recurrence_interval?.toString() || '1');
+        setCustomRecurrenceUnit((taskToEdit.custom_recurrence_unit as any) || 'week');
+        setCustomRecurrenceEndType((taskToEdit.custom_recurrence_end_type as any) || 'never');
+        setCustomRecurrenceEndDate(taskToEdit.custom_recurrence_end_date ? new Date(taskToEdit.custom_recurrence_end_date) : null);
+        
+        // Map old recurrence types to custom
+        if (taskToEdit.recurrence === 'daily') {
+          setRecurrenceType('custom');
+          setCustomRecurrenceInterval('1');
+          setCustomRecurrenceUnit('day');
+        } else if (taskToEdit.recurrence === 'weekly') {
+          setRecurrenceType('custom');
+          setCustomRecurrenceInterval('1');
+          setCustomRecurrenceUnit('week');
+        } else if (taskToEdit.recurrence === 'monthly') {
+          setRecurrenceType('custom');
+          setCustomRecurrenceInterval('1');
+          setCustomRecurrenceUnit('month');
+        } else if (taskToEdit.recurrence === 'yearly') {
+          setRecurrenceType('custom');
+          setCustomRecurrenceInterval('1');
+          setCustomRecurrenceUnit('year');
+        }
         setTaskDate(taskToEdit.due_date ? new Date(taskToEdit.due_date) : new Date());
         setProjectId(taskToEdit.project_id || 'none');
         setCategoryId(taskToEdit.category_id || 'none');
@@ -555,6 +577,11 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
         setDurationInput('30m');
         setTime('');
         setRecurrenceType('none');
+        setCustomRecurrenceBase('scheduled');
+        setCustomRecurrenceInterval('1');
+        setCustomRecurrenceUnit('week');
+        setCustomRecurrenceEndType('never');
+        setCustomRecurrenceEndDate(null);
         setTaskDate(new Date());
         setProjectId('none');
         setCategoryId('none');
@@ -624,7 +651,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
       customRecurrenceEndDate
     });
     setTitle(''); setDescription(''); setTime(''); setRecurrenceType('none'); setPriority('P4'); setDuration(30); setDurationInput('30m'); setProjectId('none'); setCategoryId('none');
-    setIsDatePickerOpen(false); setIsTimePickerOpen(false); setIsRecurrencePickerOpen(false);
+    setIsDatePickerOpen(false); setIsTimePickerOpen(false);
     onClose();
   };
 
@@ -656,9 +683,10 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
             />
             
             {/* Native Rows Section */}
-            <div className="space-y-2 mt-4">
-              {/* Date Row */}
-              <div className="relative">
+            <div className="flex flex-col gap-3 mt-4">
+              {/* ── GRUPO 1: QUANDO ── */}
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                {/* Date Row */}
                 <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
                   <PopoverTrigger asChild>
                     <button 
@@ -713,98 +741,59 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                     </div>
                   </PopoverContent>
                 </Popover>
-              </div>
 
-              {/* Time Row */}
-              <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <Clock className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                  <span className="text-sm font-medium text-gray-600">Horário</span>
-                </div>
-                <input
-                  type="text"
-                  placeholder="00:00"
-                  inputMode="numeric"
-                  maxLength={5}
-                  value={time}
-                  onChange={handleTimeChange}
-                  className="w-20 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-sm cursor-pointer"
-                />
-              </div>
-
-              {/* Recurrence Row */}
-              <div className="relative">
-                <Popover open={isRecurrencePickerOpen} onOpenChange={setIsRecurrencePickerOpen}>
-                  <PopoverTrigger asChild>
-                    <button 
-                      className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Repeat className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                        <span className="text-sm font-medium text-gray-600">Repetir</span>
-                      </div>
-                      <span className="text-sm font-semibold text-blue-600">
-                        {recurrenceType === 'daily' ? 'Todo dia' : 
-                         recurrenceType === 'weekly' ? `Toda semana` : 
-                         recurrenceType === 'weekdays' ? 'Dias úteis' :
-                         recurrenceType === 'monthly' ? `Todo mês` :
-                         recurrenceType === 'yearly' ? `Todo ano` :
-                         recurrenceType === 'custom' ? 'Personalizado' :
-                         'Não repetir'}
-                      </span>
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent 
-                    side="bottom" 
-                    align="end" 
-                    sideOffset={8} 
-                    className="w-64 p-1 bg-white rounded-xl shadow-xl border border-gray-200 z-[110] flex flex-col gap-0.5 max-h-72 overflow-y-auto"
-                  >
-                    <button onClick={() => { setRecurrenceType('daily'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'daily' && "bg-[#dceaff] text-[#1f60c2]")}>Todo dia</button>
-                    <button onClick={() => { setRecurrenceType('weekly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'weekly' && "bg-[#dceaff] text-[#1f60c2]")}>Toda semana ({format(taskDate, 'EEEE', { locale: ptBR })})</button>
-                    <button onClick={() => { setRecurrenceType('weekdays'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'weekdays' && "bg-[#dceaff] text-[#1f60c2]")}>Todo dia útil (Seg - Sex)</button>
-                    <button onClick={() => { setRecurrenceType('monthly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'monthly' && "bg-[#dceaff] text-[#1f60c2]")}>Todo mês (dia {format(taskDate, 'd')})</button>
-                    <button onClick={() => { setRecurrenceType('yearly'); setIsRecurrencePickerOpen(false); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'yearly' && "bg-[#dceaff] text-[#1f60c2]")}>Todo ano ({format(taskDate, 'd \'de\' MMMM', { locale: ptBR })})</button>
-                    <button onClick={() => { setIsRecurrencePickerOpen(false); setIsCustomRecurrenceModalOpen(true); }} className={cn("w-full text-left px-4 py-1.5 text-sm text-slate-700 rounded-lg hover:bg-slate-50 transition-colors ease-out duration-200 capitalize", recurrenceType === 'custom' && "bg-[#dceaff] text-[#1f60c2]")}>Personalizar...</button>
-                    <div className="border-t border-slate-100 my-1" />
-                    <button onClick={() => { setRecurrenceType('none'); setIsRecurrencePickerOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-red-500 rounded-lg hover:bg-red-50 transition-colors ease-out duration-200 font-medium">Limpar</button>
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* Priority Row */}
-              <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group [&>svg]:hidden">
+                {/* Time Row */}
+                <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
                   <div className="flex items-center gap-3">
-                    <Flag className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                    <span className="text-sm font-medium text-gray-600">Prioridade</span>
+                    <Clock className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                    <span className="text-sm font-medium text-gray-600">Horário</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm font-semibold text-blue-600">
-                    {priority === 'P1' && <Flag className="w-3 h-3 text-red-500" fill="currentColor" />}
-                    {priority === 'P2' && <Flag className="w-3 h-3 text-orange-500" fill="currentColor" />}
-                    {priority === 'P3' && <Flag className="w-3 h-3 text-blue-500" fill="currentColor" />}
-                    {priority === 'P4' && <Flag className="w-3 h-3 text-gray-400" fill="none" />}
-                    <span>{priority === 'P1' ? 'Urgente' : priority === 'P2' ? 'Alta' : priority === 'P3' ? 'Média' : 'Baixa'}</span>
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="z-[110]">
-                  <SelectItem value="P1"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-red-500" fill="currentColor"/> Urgente</div></SelectItem>
-                  <SelectItem value="P2"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-orange-500" fill="currentColor"/> Alta</div></SelectItem>
-                  <SelectItem value="P3"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#1f60c2]" fill="currentColor"/> Média</div></SelectItem>
-                  <SelectItem value="P4"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#808080]" fill="none"/> Baixa</div></SelectItem>
-                </SelectContent>
-              </Select>
+                  <input
+                    type="text"
+                    placeholder="00:00"
+                    inputMode="numeric"
+                    maxLength={5}
+                    value={time}
+                    onChange={handleTimeChange}
+                    className="w-16 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-sm cursor-pointer"
+                  />
+                </div>
+              </div>
 
-              {/* Project Row */}
-              {projects.length > 0 && (
+              {/* ── GRUPO 2: DETALHES ── */}
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                {/* Priority Row */}
+                <Select value={priority} onValueChange={setPriority}>
+                  <SelectTrigger className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group [&>svg]:hidden">
+                    <div className="flex items-center gap-3">
+                      <Flag className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                      <span className="text-sm font-medium text-gray-600">Prioridade</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm font-semibold text-blue-600">
+                      {priority === 'P1' && <Flag className="w-3 h-3 text-red-500" fill="currentColor" />}
+                      {priority === 'P2' && <Flag className="w-3 h-3 text-orange-500" fill="currentColor" />}
+                      {priority === 'P3' && <Flag className="w-3 h-3 text-blue-500" fill="currentColor" />}
+                      {priority === 'P4' && <Flag className="w-3 h-3 text-gray-400" fill="none" />}
+                      <span>{priority === 'P1' ? 'Urgente' : priority === 'P2' ? 'Alta' : priority === 'P3' ? 'Média' : 'Baixa'}</span>
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="z-[110]">
+                    <SelectItem value="P1"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-red-500" fill="currentColor"/> Urgente</div></SelectItem>
+                    <SelectItem value="P2"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-orange-500" fill="currentColor"/> Alta</div></SelectItem>
+                    <SelectItem value="P3"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#1f60c2]" fill="currentColor"/> Média</div></SelectItem>
+                    <SelectItem value="P4"><div className="flex items-center gap-2"><Flag className="w-4 h-4 text-[#808080]" fill="none"/> Baixa</div></SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Project Row */}
                 <Select value={projectId} onValueChange={setProjectId}>
                   <SelectTrigger className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group [&>svg]:hidden">
                     <div className="flex items-center gap-3">
                       <Target className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
                       <span className="text-sm font-medium text-gray-600">Projeto</span>
                     </div>
-                    <span className="text-sm font-semibold text-blue-600">
-                      {projectId === 'none' ? 'Nenhum' : projects.find(p => p.id === projectId)?.name}
+                    <span className="text-sm font-semibold text-blue-600 truncate max-w-[80px] text-right">
+                      {projectId !== 'none' ? projects.find(p => p.id === projectId)?.name : 'Nenhum'}
                     </span>
                   </SelectTrigger>
                   <SelectContent side="bottom" align="end" className="z-[110] max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-xl">
@@ -819,60 +808,176 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                     ))}
                   </SelectContent>
                 </Select>
-              )}
+              </div>
 
-              {/* Category Row */}
-              <Select value={categoryId} onValueChange={setCategoryId}>
-                <SelectTrigger className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group [&>svg]:hidden">
+              {/* ── GRUPO 3: CATEGORIA E DURAÇÃO ── */}
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                {/* Category Row */}
+                <Select value={categoryId} onValueChange={setCategoryId}>
+                  <SelectTrigger className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group [&>svg]:hidden">
+                    <div className="flex items-center gap-3">
+                      <Settings2 className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                      <span className="text-sm font-medium text-gray-600">Categoria</span>
+                    </div>
+                    <span className="text-sm font-semibold text-blue-600 truncate max-w-[80px] text-right">
+                      {categoryId !== 'none' ? categories?.find((c: Category) => c.id === categoryId)?.name : 'Nenhuma'}
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent side="bottom" align="end" className="z-[110] max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-xl">
+                    <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">Nenhuma categoria</SelectItem>
+                    {categories?.map((c: Category) => (
+                      <SelectItem hideCheck key={c.id} value={c.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Duration Row */}
+                <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
                   <div className="flex items-center gap-3">
-                    <Settings2 className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                    <span className="text-sm font-medium text-gray-600">Categoria</span>
+                    <Clock className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                    <span className="text-sm font-medium text-gray-600">Duração</span>
                   </div>
-                  <span className="text-sm font-semibold text-blue-600">
-                    {categoryId === 'none' ? 'Nenhuma' : categories?.find((c: Category) => c.id === categoryId)?.name}
-                  </span>
-                </SelectTrigger>
-                <SelectContent side="bottom" align="end" className="z-[110] max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-xl">
-                  <SelectItem hideCheck value="none" className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">Nenhuma categoria</SelectItem>
-                  {categories?.map((c: Category) => (
-                    <SelectItem hideCheck key={c.id} value={c.id} className="py-1.5 px-3 text-sm text-slate-700 hover:bg-slate-100">
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <div className="flex items-center gap-1">
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        const newDuration = Math.max(0, duration - 15);
+                        setDuration(newDuration);
+                        setDurationInput(formatDurationInput(newDuration));
+                      }}
+                      className="p-1 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="text-sm font-bold text-gray-700 min-w-[40px] text-center">
+                      {duration}m
+                    </span>
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        const newDuration = duration + 15;
+                        setDuration(newDuration);
+                        setDurationInput(formatDurationInput(newDuration));
+                      }}
+                      className="p-1 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              </div>
 
-              {/* Duration Row */}
-              <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <Clock className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                  <span className="text-sm font-medium text-gray-600">Duração</span>
+              {/* ── GRUPO 4: REPETIÇÃO ── */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
+                  <div className="flex items-center gap-3">
+                    <Repeat className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                    <span className="text-sm font-medium text-gray-600">Repetir</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Toggle
+                      checked={recurrenceType !== 'none'}
+                      onChange={(checked: boolean) => {
+                        if (!checked) {
+                          setRecurrenceType('none');
+                        } else {
+                          setRecurrenceType('custom');
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button 
-                    onClick={() => {
-                      const newDuration = Math.max(0, duration - 5);
-                      setDuration(newDuration);
-                      setDurationInput(formatDurationInput(newDuration));
-                    }}
-                    className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="text-sm font-bold text-gray-700 min-w-[60px] text-center">
-                    {duration} min
-                  </span>
-                  <button 
-                    onClick={() => {
-                      const newDuration = duration + 5;
-                      setDuration(newDuration);
-                      setDurationInput(formatDurationInput(newDuration));
-                    }}
-                    className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
+
+                {/* Controles de Personalização (Condicional) */}
+                <AnimatePresence>
+                  {recurrenceType !== 'none' && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-xl space-y-4">
+                        {/* Cada */}
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium text-gray-600">A cada</span>
+                          <div className="flex items-center gap-2 flex-1">
+                            <input 
+                              type="number" 
+                              min="1" 
+                              value={customRecurrenceInterval} 
+                              onChange={(e) => setCustomRecurrenceInterval(e.target.value)}
+                              className="w-16 bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-[#202020] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-center"
+                            />
+                            <select 
+                              value={customRecurrenceUnit}
+                              onChange={(e) => setCustomRecurrenceUnit(e.target.value as any)}
+                              className="flex-1 bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-[#202020] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
+                            >
+                              <option value="day">Dia(s)</option>
+                              <option value="week">Semana(s)</option>
+                              <option value="month">Mês(es)</option>
+                              <option value="year">Ano(s)</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Termina em */}
+                        <div className="space-y-2">
+                          <span className="text-sm font-medium text-gray-600 block">Termina em</span>
+                          <div className="flex flex-col gap-2">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input 
+                                type="radio" 
+                                name="customRecurrenceEndTypeInlineEdit" 
+                                value="never" 
+                                checked={customRecurrenceEndType === 'never'} 
+                                onChange={() => setCustomRecurrenceEndType('never')}
+                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                              />
+                              <span className="text-sm text-gray-700">Nunca</span>
+                            </label>
+                            <div className="flex items-center gap-2">
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input 
+                                  type="radio" 
+                                  name="customRecurrenceEndTypeInlineEdit" 
+                                  value="date" 
+                                  checked={customRecurrenceEndType === 'date'} 
+                                  onChange={() => setCustomRecurrenceEndType('date')}
+                                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                />
+                                <span className="text-sm text-gray-700">Em data específica</span>
+                              </label>
+                              {customRecurrenceEndType === 'date' && (
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <button className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors ease-out duration-200">
+                                      <CalendarIcon className="w-3 h-3" />
+                                      {customRecurrenceEndDate ? format(customRecurrenceEndDate, 'dd/MM/yyyy') : 'Selecionar'}
+                                    </button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0 z-[120]" align="start">
+                                    <div className="p-3 bg-white rounded-xl shadow-xl border border-gray-200">
+                                      <input 
+                                        type="date" 
+                                        value={customRecurrenceEndDate ? format(customRecurrenceEndDate, 'yyyy-MM-dd') : ''}
+                                        onChange={(e) => setCustomRecurrenceEndDate(e.target.value ? new Date(e.target.value) : null)}
+                                        className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-[#202020] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
+                                      />
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </div>
@@ -909,13 +1014,9 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                 />
               </div>
               <div className="h-px bg-gray-100 mx-0 my-0" />
-              <div className="flex flex-col gap-3 px-5 py-3">
+              <div className="flex flex-col px-5 py-3">
                 {/* ── GRUPO 1: QUANDO ── */}
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-300 mb-1.5">
-                    Quando
-                  </p>
-                  
+                <div className="grid grid-cols-2 gap-3 mb-3">
                   {/* Date Row */}
                   <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
                     <PopoverTrigger asChild>
@@ -985,17 +1086,13 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                       maxLength={5}
                       value={time}
                       onChange={handleTimeChange}
-                      className="w-20 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-sm cursor-pointer"
+                      className="w-16 bg-transparent text-right font-semibold text-blue-600 focus:ring-0 border-none p-0 text-sm cursor-pointer"
                     />
                   </div>
                 </div>
 
                 {/* ── GRUPO 2: DETALHES ── */}
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-300 mb-1.5 mt-2">
-                    Detalhes
-                  </p>
-                  
+                <div className="grid grid-cols-2 gap-3 mb-3">
                   {/* Priority Row */}
                   <Select value={priority} onValueChange={setPriority}>
                     <SelectTrigger className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group [&>svg]:hidden">
@@ -1026,7 +1123,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                         <Target className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
                         <span className="text-sm font-medium text-gray-600">Projeto</span>
                       </div>
-                      <span className="text-sm font-semibold text-blue-600">
+                      <span className="text-sm font-semibold text-blue-600 truncate max-w-[80px] text-right">
                         {projectId !== 'none' ? projects.find(p => p.id === projectId)?.name : 'Nenhum'}
                       </span>
                     </SelectTrigger>
@@ -1042,7 +1139,10 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
 
+                {/* ── GRUPO 3: CATEGORIA E DURAÇÃO ── */}
+                <div className="grid grid-cols-2 gap-3 mb-3">
                   {/* Category Row */}
                   <Select value={categoryId} onValueChange={setCategoryId}>
                     <SelectTrigger className="w-full flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group [&>svg]:hidden">
@@ -1050,7 +1150,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                         <Settings2 className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
                         <span className="text-sm font-medium text-gray-600">Categoria</span>
                       </div>
-                      <span className="text-sm font-semibold text-blue-600">
+                      <span className="text-sm font-semibold text-blue-600 truncate max-w-[80px] text-right">
                         {categoryId !== 'none' ? categories?.find((c: Category) => c.id === categoryId)?.name : 'Nenhuma'}
                       </span>
                     </SelectTrigger>
@@ -1063,79 +1163,6 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-
-                {/* ── GRUPO 3: REPETIR + DURAÇÃO ── */}
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {/* Recurrence Row */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
-                      <div className="flex items-center gap-3">
-                        <Repeat className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                        <span className="text-sm font-medium text-gray-600">Repetir</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        {recurrenceType !== 'none' && (
-                          <span className="text-xs font-semibold text-blue-600">
-                            {recurrenceType === 'daily' ? 'Diário' : recurrenceType === 'weekly' ? 'Semanal' : recurrenceType === 'weekdays' ? 'Dias úteis' : recurrenceType === 'monthly' ? 'Mensal' : 'Custom'}
-                          </span>
-                        )}
-                        <Toggle
-                          checked={recurrenceType !== 'none'}
-                          onChange={(checked: boolean) => {
-                            if (!checked) {
-                              setRecurrenceType('none');
-                              setIsRecurrencePickerOpen(false);
-                            } else {
-                              setIsRecurrencePickerOpen(true);
-                              if (recurrenceType === 'none') {
-                                setRecurrenceType('daily');
-                              }
-                            }
-                          }}
-                        />
-                      </div>
-                    </div>
-                    
-                    {recurrenceType !== 'none' && isRecurrencePickerOpen && (
-                      <div className="flex gap-1.5 p-1 bg-gray-50/30 rounded-xl border border-gray-100/50 flex-wrap">
-                        {[
-                          { id: 'daily', label: 'Diário' },
-                          { id: 'weekly', label: 'Semanal' },
-                          { id: 'weekdays', label: 'Úteis' },
-                          { id: 'monthly', label: 'Mensal' }
-                        ].map(freq => (
-                          <button
-                            key={freq.id}
-                            type="button"
-                            onClick={() => { setRecurrenceType(freq.id as any); setIsRecurrencePickerOpen(false); }}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
-                              ${recurrenceType === freq.id
-                                ? 'bg-blue-600 text-white shadow-sm'
-                                : 'text-gray-500 hover:bg-gray-100'
-                              }`}
-                          >
-                            {freq.label}
-                          </button>
-                        ))}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setRecurrenceType('custom');
-                            setIsRecurrencePickerOpen(false);
-                            setIsCustomRecurrenceModalOpen(true);
-                          }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
-                            ${recurrenceType === 'custom'
-                              ? 'bg-blue-600 text-white shadow-sm'
-                              : 'text-gray-500 hover:bg-gray-100'
-                            }`}
-                        >
-                          Personalizado...
-                        </button>
-                      </div>
-                    )}
-                  </div>
 
                   {/* Duration Row */}
                   <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
@@ -1143,7 +1170,7 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                       <Clock className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
                       <span className="text-sm font-medium text-gray-600">Duração</span>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
                       <button 
                         type="button" 
                         onClick={() => {
@@ -1151,12 +1178,12 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                           setDuration(newDuration);
                           setDurationInput(formatDurationInput(newDuration));
                         }}
-                        className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+                        className="p-1 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
                       >
-                        <Minus className="w-4 h-4" />
+                        <Minus className="w-3 h-3" />
                       </button>
-                      <span className="text-sm font-bold text-gray-700 min-w-[60px] text-center">
-                        {duration} min
+                      <span className="text-sm font-bold text-gray-700 min-w-[40px] text-center">
+                        {duration}m
                       </span>
                       <button 
                         type="button" 
@@ -1165,12 +1192,123 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
                           setDuration(newDuration);
                           setDurationInput(formatDurationInput(newDuration));
                         }}
-                        className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+                        className="p-1 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-3 h-3" />
                       </button>
                     </div>
                   </div>
+                </div>
+
+                {/* ── GRUPO 4: REPETIÇÃO ── */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-100/50 transition-colors group">
+                    <div className="flex items-center gap-3">
+                      <Repeat className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                      <span className="text-sm font-medium text-gray-600">Repetir</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Toggle
+                        checked={recurrenceType !== 'none'}
+                        onChange={(checked: boolean) => {
+                          if (!checked) {
+                            setRecurrenceType('none');
+                          } else {
+                            setRecurrenceType('custom');
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Controles de Personalização (Condicional) */}
+                  <AnimatePresence>
+                    {recurrenceType !== 'none' && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-xl space-y-4">
+                          {/* Cada */}
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm font-medium text-gray-600">A cada</span>
+                            <div className="flex items-center gap-2 flex-1">
+                              <input 
+                                type="number" 
+                                min="1" 
+                                value={customRecurrenceInterval} 
+                                onChange={(e) => setCustomRecurrenceInterval(e.target.value)}
+                                className="w-16 bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-[#202020] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-center"
+                              />
+                              <select 
+                                value={customRecurrenceUnit}
+                                onChange={(e) => setCustomRecurrenceUnit(e.target.value as any)}
+                                className="flex-1 bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-[#202020] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
+                              >
+                                <option value="day">Dia(s)</option>
+                                <option value="week">Semana(s)</option>
+                                <option value="month">Mês(es)</option>
+                                <option value="year">Ano(s)</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Termina em */}
+                          <div className="space-y-2">
+                            <span className="text-sm font-medium text-gray-600 block">Termina em</span>
+                            <div className="flex flex-col gap-2">
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input 
+                                  type="radio" 
+                                  name="customRecurrenceEndTypeInline" 
+                                  value="never" 
+                                  checked={customRecurrenceEndType === 'never'} 
+                                  onChange={() => setCustomRecurrenceEndType('never')}
+                                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                />
+                                <span className="text-sm text-gray-700">Nunca</span>
+                              </label>
+                              <div className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input 
+                                    type="radio" 
+                                    name="customRecurrenceEndTypeInline" 
+                                    value="date" 
+                                    checked={customRecurrenceEndType === 'date'} 
+                                    onChange={() => setCustomRecurrenceEndType('date')}
+                                    className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                  />
+                                  <span className="text-sm text-gray-700">Em data específica</span>
+                                </label>
+                                {customRecurrenceEndType === 'date' && (
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <button className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors ease-out duration-200">
+                                        <CalendarIcon className="w-3 h-3" />
+                                        {customRecurrenceEndDate ? format(customRecurrenceEndDate, 'dd/MM/yyyy') : 'Selecionar'}
+                                      </button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0 z-[120]" align="start">
+                                      <div className="p-3 bg-white rounded-xl shadow-xl border border-gray-200">
+                                        <input 
+                                          type="date" 
+                                          value={customRecurrenceEndDate ? format(customRecurrenceEndDate, 'yyyy-MM-dd') : ''}
+                                          onChange={(e) => setCustomRecurrenceEndDate(e.target.value ? new Date(e.target.value) : null)}
+                                          className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-[#202020] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
+                                        />
+                                      </div>
+                                    </PopoverContent>
+                                  </Popover>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
@@ -1197,152 +1335,6 @@ const TaskModal = ({ isOpen, onClose, onSave, projects, categories, taskToEdit }
           )}
         </motion.div>
       </div>
-
-
-      {/* Custom Recurrence Modal */}
-      <AnimatePresence>
-        {isCustomRecurrenceModalOpen && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="bg-white border border-gray-200 rounded-xl shadow-xl w-full max-w-sm overflow-hidden flex flex-col"
-            >
-              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                <h2 className="text-[14px] leading-[22px] font-bold text-[#202020]">Repetição personalizada</h2>
-                <button onClick={() => setIsCustomRecurrenceModalOpen(false)} className="text-[#808080] hover:text-[#202020] transition-colors ease-out duration-200">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="p-6 space-y-6">
-                {/* Com base na */}
-                <div className="space-y-3">
-                  <label className="text-[13px] font-bold text-[#202020]">Com base na:</label>
-                  <div className="flex flex-col gap-2">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name="customRecurrenceBase" 
-                        value="scheduled" 
-                        checked={customRecurrenceBase === 'scheduled'} 
-                        onChange={() => setCustomRecurrenceBase('scheduled')}
-                        className="w-4 h-4 text-[#1f60c2] border-gray-300 focus:ring-[#1f60c2]"
-                      />
-                      <span className="text-[13px] text-[#202020]">Data agendada</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name="customRecurrenceBase" 
-                        value="completion" 
-                        checked={customRecurrenceBase === 'completion'} 
-                        onChange={() => setCustomRecurrenceBase('completion')}
-                        className="w-4 h-4 text-[#1f60c2] border-gray-300 focus:ring-[#1f60c2]"
-                      />
-                      <span className="text-[13px] text-[#202020]">Data de conclusão</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Cada */}
-                <div className="space-y-3">
-                  <label className="text-[13px] font-bold text-[#202020]">Cada:</label>
-                  <div className="flex items-center gap-2">
-                    <input 
-                      type="number" 
-                      min="1" 
-                      value={customRecurrenceInterval} 
-                      onChange={(e) => setCustomRecurrenceInterval(e.target.value)}
-                      className="w-20 bg-white border border-gray-200 rounded-lg px-3 py-2 text-base md:text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
-                    />
-                    <select 
-                      value={customRecurrenceUnit}
-                      onChange={(e) => setCustomRecurrenceUnit(e.target.value as any)}
-                      className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-base md:text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
-                    >
-                      <option value="day">Dia(s)</option>
-                      <option value="week">Semana(s)</option>
-                      <option value="month">Mês(es)</option>
-                      <option value="year">Ano(s)</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Termina em */}
-                <div className="space-y-3">
-                  <label className="text-[13px] font-bold text-[#202020]">Termina em:</label>
-                  <div className="flex flex-col gap-2">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name="customRecurrenceEndType" 
-                        value="never" 
-                        checked={customRecurrenceEndType === 'never'} 
-                        onChange={() => setCustomRecurrenceEndType('never')}
-                        className="w-4 h-4 text-[#1f60c2] border-gray-300 focus:ring-[#1f60c2]"
-                      />
-                      <span className="text-[13px] text-[#202020]">Nunca</span>
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                          type="radio" 
-                          name="customRecurrenceEndType" 
-                          value="date" 
-                          checked={customRecurrenceEndType === 'date'} 
-                          onChange={() => setCustomRecurrenceEndType('date')}
-                          className="w-4 h-4 text-[#1f60c2] border-gray-300 focus:ring-[#1f60c2]"
-                        />
-                        <span className="text-[13px] text-[#202020]">No vencimento (incluído)</span>
-                      </label>
-                      {customRecurrenceEndType === 'date' && (
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-[13px] font-medium text-[#808080] hover:bg-gray-50 transition-colors ease-out duration-200">
-                              <CalendarIcon className="w-4 h-4" />
-                              {customRecurrenceEndDate ? format(customRecurrenceEndDate, 'dd/MM/yyyy') : 'Selecionar'}
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 z-[120]" align="start">
-                            <div className="p-4 bg-white rounded-xl shadow-xl border border-gray-200">
-                              <input 
-                                type="date" 
-                                value={customRecurrenceEndDate ? format(customRecurrenceEndDate, 'yyyy-MM-dd') : ''}
-                                onChange={(e) => setCustomRecurrenceEndDate(e.target.value ? new Date(e.target.value) : null)}
-                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-base md:text-[13px] text-[#202020] focus:outline-none focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all duration-200"
-                              />
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
-                <button
-                  onClick={() => setIsCustomRecurrenceModalOpen(false)}
-                  className="px-4 py-2 rounded-lg text-[13px] text-[#808080] hover:text-[#202020] hover:bg-gray-200 transition-colors ease-out duration-200 font-medium"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={() => {
-                    setRecurrenceType('custom');
-                    setIsCustomRecurrenceModalOpen(false);
-                  }}
-                  className="px-5 py-2.5 rounded-lg text-[13px] text-white font-semibold bg-[#7C3AED] hover:bg-[#6D28D9] transition-all ease-out duration-200 flex items-center gap-2"
-                >
-                  Salvar
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
@@ -1411,54 +1403,6 @@ const TimeModal = ({ isOpen, onClose, task, onSave }: { isOpen: boolean; onClose
           <Button variant="ghost" className="text-[13px] font-medium text-[#808080] hover:text-[#202020] hover:bg-gray-200 transition-colors ease-out duration-200" onClick={onClose}>Cancelar</Button>
           <Button className="text-[13px] font-bold bg-[#1f60c2] text-white hover:bg-[#1a50a3] transition-all ease-out duration-200 shadow-sm" onClick={() => {
             if (task) onSave(task.id, time);
-            onClose();
-          }}>Salvar</Button>
-        </div>
-      </motion.div>
-    </div>
-  );
-};
-
-const RecurrenceModal = ({ isOpen, onClose, task, onSave }: { isOpen: boolean; onClose: () => void; task: Task | null; onSave: (taskId: string, recurrence: string) => void }) => {
-  const [recurrence, setRecurrence] = useState(task?.recurrence || 'none');
-
-  useEffect(() => {
-    if (isOpen && task) {
-      setRecurrence(task.recurrence || 'none');
-    }
-  }, [isOpen, task]);
-
-  if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden border border-gray-200"
-      >
-        <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-          <h3 className="font-bold text-[16px] text-[#202020]">Repetir Tarefa</h3>
-          <button onClick={onClose} className="text-[#808080] hover:text-[#202020] transition-colors ease-out duration-200"><X className="w-5 h-5" /></button>
-        </div>
-        <div className="p-6">
-          <label className="block text-[13px] font-medium text-[#808080] mb-2">Frequência</label>
-          <Select value={recurrence} onValueChange={setRecurrence}>
-            <SelectTrigger className="border-gray-200 focus:ring-4 focus:ring-[#dceaff] focus:border-[#1f60c2] transition-all ease-out duration-200 text-[#202020]">
-              <SelectValue placeholder="Selecione a frequência" />
-            </SelectTrigger>
-            <SelectContent className="z-[110]">
-              <SelectItem value="none">Não repetir</SelectItem>
-              <SelectItem value="daily">Diariamente</SelectItem>
-              <SelectItem value="weekly">Semanalmente</SelectItem>
-              <SelectItem value="monthly">Mensalmente</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="p-4 bg-gray-50 flex justify-end gap-2 border-t border-gray-100">
-          <Button variant="ghost" className="text-[13px] font-medium text-[#808080] hover:text-[#202020] hover:bg-gray-200 transition-colors ease-out duration-200" onClick={onClose}>Cancelar</Button>
-          <Button className="text-[13px] font-bold bg-[#1f60c2] text-white hover:bg-[#1a50a3] transition-all ease-out duration-200 shadow-sm" onClick={() => {
-            if (task) onSave(task.id, recurrence);
             onClose();
           }}>Salvar</Button>
         </div>
@@ -1638,7 +1582,6 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
 
   // Modal States
   const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
-  const [isRecurrenceModalOpen, setIsRecurrenceModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [selectedTaskForModal, setSelectedTaskForModal] = useState<Task | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
@@ -1815,6 +1758,11 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
         // but preserve the time from the original due_date
         const originalDueDate = task.due_date ? new Date(task.due_date) : new Date();
         let nextDate = new Date(selectedDate);
+        
+        if (task.recurrence === 'custom' && task.custom_recurrence_base === 'scheduled') {
+          nextDate = new Date(originalDueDate);
+        }
+
         nextDate.setHours(originalDueDate.getHours(), originalDueDate.getMinutes(), originalDueDate.getSeconds(), originalDueDate.getMilliseconds());
         
         if (task.recurrence === 'daily') {
@@ -1823,32 +1771,59 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
           nextDate = addDays(nextDate, 7);
         } else if (task.recurrence === 'monthly') {
           nextDate = addMonths(nextDate, 1);
+        } else if (task.recurrence === 'custom') {
+          const interval = parseInt(task.custom_recurrence_interval?.toString() || '1', 10);
+          if (task.custom_recurrence_unit === 'day') {
+            nextDate = addDays(nextDate, interval);
+          } else if (task.custom_recurrence_unit === 'week') {
+            nextDate = addWeeks(nextDate, interval);
+          } else if (task.custom_recurrence_unit === 'month') {
+            nextDate = addMonths(nextDate, interval);
+          } else if (task.custom_recurrence_unit === 'year') {
+            nextDate = addYears(nextDate, interval);
+          }
         }
 
-        const newTask = {
-          user_id: user.id,
-          title: task.title,
-          description: task.description,
-          due_date: nextDate.toISOString(),
-          status: 'pending',
-          estimated_time: task.estimated_time,
-          time: task.time,
-          recurrence: task.recurrence,
-          elapsed_time: 0,
-          is_running: false,
-          project_id: task.project_id
-        };
+        // Check end date
+        let shouldCreateNext = true;
+        if (task.recurrence === 'custom' && task.custom_recurrence_end_type === 'date' && task.custom_recurrence_end_date) {
+          const endDate = new Date(task.custom_recurrence_end_date);
+          if (isBefore(endDate, nextDate)) {
+            shouldCreateNext = false;
+          }
+        }
 
-        const { data: newInstance, error: insertError } = await supabase
-          .from('tasks')
-          .insert([newTask])
-          .select()
-          .single();
+        if (shouldCreateNext) {
+          const newTask = {
+            user_id: user.id,
+            title: task.title,
+            description: task.description,
+            due_date: nextDate.toISOString(),
+            status: 'pending',
+            estimated_time: task.estimated_time,
+            time: task.time,
+            recurrence: task.recurrence,
+            custom_recurrence_base: task.custom_recurrence_base,
+            custom_recurrence_interval: task.custom_recurrence_interval,
+            custom_recurrence_unit: task.custom_recurrence_unit,
+            custom_recurrence_end_type: task.custom_recurrence_end_type,
+            custom_recurrence_end_date: task.custom_recurrence_end_date,
+            elapsed_time: 0,
+            is_running: false,
+            project_id: task.project_id
+          };
 
-        if (insertError) throw insertError;
-        
-        if (newInstance) {
-          setTasks(prev => [...prev, newInstance]);
+          const { data: newInstance, error: insertError } = await supabase
+            .from('tasks')
+            .insert([newTask])
+            .select()
+            .single();
+
+          if (insertError) throw insertError;
+          
+          if (newInstance) {
+            setTasks(prev => [...prev, newInstance]);
+          }
         }
       }
     } catch (error) {
@@ -1888,7 +1863,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
 
   const openRecurrenceModal = (task: Task) => {
     setSelectedTaskForModal(task);
-    setIsRecurrenceModalOpen(true);
+    setIsCreateModalOpen(true);
   };
 
   const handleOpenHistory = (task: Task) => {
@@ -1913,27 +1888,6 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
       await queryClient.invalidateQueries({ queryKey: ['insights'] });
     } catch (error) {
       console.error('Error updating task time:', error);
-      fetchTasks();
-    }
-  };
-
-  const handleSaveRecurrence = async (taskId: string, recurrence: string) => {
-    // Optimistic update
-    setTasks(tasks.map(t => t.id === taskId ? { ...t, recurrence } : t));
-
-    try {
-      const { error } = await supabase
-        .from('tasks')
-        .update({ recurrence })
-        .eq('id', taskId);
-
-      if (error) throw error;
-
-      // Invalidate queries for InsightsDashboard
-      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      await queryClient.invalidateQueries({ queryKey: ['insights'] });
-    } catch (error) {
-      console.error('Error updating task recurrence:', error);
       fetchTasks();
     }
   };
@@ -2011,11 +1965,11 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
       estimated_time: taskData.estimated_time,
       time: taskData.time,
       recurrence: taskData.recurrence,
-      // custom_recurrence_base: taskData.customRecurrenceBase,
-      // custom_recurrence_interval: taskData.customRecurrenceInterval,
-      // custom_recurrence_unit: taskData.customRecurrenceUnit,
-      // custom_recurrence_end_type: taskData.customRecurrenceEndType,
-      // custom_recurrence_end_date: taskData.customRecurrenceEndDate ? taskData.customRecurrenceEndDate.toISOString() : null,
+      custom_recurrence_base: taskData.customRecurrenceBase,
+      custom_recurrence_interval: taskData.customRecurrenceInterval,
+      custom_recurrence_unit: taskData.customRecurrenceUnit,
+      custom_recurrence_end_type: taskData.customRecurrenceEndType,
+      custom_recurrence_end_date: taskData.customRecurrenceEndDate ? taskData.customRecurrenceEndDate.toISOString() : null,
       project_id: taskData.project_id || null,
       category_id: taskData.category_id || null,
       priority: taskData.priority || 'P4'
@@ -2628,14 +2582,7 @@ export default function TasksDashboard({ isCreateModalOpen, setIsCreateModalOpen
               onSave={handleSaveTime}
             />
           )}
-          {isRecurrenceModalOpen && (
-            <RecurrenceModal 
-              isOpen={isRecurrenceModalOpen} 
-              onClose={() => setIsRecurrenceModalOpen(false)} 
-              task={selectedTaskForModal} 
-              onSave={handleSaveRecurrence}
-            />
-          )}
+
           {isHistoryModalOpen && (
             <TaskHistoryModal
               isOpen={isHistoryModalOpen}
